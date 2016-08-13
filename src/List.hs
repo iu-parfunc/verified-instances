@@ -30,9 +30,10 @@ eqList _ _ = False
 
 {-@ eqListRefl :: xs:List a -> {v:() | eqList xs xs} @-}
 eqListRefl :: Eq a => List a -> Proof
-eqListRefl Nil =   eqList Nil Nil
-               ==. True
-               *** QED
+eqListRefl Nil = undefined
+-- eqListRefl Nil =   eqList Nil Nil
+--                ==. True
+--                *** QED
 eqListRefl (Cons x xs) =   eqList (Cons x xs) (Cons x xs)
                        ==. (if x == x then eqList xs xs else False)
                        ==. eqList xs xs
