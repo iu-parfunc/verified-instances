@@ -4,7 +4,7 @@
 {-# LANGUAGE TypeFamilies          #-}
 {-# LANGUAGE IncoherentInstances   #-}
 
-module ProofCombinators (
+module Language.Haskell.Liquid.ProofCombinators (
 
     (==:), (<=:), (<:), (>:)
 

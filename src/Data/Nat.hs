@@ -4,10 +4,10 @@
 {-@ LIQUID "--higherorderqs"   @-}
 {-@ LIQUID "--prune-unsorted"  @-}
 
-module Nat where
+module Data.Nat where
 
-import VerifiedEq
-import ProofCombinators
+import GHC.Classes.VerifiedEq
+import Language.Haskell.Liquid.ProofCombinators
 
 {-@ data N [toInt] = Zero | Suc N @-}
 data N = Zero | Suc N

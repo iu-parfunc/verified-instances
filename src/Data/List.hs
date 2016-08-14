@@ -4,9 +4,9 @@
 {-@ LIQUID "--higherorderqs"   @-}
 {-@ LIQUID "--prune-unsorted"  @-}
 
-module List where
+module Data.List where
 
-import ProofCombinators
+import Language.Haskell.Liquid.ProofCombinators
 
 {-@ data List [llen] = Nil | Cons { x :: a , xs :: List a } @-}
 data List a = Nil | Cons a (List a)

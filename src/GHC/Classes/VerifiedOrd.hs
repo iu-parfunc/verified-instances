@@ -1,8 +1,8 @@
 {-@ LIQUID "--higherorder" @-}
 {-@ LIQUID "--totality"    @-}
 
-module VerifiedOrd where
+module GHC.Classes.VerifiedOrd where
 
-import ProofCombinators
+import Language.Haskell.Liquid.ProofCombinators
 
 class (Ord a) => VerifiedOrd a where

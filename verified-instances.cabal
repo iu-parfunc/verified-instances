@@ -8,14 +8,15 @@ author:              Vikraman Choudhury
 maintainer:          git@vikraman.org
 category:            Example
 build-type:          Simple
+extra-source-files:  README.md
 cabal-version:       >=1.10
 
 library
-  exposed-modules:     VerifiedEq
-                     , VerifiedOrd
-                     , Nat
-                     , ProofCombinators
-                     , List
+  exposed-modules:     GHC.Classes.VerifiedEq
+                     , GHC.Classes.VerifiedOrd
+                     , Data.Nat
+                     , Data.List
+  other-modules:       Language.Haskell.Liquid.ProofCombinators
   other-extensions:    MultiParamTypeClasses
                      , FlexibleInstances
                      , FlexibleContexts

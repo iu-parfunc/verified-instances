@@ -5,9 +5,9 @@
 {-@ LIQUID "--prune-unsorted"  @-}
 
 
-module VerifiedEq where
+module GHC.Classes.VerifiedEq where
 
-import ProofCombinators
+import Language.Haskell.Liquid.ProofCombinators
 
 {-@ class (Eq a) => VerifiedEq a where
       eq :: a -> a -> Bool
