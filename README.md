@@ -1,6 +1,6 @@
 # verified-instances
 
-Verified typeclasses using [LiquidHaskell](goto.ucsd.edu/~rjhala/liquid/haskell/blog/about/)
+Verified typeclasses using [LiquidHaskell](http://goto.ucsd.edu/~rjhala/liquid/haskell/blog/about/)
 
 ### Build Status
 
