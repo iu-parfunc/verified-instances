@@ -73,5 +73,5 @@ instance Eq N where
 
 -- instance VerifiedEq N where
 --   refl = eqNRefl
---   sym = undefined
---   trans = undefined
+--   sym = eqNSym
+--   trans = eqNTrans

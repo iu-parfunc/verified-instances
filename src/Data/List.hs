@@ -6,6 +6,7 @@
 
 module Data.List where
 
+import GHC.Classes.VerifiedEq
 import Language.Haskell.Liquid.ProofCombinators
 
 {-@ data List [llen] = Nil | Cons { x :: a , xs :: List a } @-}
@@ -56,3 +57,36 @@ eqListSym (Cons x xs) (Cons y ys) =   eqList (Cons x xs) (Cons y ys)
                                   ==. eqList (Cons y ys) (Cons x xs)
                                   ==. eqList ys xs
                                   *** QED
+
+{-@ eqListTrans :: xs:List a -> ys:List a -> zs:List a -> {v:() | eqList xs ys && eqList ys zs ==> eqList xs zs} @-}
+eqListTrans :: Eq a => List a -> List a -> List a -> Proof
+eqListTrans Nil Nil Nil = undefined
+-- eqListTrans Nil Nil Nil =   eqList Nil Nil ^ eqList Nil Nil
+--                         ==. True
+--                         *** QED
+eqListTrans Nil Nil (Cons z zs) = eqList Nil (Cons z zs)
+                                ==. True
+                                *** QED
+eqListTrans Nil (Cons y ys) zs =   eqList Nil (Cons y ys)
+                               ==. False
+                               *** QED
+eqListTrans (Cons x xs) Nil zs =   eqList (Cons x xs) Nil
+                               ==. False
+                               *** QED
+eqListTrans (Cons x xs) (Cons y ys) Nil =   eqList (Cons y ys) Nil
+                                        ==. False
+                                        *** QED
+eqListTrans (Cons x xs) (Cons y ys) (Cons z zs) =   (eqList (Cons x xs) (Cons y ys) && eqList (Cons y ys) (Cons z zs))
+                                                ==. ((if x == y then eqList xs ys else False) && (if y == z then eqList ys zs else False))
+                                                ==. (if (x == y && y == z) then (eqList xs ys && eqList ys zs) else False)
+                                                ==. (if x == z then eqList xs zs else False) ? eqListTrans xs ys zs
+                                                ==. eqList (Cons x xs) (Cons z zs)
+                                                *** QED
+
+instance Eq a => Eq (List a) where
+  (==) = eqList
+
+-- instance VerifiedEq a => VerifiedEq (List a) where
+--   refl = eqListRefl
+--   sym = eqListSym
+--   trans = eqListTrans
