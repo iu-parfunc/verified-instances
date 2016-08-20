@@ -5,7 +5,7 @@
 
 module Data.List where
 
--- import GHC.Classes.VerifiedEq
+import GHC.Classes.VerifiedEq
 -- import Data.VerifiedEq
 import Language.Haskell.Liquid.ProofCombinators
 
@@ -86,10 +86,10 @@ eqListTrans (Cons x xs) (Cons y ys) (Cons z zs) =   (eqList (Cons x xs) (Cons y 
 instance Eq a => Eq (List a) where
   (==) = eqList
 
--- instance VerifiedEq a => VerifiedEq (List a) where
---   refl = eqListRefl
---   sym = eqListSym
---   trans = eqListTrans
+instance VerifiedEq a => VerifiedEq (List a) where
+  refl = eqListRefl
+  sym = eqListSym
+  trans = eqListTrans
 
 -- veqList :: Eq a => VerifiedEq (List a)
 -- veqList = VerifiedEq eqList eqListRefl eqListSym eqListTrans
