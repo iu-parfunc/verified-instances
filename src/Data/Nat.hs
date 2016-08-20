@@ -4,7 +4,7 @@
 
 module Data.Nat where
 
--- import Data.VerifiedEq
+import Data.VerifiedEq
 -- import GHC.Classes.VerifiedEq
 import Language.Haskell.Liquid.ProofCombinators
 
@@ -75,5 +75,5 @@ instance Eq N where
 --   sym = eqNSym
 --   trans = eqNTrans
 
--- veqN :: VerifiedEq N
--- veqN = VerifiedEq eqN eqNRefl eqNSym eqNTrans
+veqN :: VerifiedEq N
+veqN = VerifiedEq eqN eqNRefl eqNSym eqNTrans
