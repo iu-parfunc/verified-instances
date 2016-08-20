@@ -1,9 +1,5 @@
 {-@ LIQUID "--higherorder"     @-}
 {-@ LIQUID "--totality"        @-}
-{-@ LIQUID "--exact-data-cons" @-}
-{-@ LIQUID "--higherorderqs"   @-}
-{-@ LIQUID "--prune-unsorted"  @-}
-
 
 module GHC.Classes.VerifiedEq where
 

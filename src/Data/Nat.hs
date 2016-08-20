@@ -1,12 +1,10 @@
 {-@ LIQUID "--higherorder"     @-}
 {-@ LIQUID "--totality"        @-}
 {-@ LIQUID "--exact-data-cons" @-}
-{-@ LIQUID "--higherorderqs"   @-}
-{-@ LIQUID "--prune-unsorted"  @-}
 
 module Data.Nat where
 
-import GHC.Classes.VerifiedEq
+-- import GHC.Classes.VerifiedEq
 import Language.Haskell.Liquid.ProofCombinators
 
 {-@ data N [toInt] = Zero | Suc N @-}

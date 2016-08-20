@@ -1,7 +1,5 @@
 {-@ LIQUID "--higherorder"     @-}
 {-@ LIQUID "--totality"        @-}
-{-@ LIQUID "--higherorderqs"   @-}
-{-@ LIQUID "--prune-unsorted"  @-}
 
 module Data.VerifiedEq where
 
