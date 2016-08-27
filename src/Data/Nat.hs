@@ -77,3 +77,21 @@ instance Eq N where
 
 -- veqN :: VerifiedEq N
 -- veqN = VerifiedEq eqN eqNRefl eqNSym eqNTrans
+
+{-@ axiomatize addN @-}
+addN :: N -> N -> N
+addN Zero y = y
+addN (Suc x) y = Suc (x `addN` y)
+
+{-@ addNAssoc :: x:N -> y:N -> z:N -> { (addN (addN x y) z) == (addN x (addN y z)) } @-}
+addNAssoc :: N -> N -> N -> Proof
+addNAssoc Zero y z =   (addN (addN Zero y) z)
+                  ==. addN y z
+                  ==. addN Zero (addN y z)
+                  *** QED
+addNAssoc (Suc x) y z =   (addN (addN (Suc x) y) z)
+                     ==. (addN (Suc (addN x y)) z)
+                     ==. (Suc (addN (addN x y) z))
+                     ==. (Suc (addN x (addN y z))) ? addNAssoc x y z
+                     ==. (addN (Suc x) (addN y z))
+                     *** QED

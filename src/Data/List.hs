@@ -18,11 +18,6 @@ llen :: List a -> Int
 llen Nil = 0
 llen (Cons x xs) = 1 + llen xs
 
-{-@ axiomatize appendList @-}
-appendList :: List a -> List a -> List a
-appendList Nil ys = ys
-appendList (Cons x xs) ys = Cons x (appendList xs ys)
-
 {-@ axiomatize eqList @-}
 eqList :: Eq a => List a -> List a -> Bool
 eqList Nil Nil = True
@@ -93,3 +88,23 @@ instance Eq a => Eq (List a) where
 
 -- veqList :: Eq a => VerifiedEq (List a)
 -- veqList = VerifiedEq eqList eqListRefl eqListSym eqListTrans
+
+{-@ axiomatize appendList @-}
+appendList :: List a -> List a -> List a
+appendList Nil ys = ys
+appendList (Cons x xs) ys = Cons x (appendList xs ys)
+
+{-@ appendListAssoc :: xs:List a -> ys:List a -> zs:List a
+  -> { appendList (appendList xs ys) zs == appendList xs (appendList ys zs) }
+@-}
+appendListAssoc :: List a -> List a -> List a -> Proof
+appendListAssoc Nil ys zs =   appendList (appendList Nil ys) zs
+                          ==. appendList ys zs
+                          ==. appendList Nil (appendList ys zs)
+                          *** QED
+appendListAssoc (Cons x xs) ys zs =   appendList (appendList (Cons x xs) ys) zs
+                                  ==. appendList (Cons x (appendList xs ys)) zs
+                                  ==. Cons x (appendList (appendList xs ys) zs)
+                                  ==. Cons x (appendList xs (appendList ys zs)) ? appendListAssoc xs ys zs
+                                  ==. appendList (Cons x xs) (appendList ys zs)
+                                  *** QED
