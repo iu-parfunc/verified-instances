@@ -1,3 +1,5 @@
+
+{-# LANGUAGE Trustworthy          #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -8,7 +10,7 @@
 module Data.VerifiedOrd (leqOrd) where
 
 import Language.Haskell.Liquid.ProofCombinators
-import Data.VerifiableConstraint
+import Data.VerifiableConstraint.Internal
 import Data.Proxy
 import Data.Reflection
 import Data.Constraint

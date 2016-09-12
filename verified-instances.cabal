@@ -17,8 +17,9 @@ library
                      , Data.Nat
                      , Data.List
                      , Data.VerifiableConstraint
+                     , Data.VerifiableConstraint.Internal                     
                      , Data.VerifiedOrd
-  other-modules:       Language.Haskell.Liquid.ProofCombinators
+                     , Language.Haskell.Liquid.ProofCombinators
   other-extensions:    MultiParamTypeClasses
                      , FlexibleInstances
                      , FlexibleContexts
