@@ -4,7 +4,7 @@ CHS = $(subst hs,chs,$(HS))
 
 LIQUID ?= stack exec liquid --
 
-all: check build
+all: build check
 
 build:
 	stack build
