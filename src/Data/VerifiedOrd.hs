@@ -1,60 +1,47 @@
-{-@ LIQUID "--higherorder"     @-}
-{-@ LIQUID "--totality"        @-}
+{-# LANGUAGE FlexibleInstances    #-}
+{-# LANGUAGE FlexibleContexts     #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE TypeFamilies         #-}
+{-@ LIQUID "--higherorder"         @-}
+{-@ LIQUID "--totality"            @-}
 
-module Data.VerifiedOrd (
-    VerifiedOrd,
-    leqOrd,
-    cmpOrd,
-    (<),
-    (<=),
-    (>),
-    (>=),
-    max,
-    min,
-    ) where
+module Data.VerifiedOrd (leqOrd) where
 
-import Prelude hiding ((<), (<=), (>), (>=))
 import Language.Haskell.Liquid.ProofCombinators
+import Data.VerifiableConstraint
+import Data.Proxy
+import Data.Reflection
+import Data.Constraint
+import Data.Constraint.Unsafe
 
-data VerifiedOrd a = LEq (a -> a -> Bool)
-                   | Cmp (a -> a -> Ordering)
+instance VerifiableConstraint Ord where
+  data Verified Ord a = LEq (a -> a -> Bool)
+                      | Cmp (a -> a -> Ordering)
+  reifiedIns = Sub Dict
 
 {-@
 leqOrd :: leq:(a -> a -> Bool)
        -> (x:a -> y:a -> { v:() | Prop (leq x y) || Prop (leq y x) })
        -> (x:a -> y:a -> { v:() | Prop (leq x y) || Prop (leq y x) ==> x == y })
        -> (x:a -> y:a -> z:a -> { v:() | Prop (leq x y) && Prop (leq y z) ==> Prop (leq x z) })
-       -> VerifiedOrd a
+       -> Verified Ord a
  @-}
 leqOrd :: (a -> a -> Bool)
        -> (a -> a -> Proof)
        -> (a -> a -> Proof)
        -> (a -> a -> a -> Proof)
-       -> VerifiedOrd a
+       -> Verified Ord a
 leqOrd leq total antisym trans = LEq leq
 
--- TODO
-cmpOrd :: (a -> a -> Ordering) -> VerifiedOrd a
-cmpOrd cmp = undefined
+instance Reifies s (Verified Ord a) => Eq (Lift Ord a s) where
+  a == b = (compare a b == EQ)
 
-(<) :: Eq a => VerifiedOrd a -> a -> a -> Bool
-(<) (LEq f) x y = f x y && not (x == y)
-(<) (Cmp f) x y = case f x y of { LT -> True ; _ -> False }
-
-(<=) :: VerifiedOrd a -> a -> a -> Bool
-(<=) (LEq f) x y = f x y
-(<=) (Cmp f) x y = case f x y of { GT -> False ; _ -> True }
-
-(>) :: VerifiedOrd a -> a -> a -> Bool
-(>) (LEq f) x y = not (f x y)
-(>) (Cmp f) x y = case f x y of { GT -> True ; _ -> False }
-
-(>=) :: Eq a => VerifiedOrd a -> a -> a -> Bool
-(>=) (LEq f) x y = not (f x y) || x == y
-(>=) (Cmp f) x y = case f x y of { LT -> False ; _ -> False }
-
-max :: VerifiedOrd a -> a -> a -> a
-max v x y = if ((<=) v x y) then y else x
-
-min :: VerifiedOrd a -> a -> a -> a
-min v x y = if ((<=) v x y) then x else y
+instance Reifies s (Verified Ord a) => Ord (Lift Ord a s) where
+  compare x y =
+    case reflect x of
+      LEq f -> if (x == y)
+                 then EQ
+                 else if f (lower x) (lower y)
+                        then LT
+                        else GT
+      Cmp f -> f (lower x) (lower y)
