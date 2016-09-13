@@ -24,19 +24,18 @@ eqList Nil Nil = True
 eqList (Cons x xs) (Cons y ys) = if x == y then eqList xs ys else False
 eqList _ _ = False
 
-{-@ eqListRefl :: xs:List a -> {v:() | eqList xs xs} @-}
+{-@ eqListRefl :: xs:List a -> {eqList xs xs} @-}
 eqListRefl :: Eq a => List a -> Proof
-eqListRefl Nil = undefined
--- eqListRefl Nil =   eqList Nil Nil
---                ==. True
---                *** QED
+eqListRefl xs@Nil =   eqList xs xs
+                  ==. True
+                  *** QED
 eqListRefl (Cons x xs) =   eqList (Cons x xs) (Cons x xs)
                        ==. (if x == x then eqList xs xs else False)
                        ==. eqList xs xs
                        ==. True ? eqListRefl xs
                        *** QED
 
-{-@ eqListSym :: xs:List a -> ys: List a -> {v:() | eqList xs ys ==> eqList ys xs} @-}
+{-@ eqListSym :: xs:List a -> ys: List a -> {eqList xs ys ==> eqList ys xs} @-}
 eqListSym :: Eq a => List a -> List a -> Proof
 eqListSym Nil Nil = simpleProof
 eqListSym Nil (Cons y ys) =   eqList Nil (Cons y ys)
@@ -53,7 +52,7 @@ eqListSym (Cons x xs) (Cons y ys) =   eqList (Cons x xs) (Cons y ys)
                                   ==. eqList ys xs
                                   *** QED
 
-{-@ eqListTrans :: xs:List a -> ys:List a -> zs:List a -> {v:() | eqList xs ys && eqList ys zs ==> eqList xs zs} @-}
+{-@ eqListTrans :: xs:List a -> ys:List a -> zs:List a -> {eqList xs ys && eqList ys zs ==> eqList xs zs} @-}
 eqListTrans :: Eq a => List a -> List a -> List a -> Proof
 eqListTrans Nil Nil Nil = simpleProof
 eqListTrans Nil Nil (Cons z zs) = eqList Nil (Cons z zs)
