@@ -21,9 +21,9 @@ instance VerifiableConstraint Monoid where
 
 {-@
 monoid :: zero:a -> prod:(a -> a -> a)
-       -> lident:(x:a -> {zero `prod` x == x})
-       -> rident:(x:a -> {x `prod` zero == x})
-       -> assoc:(x:a -> y:a -> z:a -> {x `prod` (y `prod` z) == (x `prod` y) `prod` z})
+       -> lident:(x:a -> {prod zero x == x})
+       -> rident:(x:a -> {prod x zero == x})
+       -> assoc:(x:a -> y:a -> z:a -> {prod x (prod y z) == prod (prod x y) z})
        -> Verified Monoid a
 @-}
 monoid :: a -> (a -> a -> a)

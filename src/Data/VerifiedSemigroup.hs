@@ -21,7 +21,7 @@ instance VerifiableConstraint Semigroup where
 
 {-@
 semigroup :: op:(a -> a -> a)
-          -> assoc:(x:a -> y:a -> z:a -> {x `op` (y `op` z) == (x `op` y) `op` z})
+          -> assoc:(x:a -> y:a -> z:a -> {op x (op y z) == op (op x y) z})
           -> Verified Semigroup a
 @-}
 semigroup :: (a -> a -> a)
