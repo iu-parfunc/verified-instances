@@ -55,10 +55,7 @@ eqListSym (Cons x xs) (Cons y ys) =   eqList (Cons x xs) (Cons y ys)
 
 {-@ eqListTrans :: xs:List a -> ys:List a -> zs:List a -> {v:() | eqList xs ys && eqList ys zs ==> eqList xs zs} @-}
 eqListTrans :: Eq a => List a -> List a -> List a -> Proof
-eqListTrans Nil Nil Nil = undefined
--- eqListTrans Nil Nil Nil =   eqList Nil Nil ^ eqList Nil Nil
---                         ==. True
---                         *** QED
+eqListTrans Nil Nil Nil = simpleProof
 eqListTrans Nil Nil (Cons z zs) = eqList Nil (Cons z zs)
                                 ==. True
                                 *** QED
