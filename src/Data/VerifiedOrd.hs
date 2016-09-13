@@ -20,9 +20,9 @@ instance VerifiableConstraint Ord where
 
 {-@
 leqOrd :: leq:(a -> a -> Bool)
-       -> (x:a -> y:a -> { Prop (leq x y) || Prop (leq y x) })
-       -> (x:a -> y:a -> { Prop (leq x y) || Prop (leq y x) ==> x == y })
-       -> (x:a -> y:a -> z:a -> { Prop (leq x y) && Prop (leq y z) ==> Prop (leq x z) })
+       -> total:(x:a -> y:a -> { Prop (leq x y) || Prop (leq y x) })
+       -> antisym:(x:a -> y:a -> { Prop (leq x y) || Prop (leq y x) ==> x == y })
+       -> trans:(x:a -> y:a -> z:a -> { Prop (leq x y) && Prop (leq y z) ==> Prop (leq x z) })
        -> Verified Ord a
  @-}
 leqOrd :: (a -> a -> Bool)

@@ -19,6 +19,7 @@ library
                      , Data.VerifiableConstraint
                      , Data.VerifiableConstraint.Internal
                      , Data.VerifiedOrd
+                     , Data.VerifiedSemigroup
                      , Language.Haskell.Liquid.ProofCombinators
   other-extensions:    MultiParamTypeClasses
                      , FlexibleInstances
@@ -28,6 +29,7 @@ library
   build-depends:       base >=4.8 && <5
                      , constraints >=0.8 && <0.9
                      , reflection >=2.1.2 && <2.2
+                     , semigroups >=0.18 && <0.19
   hs-source-dirs:      src
   ghc-options:         -O2 -Wall
   default-language:    Haskell2010
