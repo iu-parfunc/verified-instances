@@ -1,4 +1,3 @@
-
 {-# LANGUAGE Trustworthy          #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE FlexibleContexts     #-}
@@ -9,12 +8,10 @@
 
 module Data.VerifiedOrd (leqOrd) where
 
-import Language.Haskell.Liquid.ProofCombinators
-import Data.VerifiableConstraint.Internal
-import Data.Proxy
-import Data.Reflection
 import Data.Constraint
-import Data.Constraint.Unsafe
+import Data.Reflection
+import Data.VerifiableConstraint.Internal
+import Language.Haskell.Liquid.ProofCombinators
 
 instance VerifiableConstraint Ord where
   data Verified Ord a = LEq (a -> a -> Bool)
@@ -23,9 +20,9 @@ instance VerifiableConstraint Ord where
 
 {-@
 leqOrd :: leq:(a -> a -> Bool)
-       -> (x:a -> y:a -> { v:() | Prop (leq x y) || Prop (leq y x) })
-       -> (x:a -> y:a -> { v:() | Prop (leq x y) || Prop (leq y x) ==> x == y })
-       -> (x:a -> y:a -> z:a -> { v:() | Prop (leq x y) && Prop (leq y z) ==> Prop (leq x z) })
+       -> (x:a -> y:a -> { Prop (leq x y) || Prop (leq y x) })
+       -> (x:a -> y:a -> { Prop (leq x y) || Prop (leq y x) ==> x == y })
+       -> (x:a -> y:a -> z:a -> { Prop (leq x y) && Prop (leq y z) ==> Prop (leq x z) })
        -> Verified Ord a
  @-}
 leqOrd :: (a -> a -> Bool)

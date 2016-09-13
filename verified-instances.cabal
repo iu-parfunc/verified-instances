@@ -17,7 +17,7 @@ library
                      , Data.Nat
                      , Data.List
                      , Data.VerifiableConstraint
-                     , Data.VerifiableConstraint.Internal                     
+                     , Data.VerifiableConstraint.Internal
                      , Data.VerifiedOrd
                      , Language.Haskell.Liquid.ProofCombinators
   other-extensions:    MultiParamTypeClasses
@@ -29,4 +29,5 @@ library
                      , constraints >=0.8 && <0.9
                      , reflection >=2.1.2 && <2.2
   hs-source-dirs:      src
+  ghc-options:         -O2 -Wall
   default-language:    Haskell2010
