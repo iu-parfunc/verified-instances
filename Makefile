@@ -9,7 +9,7 @@ all: build check
 build:
 	stack build
 
-check: $(CHS)
+check: build $(CHS)
 
 %.chs: %.hs
 	$(LIQUID) -i src $<
