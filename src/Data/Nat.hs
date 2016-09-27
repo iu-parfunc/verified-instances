@@ -48,7 +48,7 @@ eqNSym (Suc x) (Suc y) =   eqN (Suc x) (Suc y)
                        ==. eqN (Suc y) (Suc x)
                        *** QED
 
-{-@ eqNTrans :: x:N -> y:N -> z:N -> { eqN x y && eqN y z ==> eqN x z } @-}
+{-@ eqNTrans :: x:N -> y:N -> z:N -> { (eqN x y && eqN y z) ==> eqN x z } @-}
 eqNTrans :: N -> N -> N -> Proof
 eqNTrans Zero Zero Zero = simpleProof
 eqNTrans Zero Zero (Suc z) = simpleProof
@@ -75,8 +75,24 @@ instance Eq N where
 --   sym = eqNSym
 --   trans = eqNTrans
 
--- veqN :: VerifiedEq N
--- veqN = VerifiedEq eqN eqNRefl eqNSym eqNTrans
+
+{-@ data VerifiedEq a = VerifiedEq {
+      eq :: x:a -> y:a -> Bool
+    , refl :: x:a -> { Prop (eq x x) }
+    , sym :: x:a -> y:a -> { Prop (eq x y) ==> Prop (eq y x) }
+    , trans :: x:a -> y:a -> z:a -> { (Prop (eq x y) && Prop (eq y z)) ==> Prop (eq x z) }
+    }
+@-}
+data VerifiedEq a = VerifiedEq {
+    eq :: a -> a -> Bool
+  , refl :: a -> Proof
+  , sym :: a -> a -> Proof
+  , trans :: a -> a -> a -> Proof
+}
+
+
+veqN :: VerifiedEq N
+veqN = VerifiedEq eqN eqNRefl eqNSym eqNTrans
 
 {-@ axiomatize addN @-}
 addN :: N -> N -> N
