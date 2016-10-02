@@ -1,10 +1,8 @@
-FROM fpco/stack-build:lts-7
-
-WORKDIR /opt
+FROM fpco/stack-build:lts-6
 
 RUN apt-get -y install z3
 
-RUN git clone --recursive https://github.com/ucsd-progsys/liquidhaskell.git
+RUN git clone --recursive https://github.com/ucsd-progsys/liquidhaskell.git /opt/liquidhaskell
 WORKDIR /opt/liquidhaskell
 
 # "develop" branch
@@ -13,9 +11,3 @@ RUN git checkout ${LIQUID_SHA} && \
     git submodule update --init --recursive && \
     stack install --local-bin-path=/usr/local/bin \
           liquiddesugar liquid-fixpoint prover liquidhaskell
-
-WORKDIR /root
-ADD . verified-instances
-WORKDIR /root/verified-instances
-
-RUN make all

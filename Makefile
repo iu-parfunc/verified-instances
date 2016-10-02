@@ -2,12 +2,25 @@ HS = $(shell find src -type f -name '*.hs')
 # Dummy target
 CHS = $(subst hs,chs,$(HS))
 
-LIQUID ?= stack exec liquid --
+DOCKER ?= true
 
-all: build check
+ifeq ($(DOCKER),true)
+	STACK ?= stack --docker
+	ALL = docker build check
+else
+	STACK ?= stack
+	ALL = build check
+endif
+
+LIQUID ?= $(STACK) exec liquid --
+
+all: $(ALL)
+
+docker:
+	docker build -t liquidhaskell .
 
 build:
-	stack build
+	$(STACK) build
 
 check: build $(CHS)
 
@@ -16,6 +29,6 @@ check: build $(CHS)
 
 clean:
 	find . -type d -name '.liquid' -exec rm -rf {} \+
-	stack clean
+	$(STACK) clean
 
-.PHONY: build check clean
+.PHONY: docker build check clean
