@@ -4,7 +4,7 @@
 
 module Data.Nat where
 
--- import Data.VerifiedEq
+import Data.VerifiedEq
 -- import GHC.Classes.VerifiedEq
 import Language.Haskell.Liquid.ProofCombinators
 
@@ -74,22 +74,6 @@ instance Eq N where
 --   refl = eqNRefl
 --   sym = eqNSym
 --   trans = eqNTrans
-
-
-{-@ data VerifiedEq a = VerifiedEq {
-      eq :: x:a -> y:a -> Bool
-    , refl :: x:a -> { Prop (eq x x) }
-    , sym :: x:a -> y:a -> { Prop (eq x y) ==> Prop (eq y x) }
-    , trans :: x:a -> y:a -> z:a -> { (Prop (eq x y) && Prop (eq y z)) ==> Prop (eq x z) }
-    }
-@-}
-data VerifiedEq a = VerifiedEq {
-    eq :: a -> a -> Bool
-  , refl :: a -> Proof
-  , sym :: a -> a -> Proof
-  , trans :: a -> a -> a -> Proof
-}
-
 
 veqN :: VerifiedEq N
 veqN = VerifiedEq eqN eqNRefl eqNSym eqNTrans

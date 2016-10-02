@@ -6,7 +6,7 @@
 module Data.List where
 
 -- import GHC.Classes.VerifiedEq
--- import Data.VerifiedEq
+import Data.VerifiedEq
 import Language.Haskell.Liquid.ProofCombinators
 
 {-@ data List [llen] = Nil | Cons { x :: a , xs :: List a } @-}
@@ -82,8 +82,8 @@ instance Eq a => Eq (List a) where
 --   sym = eqListSym
 --   trans = eqListTrans
 
--- veqList :: Eq a => VerifiedEq (List a)
--- veqList = VerifiedEq eqList eqListRefl eqListSym eqListTrans
+veqList :: Eq a => VerifiedEq (List a)
+veqList = VerifiedEq eqList eqListRefl eqListSym eqListTrans
 
 {-@ axiomatize appendList @-}
 appendList :: List a -> List a -> List a
