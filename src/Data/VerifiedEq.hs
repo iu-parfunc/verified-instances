@@ -4,8 +4,6 @@
 
 module Data.VerifiedEq where
 
--- import Data.Nat
--- import Data.List
 import Language.Haskell.Liquid.ProofCombinators
 
 {-@ data VerifiedEq a = VerifiedEq {
@@ -21,24 +19,3 @@ data VerifiedEq a = VerifiedEq {
   , sym :: a -> a -> Proof
   , trans :: a -> a -> a -> Proof
 }
-
-{-@ eqIntRefl :: x:Int -> { x == x } @-}
-eqIntRefl :: Int -> Proof
-eqIntRefl x = simpleProof
-
-{-@ eqIntSym :: x:Int -> y:Int -> { x == y ==> y == x } @-}
-eqIntSym :: Int -> Int -> Proof
-eqIntSym x y = simpleProof
-
-{-@ eqIntTrans :: x:Int -> y:Int -> z:Int -> { x == y && y == z ==> x == z } @-}
-eqIntTrans :: Int -> Int -> Int -> Proof
-eqIntTrans x y z = simpleProof
-
--- veqInt :: VerifiedEq Int
--- veqInt = VerifiedEq (==) eqIntRefl eqIntSym eqIntTrans
-
--- veqN :: VerifiedEq N
--- veqN = VerifiedEq eqN eqNRefl eqNSym eqNTrans
-
--- veqList :: Eq a => VerifiedEq (List a)
--- veqList = VerifiedEq eqList eqListRefl eqListSym eqListTrans
