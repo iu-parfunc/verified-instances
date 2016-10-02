@@ -1,4 +1,4 @@
-FROM fpco/stack-build:lts-6
+FROM fpco/stack-build:lts-7
 
 WORKDIR /opt
 
