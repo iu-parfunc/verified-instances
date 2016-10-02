@@ -18,6 +18,7 @@ library
                      , Data.List
                      , Data.VerifiableConstraint
                      , Data.VerifiableConstraint.Internal
+                     , Data.VerifiedEq
                      , Data.VerifiedOrd
                      , Data.VerifiedSemigroup
                      , Language.Haskell.Liquid.ProofCombinators
