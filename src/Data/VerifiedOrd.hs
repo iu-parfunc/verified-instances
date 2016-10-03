@@ -3,44 +3,48 @@
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE TypeFamilies         #-}
-{-@ LIQUID "--higherorder"         @-}
-{-@ LIQUID "--totality"            @-}
+{-@ LIQUID "--higherorder"        @-}
+{-@ LIQUID "--totality"           @-}
 
-module Data.VerifiedOrd (leqOrd) where
+module Data.VerifiedOrd where
 
 import Data.Constraint
 import Data.Reflection
+import Data.VerifiedEq
 import Data.VerifiableConstraint.Internal
 import Language.Haskell.Liquid.ProofCombinators
 
+-- {-@ data VerifiedOrd a = VerifiedOrd {
+--       leq :: (a -> a -> Bool)
+--     , total :: (x:a -> y:a -> { Prop (leq x y) || Prop (leq y x) })
+--     , antisym :: (x:a -> y:a -> { Prop (leq x y) || Prop (leq y x) ==> x == y })
+--     , trans :: (x:a -> y:a -> z:a -> { Prop (leq x y) && Prop (leq y z) ==> Prop (leq x z) })
+--     , verifiedEq :: VerifiedEq a
+--     }
+-- @-}
+
+data VerifiedOrd a = VerifiedOrd {
+    leq :: a -> a -> Bool
+  , total :: a -> a -> Proof
+  , antisym :: a -> a -> Proof
+  , trans :: a -> a -> a -> Proof
+  , verifiedEq :: VerifiedEq a
+  }
+
+{-@ VerifiedOrd :: leq: (a -> a -> Bool)
+                -> total: (x:a -> y:a -> { Prop (leq x y) || Prop (leq y x) })
+                -> antisym: (x:a -> y:a -> { Prop (leq x y) || Prop (leq y x) ==> x == y })
+                -> trans: (x:a -> y:a -> z:a -> { Prop (leq x y) && Prop (leq y z) ==> Prop (leq x z) })
+                -> verifiedEq: VerifiedEq a
+                -> VerifiedOrd a
+@-}
+
 instance VerifiableConstraint Ord where
-  data Verified Ord a = LEq (a -> a -> Bool)
-                      | Cmp (a -> a -> Ordering)
+  data Verified Ord a = VOrd { vord :: VerifiedOrd a }
   reifiedIns = Sub Dict
 
-{-@
-leqOrd :: leq:(a -> a -> Bool)
-       -> total:(x:a -> y:a -> { Prop (leq x y) || Prop (leq y x) })
-       -> antisym:(x:a -> y:a -> { Prop (leq x y) || Prop (leq y x) ==> x == y })
-       -> trans:(x:a -> y:a -> z:a -> { Prop (leq x y) && Prop (leq y z) ==> Prop (leq x z) })
-       -> Verified Ord a
- @-}
-leqOrd :: (a -> a -> Bool)
-       -> (a -> a -> Proof)
-       -> (a -> a -> Proof)
-       -> (a -> a -> a -> Proof)
-       -> Verified Ord a
-leqOrd leq total antisym trans = LEq leq
-
 instance Reifies s (Verified Ord a) => Eq (Lift Ord a s) where
-  a == b = (compare a b == EQ)
+  x == y = (eq . verifiedEq . vord . reflect $ x) (lower x) (lower y)
 
 instance Reifies s (Verified Ord a) => Ord (Lift Ord a s) where
-  compare x y =
-    case reflect x of
-      LEq f -> if (x == y)
-                 then EQ
-                 else if f (lower x) (lower y)
-                        then LT
-                        else GT
-      Cmp f -> f (lower x) (lower y)
+  x <= y = (leq . vord . reflect $ x) (lower x) (lower y)

@@ -28,8 +28,8 @@ data VerifiedEq a = VerifiedEq {
   }
 
 instance VerifiableConstraint Eq where
-  data Verified Eq a = Verified { veq :: VerifiedEq a }
+  data Verified Eq a = VEq { veq :: VerifiedEq a }
   reifiedIns = Sub Dict
 
 instance Reifies s (Verified Eq a) => Eq (Lift Eq a s) where
-  x == y = eq (veq $ reflect x) (lower x) (lower y)
+  x == y = (eq . veq . reflect $ x) (lower x) (lower y)

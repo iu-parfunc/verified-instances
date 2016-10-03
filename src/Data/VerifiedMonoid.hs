@@ -3,35 +3,48 @@
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE TypeFamilies         #-}
-{-@ LIQUID "--higherorder"         @-}
-{-@ LIQUID "--totality"            @-}
+{-@ LIQUID "--higherorder"        @-}
+{-@ LIQUID "--totality"           @-}
 
-module Data.VerifiedMonoid (monoid) where
+module Data.VerifiedMonoid where
 
 import Data.Monoid
+import Data.Semigroup
 import Data.Constraint
 import Data.Reflection
+import Data.VerifiedSemigroup
 import Data.VerifiableConstraint.Internal
 import Language.Haskell.Liquid.ProofCombinators
 
+-- {-@ data VerifiedMonoid a = VerifiedMonoid {
+--       ident :: a
+--     , verifiedSemigroup :: VerifiedSemigroup a
+--     , lident :: x:a -> {prod verifiedSemigroup ident x == x}
+--     , rident :: x:a -> {prod verifiedSemigroup x ident == x}
+--     }
+-- @-}
+
+data VerifiedMonoid a = VerifiedMonoid {
+    ident :: a
+  , verifiedSemigroup :: VerifiedSemigroup a
+  , lident :: a -> Proof
+  , rident :: a -> Proof
+}
+
+{-@ VerifiedMonoid :: ident: a
+                   -> verifiedSemigroup: VerifiedSemigroup a
+                   -> lident: (x:a -> {prod verifiedSemigroup ident x == x})
+                   -> rident: (x:a -> {prod verifiedSemigroup x ident == x})
+                   -> VerifiedMonoid a
+@-}
+
 instance VerifiableConstraint Monoid where
-  data Verified Monoid a =
-    VerifiedMonoid { vmempty :: a, vmappend :: a -> a -> a }
+  data Verified Monoid a = VMonoid { vmonoid :: VerifiedMonoid a }
   reifiedIns = Sub Dict
 
-{-@
-monoid :: zero:a -> prod:(a -> a -> a)
-       -> lident:(x:a -> {prod zero x == x})
-       -> rident:(x:a -> {prod x zero == x})
-       -> assoc:(x:a -> y:a -> z:a -> {prod x (prod y z) == prod (prod x y) z})
-       -> Verified Monoid a
-@-}
-monoid :: a -> (a -> a -> a)
-       -> (a -> Proof) -> (a -> Proof)
-       -> (a -> a -> a -> Proof)
-       -> Verified Monoid a
-monoid zero prod _ _ _ = VerifiedMonoid zero prod
+instance Reifies s (Verified Monoid a) => Semigroup (Lift Monoid a s) where
+  x <> y = Lift $ (prod . verifiedSemigroup . vmonoid . reflect $ x) (lower x) (lower y)
 
 instance Reifies s (Verified Monoid a) => Monoid (Lift Monoid a s) where
-  mempty = x where x = Lift $ vmempty (reflect x)
-  x `mappend` y = Lift $ vmappend (reflect x) (lower x) (lower y)
+  mempty = x where x = Lift . ident . vmonoid . reflect $ x
+  x `mappend` y = Lift $ (prod . verifiedSemigroup . vmonoid . reflect $ x) (lower x) (lower y)
