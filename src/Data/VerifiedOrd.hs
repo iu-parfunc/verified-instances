@@ -14,14 +14,14 @@ import Data.VerifiedEq
 import Data.VerifiableConstraint.Internal
 import Language.Haskell.Liquid.ProofCombinators
 
--- {-@ data VerifiedOrd a = VerifiedOrd {
---       leq :: (a -> a -> Bool)
---     , total :: (x:a -> y:a -> { Prop (leq x y) || Prop (leq y x) })
---     , antisym :: (x:a -> y:a -> { Prop (leq x y) || Prop (leq y x) ==> x == y })
---     , trans :: (x:a -> y:a -> z:a -> { Prop (leq x y) && Prop (leq y z) ==> Prop (leq x z) })
---     , verifiedEq :: VerifiedEq a
---     }
--- @-}
+{-@ data VerifiedOrd a = VerifiedOrd {
+      leq :: (a -> a -> Bool)
+    , total :: (x:a -> y:a -> { Prop (leq x y) || Prop (leq y x) })
+    , antisym :: (x:a -> y:a -> { Prop (leq x y) || Prop (leq y x) ==> x == y })
+    , trans :: (x:a -> y:a -> z:a -> { Prop (leq x y) && Prop (leq y z) ==> Prop (leq x z) })
+    , verifiedEq :: VerifiedEq a
+    }
+@-}
 
 data VerifiedOrd a = VerifiedOrd {
     leq :: a -> a -> Bool
@@ -30,14 +30,6 @@ data VerifiedOrd a = VerifiedOrd {
   , trans :: a -> a -> a -> Proof
   , verifiedEq :: VerifiedEq a
   }
-
-{-@ VerifiedOrd :: leq: (a -> a -> Bool)
-                -> total: (x:a -> y:a -> { Prop (leq x y) || Prop (leq y x) })
-                -> antisym: (x:a -> y:a -> { Prop (leq x y) || Prop (leq y x) ==> x == y })
-                -> trans: (x:a -> y:a -> z:a -> { Prop (leq x y) && Prop (leq y z) ==> Prop (leq x z) })
-                -> verifiedEq: VerifiedEq a
-                -> VerifiedOrd a
-@-}
 
 instance VerifiableConstraint Ord where
   data Verified Ord a = VOrd { vord :: VerifiedOrd a }
