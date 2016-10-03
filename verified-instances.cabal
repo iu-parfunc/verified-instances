@@ -14,6 +14,7 @@ cabal-version:       >=1.10
 library
   exposed-modules:     GHC.Classes.VerifiedEq
                      , GHC.Classes.VerifiedOrd
+                     , Data.Prod
                      , Data.VerifiableConstraint
                      , Data.VerifiableConstraint.Internal
                      , Data.VerifiedEq
