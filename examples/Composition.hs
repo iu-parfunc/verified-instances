@@ -1,5 +1,5 @@
-{-@ LIQUID "--totality"       @-}
-{-@ LIQUID "--higherorder"    @-}
+{-@ LIQUID "--totality"    @-}
+{-@ LIQUID "--higherorder" @-}
 
 module Composition where
 
@@ -20,3 +20,8 @@ x :: Bool
 x = using (VEq veqInt)
   $ using (VEq veqString)
   $ (1, "foo") /= (2, "bar")
+
+y :: Bool
+y = using (VEq veqInt)
+  $ using (VEq veqString)
+  $ Left 1 /= Right "foo"
