@@ -3,7 +3,7 @@
 {-@ LIQUID "--exact-data-cons" @-}
 {-@ LIQUID "--prune-unsorted"  @-}
 
-module Data.List where
+module List where
 
 -- import GHC.Classes.VerifiedEq
 import Data.VerifiedEq

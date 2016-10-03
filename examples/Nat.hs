@@ -2,7 +2,7 @@
 {-@ LIQUID "--totality"        @-}
 {-@ LIQUID "--exact-data-cons" @-}
 
-module Data.Nat where
+module Nat where
 
 import Data.VerifiedEq
 -- import GHC.Classes.VerifiedEq

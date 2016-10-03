@@ -2,7 +2,7 @@
 {-@ LIQUID "--totality"        @-}
 {-@ LIQUID "--prune-unsorted"  @-}
 
-module Data.VerifiedEq.Instances where
+module Int where
 
 import Data.VerifiedEq
 import Language.Haskell.Liquid.ProofCombinators

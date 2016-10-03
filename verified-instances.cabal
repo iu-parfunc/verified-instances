@@ -14,12 +14,9 @@ cabal-version:       >=1.10
 library
   exposed-modules:     GHC.Classes.VerifiedEq
                      , GHC.Classes.VerifiedOrd
-                     , Data.Nat
-                     , Data.List
                      , Data.VerifiableConstraint
                      , Data.VerifiableConstraint.Internal
                      , Data.VerifiedEq
-                     , Data.VerifiedEq.Instances
                      , Data.VerifiedOrd
                      , Data.VerifiedMonoid
                      , Data.VerifiedSemigroup
