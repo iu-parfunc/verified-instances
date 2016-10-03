@@ -1,9 +1,16 @@
-{-@ LIQUID "--higherorder"     @-}
-{-@ LIQUID "--totality"        @-}
-{-@ LIQUID "--prune-unsorted"  @-}
+{-# LANGUAGE Trustworthy          #-}
+{-# LANGUAGE FlexibleInstances    #-}
+{-# LANGUAGE FlexibleContexts     #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE TypeFamilies         #-}
+{-@ LIQUID "--higherorder"        @-}
+{-@ LIQUID "--totality"           @-}
 
 module Data.VerifiedEq where
 
+import Data.Constraint
+import Data.Reflection
+import Data.VerifiableConstraint.Internal
 import Language.Haskell.Liquid.ProofCombinators
 
 {-@ data VerifiedEq a = VerifiedEq {
@@ -18,4 +25,11 @@ data VerifiedEq a = VerifiedEq {
   , refl :: a -> Proof
   , sym :: a -> a -> Proof
   , trans :: a -> a -> a -> Proof
-}
+  }
+
+instance VerifiableConstraint Eq where
+  data Verified Eq a = Verified { veq :: VerifiedEq a }
+  reifiedIns = Sub Dict
+
+instance Reifies s (Verified Eq a) => Eq (Lift Eq a s) where
+  x == y = eq (veq $ reflect x) (lower x) (lower y)
