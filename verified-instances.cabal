@@ -30,6 +30,7 @@ library
                      , IncoherentInstances
   build-depends:       base >=4.8 && <5
                      , constraints >=0.8 && <0.9
+                     , newtype >= 0.2 && <0.3
                      , reflection >=2.1.2 && <2.2
                      , semigroups >=0.18 && <0.19
   hs-source-dirs:      src
