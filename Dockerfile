@@ -6,7 +6,7 @@ RUN git clone --recursive https://github.com/ucsd-progsys/liquidhaskell.git /opt
 WORKDIR /opt/liquidhaskell
 
 # "develop" branch
-ENV LIQUID_SHA 444bce9952b8af96bb3e954f1e785095f3c86bfa
+ENV LIQUID_SHA 78b4e18331ce69b232534e7b5b382ca566230a43
 RUN git checkout ${LIQUID_SHA} && \
     git submodule update --init --recursive && \
     stack install --local-bin-path=/usr/local/bin \
