@@ -26,7 +26,7 @@ data VerifiedSemigroup a = VerifiedSemigroup {
   }
 
 instance VerifiableConstraint Semigroup where
-  data Verified Semigroup a = VSemigrp { vsemigrp :: VerifiedSemigroup a }
+  newtype Verified Semigroup a = VSemigrp { vsemigrp :: VerifiedSemigroup a }
   reifiedIns = Sub Dict
 
 instance Reifies s (Verified Semigroup a) => Semigroup (Lift Semigroup a s) where

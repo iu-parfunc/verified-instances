@@ -28,7 +28,7 @@ data VerifiedEq a = VerifiedEq {
   }
 
 instance VerifiableConstraint Eq where
-  data Verified Eq a = VEq { veq :: VerifiedEq a }
+  newtype Verified Eq a = VEq { veq :: VerifiedEq a }
   reifiedIns = Sub Dict
 
 instance Reifies s (Verified Eq a) => Eq (Lift Eq a s) where

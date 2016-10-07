@@ -39,7 +39,7 @@ data VerifiedMonoid a = VerifiedMonoid {
 @-}
 
 instance VerifiableConstraint Monoid where
-  data Verified Monoid a = VMonoid { vmonoid :: VerifiedMonoid a }
+  newtype Verified Monoid a = VMonoid { vmonoid :: VerifiedMonoid a }
   reifiedIns = Sub Dict
 
 instance Reifies s (Verified Monoid a) => Semigroup (Lift Monoid a s) where

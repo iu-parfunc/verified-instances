@@ -32,7 +32,7 @@ data VerifiedOrd a = VerifiedOrd {
   }
 
 instance VerifiableConstraint Ord where
-  data Verified Ord a = VOrd { vord :: VerifiedOrd a }
+  newtype Verified Ord a = VOrd { vord :: VerifiedOrd a }
   reifiedIns = Sub Dict
 
 instance Reifies s (Verified Ord a) => Eq (Lift Ord a s) where
