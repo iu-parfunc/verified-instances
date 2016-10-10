@@ -26,8 +26,8 @@ data VerifiedSemigroup a = VerifiedSemigroup {
   }
 
 instance VerifiableConstraint Semigroup where
-  newtype Verified Semigroup a = VSemigrp { vsemigrp :: VerifiedSemigroup a }
+  newtype Verified Semigroup a = VSemigroup { vsemigroup :: VerifiedSemigroup a }
   reifiedIns = Sub Dict
 
 instance Reifies s (Verified Semigroup a) => Semigroup (Lift Semigroup a s) where
-  x <> y = Lift $ (prod . vsemigrp . reflect $ x) (lower x) (lower y)
+  x <> y = Lift $ (prod . vsemigroup . reflect $ x) (lower x) (lower y)
