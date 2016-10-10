@@ -1,10 +1,29 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 
-module Data.VerifiedEq.Instances where
+module Data.VerifiedEq.Instances (veqInt, veqProd) where
 
 import Data.VerifiedEq
 import Language.Haskell.Liquid.ProofCombinators
+
+{-@ axiomatize eqInt @-}
+eqInt :: Int -> Int -> Bool
+eqInt x y = x == y
+
+{-@ eqIntRefl :: x:Int -> { eqInt x x } @-}
+eqIntRefl :: Int -> Proof
+eqIntRefl x = eqInt x x ==. x == x *** QED
+
+{-@ eqIntSym :: x:Int -> y:Int -> { eqInt x y ==> eqInt y x } @-}
+eqIntSym :: Int -> Int -> Proof
+eqIntSym x y = eqInt x y ==. x == y ==. y == x *** QED
+
+{-@ eqIntTrans :: x:Int -> y:Int -> z:Int -> { eqInt x y && eqInt y z ==> eqInt x z } @-}
+eqIntTrans :: Int -> Int -> Int -> Proof
+eqIntTrans x y z = (eqInt x y && eqInt y z) ==. (x == y && y == z) ==. x == z *** QED
+
+veqInt :: VerifiedEq Int
+veqInt = VerifiedEq eqInt eqIntRefl eqIntSym eqIntTrans
 
 {-@ axiomatize eqProd @-}
 eqProd :: (a -> a -> Bool) -> (b -> b -> Bool)
@@ -62,9 +81,9 @@ eqProdTrans eqa eqaTrans eqb eqbTrans p@(x1, y1) q@(x2, y2) r@(x3, y3) =
   ==. eqProd eqa eqb p r
   *** QED
 
-{-@ verifiedEqProd :: VerifiedEq a -> VerifiedEq b -> VerifiedEq (a, b) @-}
-verifiedEqProd :: VerifiedEq a -> VerifiedEq b -> VerifiedEq (a, b)
-verifiedEqProd (VerifiedEq eqa eqaRefl eqaSym eqaTrans) (VerifiedEq eqb eqbRefl eqbSym eqbTrans) =
+{-@ veqProd :: VerifiedEq a -> VerifiedEq b -> VerifiedEq (a, b) @-}
+veqProd :: VerifiedEq a -> VerifiedEq b -> VerifiedEq (a, b)
+veqProd (VerifiedEq eqa eqaRefl eqaSym eqaTrans) (VerifiedEq eqb eqbRefl eqbSym eqbTrans) =
   VerifiedEq (eqProd eqa eqb)
              (eqProdRefl eqa eqaRefl eqb eqbRefl)
              (eqProdSym eqa eqaSym eqb eqbSym)

@@ -19,6 +19,7 @@ library
                      , Data.VerifiedEq
                      , Data.VerifiedEq.Instances
                      , Data.VerifiedOrd
+                     , Data.VerifiedOrd.Instances
                      , Data.VerifiedMonoid
                      , Data.VerifiedSemigroup
                      , Language.Haskell.Liquid.ProofCombinators
