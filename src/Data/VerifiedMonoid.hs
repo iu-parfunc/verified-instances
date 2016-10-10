@@ -8,7 +8,6 @@
 
 module Data.VerifiedMonoid where
 
-import Data.Monoid
 import Data.Semigroup
 import Data.Constraint
 import Data.Reflection

@@ -20,15 +20,15 @@ class Eq a => VerifiedEq a where
 
 {-@ eqIntRefl :: x:Int -> { x == x } @-}
 eqIntRefl :: Int -> Proof
-eqIntRefl x = simpleProof
+eqIntRefl _x = simpleProof
 
 {-@ eqIntSym :: x:Int -> y:Int -> { x == y ==> y == x } @-}
 eqIntSym :: Int -> Int -> Proof
-eqIntSym x y = simpleProof
+eqIntSym _x _y = simpleProof
 
 {-@ eqIntTrans :: x:Int -> y:Int -> z:Int -> { x == y && y == z ==> x == z } @-}
 eqIntTrans :: Int -> Int -> Int -> Proof
-eqIntTrans x y z = simpleProof
+eqIntTrans _x _y _z = simpleProof
 
 -- instance VerifiedEq Int where
 --   refl = eqIntRefl

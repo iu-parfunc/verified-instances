@@ -16,7 +16,7 @@ data List a = Nil | Cons a (List a)
 {-@ llen :: List a -> Nat @-}
 llen :: List a -> Int
 llen Nil = 0
-llen (Cons x xs) = 1 + llen xs
+llen (Cons _ xs) = 1 + llen xs
 
 {-@ axiomatize eqList @-}
 eqList :: Eq a => List a -> List a -> Bool
@@ -58,15 +58,15 @@ eqListTrans Nil Nil Nil = simpleProof
 eqListTrans Nil Nil (Cons z zs) = eqList Nil (Cons z zs)
                                 ==. True
                                 *** QED
-eqListTrans Nil (Cons y ys) zs =   eqList Nil (Cons y ys)
-                               ==. False
-                               *** QED
-eqListTrans (Cons x xs) Nil zs =   eqList (Cons x xs) Nil
-                               ==. False
-                               *** QED
-eqListTrans (Cons x xs) (Cons y ys) Nil =   eqList (Cons y ys) Nil
-                                        ==. False
-                                        *** QED
+eqListTrans Nil (Cons y ys) _zs =   eqList Nil (Cons y ys)
+                                ==. False
+                                *** QED
+eqListTrans (Cons x xs) Nil _zs =   eqList (Cons x xs) Nil
+                                ==. False
+                                *** QED
+eqListTrans (Cons _ _) (Cons y ys) Nil =   eqList (Cons y ys) Nil
+                                       ==. False
+                                       *** QED
 eqListTrans (Cons x xs) (Cons y ys) (Cons z zs) =   (eqList (Cons x xs) (Cons y ys) && eqList (Cons y ys) (Cons z zs))
                                                 ==. ((if x == y then eqList xs ys else False) && (if y == z then eqList ys zs else False))
                                                 ==. (if (x == y && y == z) then (eqList xs ys && eqList ys zs) else False)

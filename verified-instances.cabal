@@ -32,5 +32,5 @@ library
                      , reflection >=2.1.2 && <2.2
                      , semigroups >=0.18 && <0.19
   hs-source-dirs:      src
-  ghc-options:         -O2 -Wall
+  ghc-options:         -O2 -Wall -fno-warn-orphans
   default-language:    Haskell2010

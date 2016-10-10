@@ -5,7 +5,6 @@ module Composition where
 
 import Data.VerifiedEq
 import Data.VerifiableConstraint
-import Language.Haskell.Liquid.ProofCombinators
 
 {-@ assume veqInt :: VerifiedEq Int @-}
 veqInt :: VerifiedEq Int
@@ -19,9 +18,9 @@ veqString = VerifiedEq (==) undefined undefined undefined
 x :: Bool
 x = using (VEq veqInt)
   $ using (VEq veqString)
-  $ (1, "foo") /= (2, "bar")
+  $ ('1', "foo") /= ('2', "bar")
 
 y :: Bool
 y = using (VEq veqInt)
   $ using (VEq veqString)
-  $ Left 1 /= Right "foo"
+  $ Left '1' /= Right "foo"

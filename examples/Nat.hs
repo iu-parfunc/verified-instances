@@ -51,7 +51,7 @@ eqNSym (Suc x) (Suc y) =   eqN (Suc x) (Suc y)
 {-@ eqNTrans :: x:N -> y:N -> z:N -> { (eqN x y && eqN y z) ==> eqN x z } @-}
 eqNTrans :: N -> N -> N -> Proof
 eqNTrans Zero Zero Zero = simpleProof
-eqNTrans Zero Zero (Suc z) = simpleProof
+eqNTrans Zero Zero (Suc _) = simpleProof
 eqNTrans Zero (Suc y) z =   (eqN Zero (Suc y) && eqN (Suc y) z)
                         ==. False
                         *** QED

@@ -3,7 +3,7 @@
 
 module Int where
 
-import Data.VerifiedEq
+-- import Data.VerifiedEq
 import Language.Haskell.Liquid.ProofCombinators
 
 {-@ eqIntRefl :: x:Int -> { x == x } @-}

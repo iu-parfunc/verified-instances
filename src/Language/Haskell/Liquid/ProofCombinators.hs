@@ -71,14 +71,14 @@ _ *** _ = ()
           ((Prop (proofBool p) && Prop (proofBool q)))
           } @-}
 (==>) :: Proof -> Proof -> Proof
-p ==> q = ()
+_p ==> _q = ()
 
 
 {-@ (&&&) :: p:{Proof | Prop (proofBool p) }
           -> q:{Proof | Prop (proofBool q) }
           -> {v:Proof | Prop (proofBool p) && Prop (proofBool q) } @-}
 (&&&) :: Proof -> Proof -> Proof
-p &&& q = ()
+_p &&& _q = ()
 
 
 -- | proof goes from Int to resolve types for the optional proof combinators
@@ -95,11 +95,11 @@ simpleProof = ()
 
 (<=:) :: a -> a -> Proof -> a
 {-@ (<=:) :: x:a -> y:a -> {v:Proof | x <= y } -> {v:a | v == x } @-}
-(<=:) x y _ = x
+(<=:) x _y _ = x
 
 (<:) :: a -> a -> Proof -> a
 {-@ (<:) :: x:a -> y:a -> {v:Proof | x < y } -> {v:a | v == x } @-}
-(<:) x y _ = x
+(<:) x _y _ = x
 
 
 (>:) :: a -> a -> Proof -> a
@@ -210,4 +210,4 @@ instance (a~b) => OptGt a b where
 {-@ instance OptGt a b where
   >. :: x:a -> y:{a| x > y} -> {v:b | v ~~ x  }
   @-}
-  (>.) x y = x
+  (>.) x _y = x

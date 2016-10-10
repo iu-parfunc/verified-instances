@@ -4,7 +4,6 @@
 
 module Fold where
 
-import Data.Monoid
 import Data.Traversable
 import Data.VerifiedMonoid
 import Data.VerifiedSemigroup
@@ -22,11 +21,11 @@ newtype Prod = Prod { unProd :: Int }
 
 {-@ assume unProdBeta :: x:Int -> { unProd (Prod x) == x } @-}
 unProdBeta :: Int -> Proof
-unProdBeta x = simpleProof
+unProdBeta _x = simpleProof
 
 {-@ assume prodEta :: x:Prod -> { Prod (unProd x) == x } @-}
 prodEta :: Prod -> Proof
-prodEta x = simpleProof
+prodEta _x = simpleProof
 
 {-@ axiomatize mult @-}
 mult :: Prod -> Prod -> Prod
