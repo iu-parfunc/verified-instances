@@ -8,6 +8,10 @@ services:
 cache:
   directories:
     - $HOME/.stack
+    - $HOME/docker
+env:
+  global:
+    - DOCKER_CACHE_FILE=$HOME/docker/cache.bz2
 
 before_install:
   # Download and unpack the stack executable
@@ -15,6 +19,10 @@ before_install:
   - export PATH=${HOME}/.local/bin:${PATH}
   - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ${HOME}/.local/bin '*/stack'
   - stack --version
+  # Load cached docker images
+  - if [ -f ${DOCKER_CACHE_FILE} ]; then bunzip2 -c ${DOCKER_CACHE_FILE} | docker load; fi
 
 script:
   - make
+  # Save docker images to cache
+  - if [[ ${TRAVIS_PULL_REQUEST} == "false" ]]; then mkdir -p $(dirname ${DOCKER_CACHE_FILE}) ; docker save liquidhaskell | bzip2 > ${DOCKER_CACHE_FILE}; fi
