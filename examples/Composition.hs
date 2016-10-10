@@ -5,6 +5,7 @@ module Composition where
 
 import Data.VerifiedEq
 import Data.VerifiableConstraint
+import Language.Haskell.Liquid.ProofCombinators
 
 {-@ assume veqInt :: VerifiedEq Int @-}
 veqInt :: VerifiedEq Int
