@@ -18,12 +18,16 @@ x = using (VEq veqInt)
   $ using (VEq veqString)
   $ ('1', "foo") /= ('2', "bar")
 
--- good usage
 y :: Bool
-y = using (VEq $ veqProd veqInt veqString)
-  $ ('1', "foo") /= ('2', "bar")
-
-z :: Bool
-z = using (VEq veqInt)
+y = using (VEq veqInt)
   $ using (VEq veqString)
   $ Left '1' /= Right "foo"
+
+-- good usage
+x' :: Bool
+x' = using (VEq $ veqProd veqInt veqString)
+   $ ('1', "foo") /= ('2', "bar")
+
+y' :: Bool
+y' = using (VEq $ veqSum veqInt veqString)
+   $ Left '1' /= Right "foo"

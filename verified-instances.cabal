@@ -18,6 +18,8 @@ library
                      , Data.VerifiableConstraint.Internal
                      , Data.VerifiedEq
                      , Data.VerifiedEq.Instances
+                     , Data.VerifiedEq.Instances.Sum
+                     , Data.VerifiedEq.Instances.Prod
                      , Data.VerifiedOrd
                      , Data.VerifiedOrd.Instances
                      , Data.VerifiedMonoid

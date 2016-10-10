@@ -1,0 +1,125 @@
+{-@ LIQUID "--higherorder"        @-}
+{-@ LIQUID "--totality"           @-}
+{-@ LIQUID "--exactdc"            @-}
+
+module Data.VerifiedEq.Instances.Sum (veqSum) where
+
+import Data.VerifiedEq
+import Language.Haskell.Liquid.ProofCombinators
+
+{-@ data Either a b = Left a | Right b @-}
+
+{-@ axiomatize eqSum @-}
+eqSum :: (a -> a -> Bool) -> (b -> b -> Bool)
+      -> Either a b -> Either a b -> Bool
+eqSum eqa eqb (Left x) (Left y) = eqa x y
+eqSum eqa eqb (Left x) (Right y) = False
+eqSum eqa eqb (Right x) (Left y) = False
+eqSum eqa eqb (Right x) (Right y) = eqb x y
+
+{-@ eqSumRefl :: eqa:(a -> a -> Bool) -> eqaRefl:(x:a -> { Prop (eqa x x) })
+              -> eqb:(b -> b -> Bool) -> eqbRefl:(y:b -> { Prop (eqb y y) })
+              -> p:Either a b
+              -> { eqSum eqa eqb p p }
+@-}
+eqSumRefl :: (a -> a -> Bool) -> (a -> Proof)
+          -> (b -> b -> Bool) -> (b -> Proof)
+          -> Either a b -> Proof
+eqSumRefl eqa eqaRefl eqb eqbRefl p@(Left x) =
+      eqSum eqa eqb p p
+  ==. eqa x x
+  ==. True ? eqaRefl x
+  *** QED
+eqSumRefl eqa eqaRefl eqb eqbRefl p@(Right y) =
+      eqSum eqa eqb p p
+  ==. eqb y y
+  ==. True ? eqbRefl y
+  *** QED
+
+{-@ eqSumSym :: eqa:(a -> a -> Bool) -> eqaSym:(x:a -> y:a -> { Prop (eqa x y) ==> Prop (eqa y x) })
+             -> eqb:(b -> b -> Bool) -> eqbSym:(x:b -> y:b -> { Prop (eqb x y) ==> Prop (eqb y x) })
+             -> p:Either a b -> q:Either a b
+             -> { eqSum eqa eqb p q ==> eqSum eqa eqb q p }
+@-}
+eqSumSym :: (a -> a -> Bool) -> (a -> a -> Proof)
+         -> (b -> b -> Bool) -> (b -> b -> Proof)
+         -> Either a b -> Either a b -> Proof
+eqSumSym eqa eqaSym eqb eqbSym p@(Left x) q@(Left y) =
+      eqSum eqa eqb p q
+  ==. eqa x y
+  ==. eqa y x ? eqaSym x y
+  ==. eqSum eqa eqb q p
+  *** QED
+eqSumSym eqa eqaSym eqb eqbSym p@(Left x) q@(Right y) =
+      eqSum eqa eqb p q
+  ==. False
+  *** QED
+eqSumSym eqa eqaSym eqb eqbSym p@(Right x) q@(Left y) =
+      eqSum eqa eqb p q
+  ==. False
+  *** QED
+eqSumSym eqa eqaSym eqb eqbSym p@(Right x) q@(Right y) =
+      eqSum eqa eqb p q
+  ==. eqb x y
+  ==. eqb y x ? eqbSym x y
+  ==. eqSum eqa eqb q p
+  *** QED
+
+{-@ eqSumTrans :: eqa:(a -> a -> Bool) -> eqaTrans:(x:a -> y:a -> z:a -> { Prop (eqa x y) && Prop (eqa y z) ==> Prop (eqa x z) })
+               -> eqb:(b -> b -> Bool) -> eqbTrans:(x:b -> y:b -> z:b -> { Prop (eqb x y) && Prop (eqb y z) ==> Prop (eqb x z) })
+               -> p:Either a b -> q:Either a b -> r:Either a b
+               -> { eqSum eqa eqb p q && eqSum eqa eqb q r ==> eqSum eqa eqb p r }
+@-}
+eqSumTrans :: (a -> a -> Bool) -> (a -> a -> a -> Proof)
+           -> (b -> b -> Bool) -> (b -> b -> b -> Proof)
+           -> Either a b -> Either a b -> Either a b -> Proof
+eqSumTrans eqa eqaTrans eqb eqbTrans p@(Left x) q@(Left y) r@(Left z) =
+      (eqSum eqa eqb p q && eqSum eqa eqb q r)
+  ==. (eqa x y && eqa y z)
+  ==. eqa x z ? eqaTrans x y z
+  ==. eqSum eqa eqb p r
+  *** QED
+eqSumTrans eqa eqaTrans eqb eqbTrans p@(Left x) q@(Left y) r@(Right z) =
+      (eqSum eqa eqb p q && eqSum eqa eqb q r)
+  ==. (eqa x y && False)
+  ==. False
+  *** QED
+eqSumTrans eqa eqaTrans eqb eqbTrans p@(Left x) q@(Right y) r@(Left z) =
+      (eqSum eqa eqb p q && eqSum eqa eqb q r)
+  ==. (False && False)
+  ==. False
+  *** QED
+eqSumTrans eqa eqaTrans eqb eqbTrans p@(Left x) q@(Right y) r@(Right z) =
+      (eqSum eqa eqb p q && eqSum eqa eqb q r)
+  ==. (False && eqb y z)
+  ==. False
+  *** QED
+eqSumTrans eqa eqaTrans eqb eqbTrans p@(Right x) q@(Left y) r@(Left z) =
+      (eqSum eqa eqb p q && eqSum eqa eqb q r)
+  ==. (False && eqa y z)
+  ==. False
+  *** QED
+eqSumTrans eqa eqaTrans eqb eqbTrans p@(Right x) q@(Left y) r@(Right z) =
+      (eqSum eqa eqb p q && eqSum eqa eqb q r)
+  ==. (False && False)
+  ==. False
+  *** QED
+eqSumTrans eqa eqaTrans eqb eqbTrans p@(Right x) q@(Right y) r@(Left z) =
+      (eqSum eqa eqb p q && eqSum eqa eqb q r)
+  ==. (eqb x y && False)
+  ==. False
+  *** QED
+eqSumTrans eqa eqaTrans eqb eqbTrans p@(Right x) q@(Right y) r@(Right z) =
+      (eqSum eqa eqb p q && eqSum eqa eqb q r)
+  ==. (eqb x y && eqb y z)
+  ==. eqb x z ? eqbTrans x y z
+  ==. eqSum eqa eqb p r
+  *** QED
+
+{-@ veqSum :: VerifiedEq a -> VerifiedEq b -> VerifiedEq (Either a b) @-}
+veqSum :: VerifiedEq a -> VerifiedEq b -> VerifiedEq (Either a b)
+veqSum (VerifiedEq eqa eqaRefl eqaSym eqaTrans) (VerifiedEq eqb eqbRefl eqbSym eqbTrans) =
+  VerifiedEq (eqSum eqa eqb)
+             (eqSumRefl eqa eqaRefl eqb eqbRefl)
+             (eqSumSym eqa eqaSym eqb eqbSym)
+             (eqSumTrans eqa eqaTrans eqb eqbTrans)
