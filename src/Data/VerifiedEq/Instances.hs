@@ -3,11 +3,12 @@
 
 module Data.VerifiedEq.Instances (veqInt, veqUnit, module X) where
 
-import           Data.VerifiedEq.Instances.Prod           as X
-import           Data.VerifiedEq.Instances.Sum            as X
+import Data.VerifiedEq.Instances.Iso  as X
+import Data.VerifiedEq.Instances.Prod as X
+import Data.VerifiedEq.Instances.Sum  as X
 
-import           Data.VerifiedEq
-import           Language.Haskell.Liquid.ProofCombinators
+import Data.VerifiedEq
+import Language.Haskell.Liquid.ProofCombinators
 
 {-@ axiomatize eqUnit @-}
 eqUnit :: () -> () -> Bool
