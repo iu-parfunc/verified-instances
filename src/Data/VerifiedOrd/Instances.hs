@@ -1,11 +1,30 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 
-module Data.VerifiedOrd.Instances (vordInt) where
+module Data.VerifiedOrd.Instances (vordUnit, vordInt) where
 
-import Data.VerifiedOrd
-import Data.VerifiedEq.Instances
-import Language.Haskell.Liquid.ProofCombinators
+import           Data.VerifiedEq.Instances
+import           Data.VerifiedOrd
+import           Language.Haskell.Liquid.ProofCombinators
+
+{-@ axiomatize leqUnit @-}
+leqUnit :: () -> () -> Bool
+leqUnit () () = True
+
+{-@ leqUnitTotal :: x:() -> y:() -> { leqUnit x y || leqUnit y x } @-}
+leqUnitTotal :: () -> () -> Proof
+leqUnitTotal () () = (leqUnit () () || leqUnit () ()) ==. True *** QED
+
+{-@ leqUnitAntisym :: x:() -> y:() -> { leqUnit x y && leqUnit y x ==> x == y } @-}
+leqUnitAntisym :: () -> () -> Proof
+leqUnitAntisym () () = (leqUnit () () && leqUnit () ()) ==. True *** QED
+
+{-@ leqUnitTrans :: x:() -> y:() -> z:() -> { leqUnit x y && leqUnit y z ==> leqUnit x z } @-}
+leqUnitTrans :: () -> () -> () -> Proof
+leqUnitTrans () () () = (leqUnit () () && leqUnit () ()) ==. True *** QED
+
+vordUnit :: VerifiedOrd ()
+vordUnit = VerifiedOrd leqUnit leqUnitTotal leqUnitAntisym leqUnitTrans veqUnit
 
 {-@ axiomatize leqInt @-}
 leqInt :: Int -> Int -> Bool

@@ -1,13 +1,32 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 
-module Data.VerifiedEq.Instances (veqInt, module X) where
+module Data.VerifiedEq.Instances (veqInt, veqUnit, module X) where
 
-import Data.VerifiedEq.Instances.Sum as X
-import Data.VerifiedEq.Instances.Prod as X
+import           Data.VerifiedEq.Instances.Prod           as X
+import           Data.VerifiedEq.Instances.Sum            as X
 
-import Data.VerifiedEq
-import Language.Haskell.Liquid.ProofCombinators
+import           Data.VerifiedEq
+import           Language.Haskell.Liquid.ProofCombinators
+
+{-@ axiomatize eqUnit @-}
+eqUnit :: () -> () -> Bool
+eqUnit () () = True
+
+{-@ eqUnitRefl :: x:() -> { eqUnit x x } @-}
+eqUnitRefl :: () -> Proof
+eqUnitRefl () = eqUnit () () ==. True *** QED
+
+{-@ eqUnitSym :: x:() -> y:() -> { eqUnit x y ==> eqUnit y x } @-}
+eqUnitSym :: () -> () -> Proof
+eqUnitSym () () = eqUnit () () ==. True *** QED
+
+{-@ eqUnitTrans :: x:() -> y:() -> z:() -> { eqUnit x y && eqUnit y z ==> eqUnit x z } @-}
+eqUnitTrans :: () -> () -> () -> Proof
+eqUnitTrans () () () = (eqUnit () () && eqUnit () ()) ==. True *** QED
+
+veqUnit :: VerifiedEq ()
+veqUnit = VerifiedEq eqUnit eqUnitRefl eqUnitSym eqUnitTrans
 
 {-@ axiomatize eqInt @-}
 eqInt :: Int -> Int -> Bool
