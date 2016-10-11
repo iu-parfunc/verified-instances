@@ -24,6 +24,7 @@ library
                      , Data.VerifiedOrd.Instances
                      , Data.VerifiedMonoid
                      , Data.VerifiedSemigroup
+                     , Data.Iso
                      , Language.Haskell.Liquid.ProofCombinators
   other-extensions:    MultiParamTypeClasses
                      , FlexibleInstances
