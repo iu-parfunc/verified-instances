@@ -1,10 +1,10 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 
-module Data.VerifiedEq.Instances.Contra () where
+module Data.VerifiedEq.Instances.Contra (veqContra) where
 
-import Data.Functor.Contravariant
 import Data.VerifiedEq
+import Data.Functor.Contravariant
 import Language.Haskell.Liquid.ProofCombinators
 
 {-@ axiomatize eqContra @-}
