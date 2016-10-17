@@ -15,6 +15,7 @@ leqFrom :: (a -> a -> Bool)
         -> (b -> a)
         -> (b -> b -> Bool)
 leqFrom leqa from x y = leqa (from x) (from y)
+{-# INLINE leqFrom #-}
 
 {-@ leqFromTotal :: leqa:(a -> a -> Bool) -> leqaTotal:(x:a -> y:a -> { Prop (leqa x y) || Prop (leqa y x) })
                  -> from:(b -> a) -> x:b -> y:b -> { leqFrom leqa from x y || leqFrom leqa from y x }

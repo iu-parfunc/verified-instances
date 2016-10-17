@@ -16,6 +16,7 @@ eqSum eqa eqb (Left x) (Left y) = eqa x y
 eqSum eqa eqb (Left x) (Right y) = False
 eqSum eqa eqb (Right x) (Left y) = False
 eqSum eqa eqb (Right x) (Right y) = eqb x y
+{-# INLINE eqSum #-}
 
 {-@ eqSumRefl :: eqa:(a -> a -> Bool) -> eqaRefl:(x:a -> { Prop (eqa x x) })
               -> eqb:(b -> b -> Bool) -> eqbRefl:(y:b -> { Prop (eqb y y) })

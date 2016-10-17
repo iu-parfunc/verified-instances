@@ -12,6 +12,7 @@ eqContra :: (a -> a -> Bool)
          -> (b -> a)
          -> (b -> b -> Bool)
 eqContra eqa g x y = eqa (g x) (g y)
+{-# INLINE eqContra #-}
 
 {-@ eqContraRefl :: eqa:(a -> a -> Bool) -> eqaRefl:(x:a -> { Prop (eqa x x) })
                  -> g:(b -> a) -> x:b -> { eqContra eqa g x x }

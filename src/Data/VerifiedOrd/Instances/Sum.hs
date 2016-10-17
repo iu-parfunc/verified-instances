@@ -19,6 +19,7 @@ leqSum leqa leqb (Left x) (Left y) = leqa x y
 leqSum leqa leqb (Left x) (Right y) = True
 leqSum leqa leqb (Right x) (Left y) = False
 leqSum leqa leqb (Right x) (Right y) = leqb x y
+{-# INLINE leqSum #-}
 
 {-@ leqSumRefl :: leqa:(a -> a -> Bool) -> leqaRefl:(x:a -> { Prop (leqa x x) })
                -> leqb:(b -> b -> Bool) -> leqbRefl:(y:b -> { Prop (leqb y y) })

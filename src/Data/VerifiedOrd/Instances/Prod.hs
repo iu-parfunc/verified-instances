@@ -14,6 +14,7 @@ leqProd :: (a -> a -> Bool) -> (b -> b -> Bool)
         -> (a, b) -> (a, b) -> Bool
 leqProd leqa leqb p q =
   leqa (fst p) (fst q) && leqb (snd p) (snd q)
+{-# INLINE leqProd #-}
 
 {-@ leqProdTotal :: leqa:(a -> a -> Bool) -> leqaTotal:(x:a -> y:a -> { Prop (leqa x y) || Prop (leqa y x) })
                  -> leqb:(b -> b -> Bool) -> leqbTotal:(x:b -> y:b -> { Prop (leqb x y) || Prop (leqb y x) })

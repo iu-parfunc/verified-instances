@@ -14,6 +14,7 @@ import Language.Haskell.Liquid.ProofCombinators
 {-@ axiomatize leqUnit @-}
 leqUnit :: () -> () -> Bool
 leqUnit () () = True
+{-# INLINE leqUnit #-}
 
 {-@ leqUnitTotal :: x:() -> y:() -> { leqUnit x y || leqUnit y x } @-}
 leqUnitTotal :: () -> () -> Proof
@@ -33,6 +34,7 @@ vordUnit = VerifiedOrd leqUnit leqUnitTotal leqUnitAntisym leqUnitTrans veqUnit
 {-@ axiomatize leqInt @-}
 leqInt :: Int -> Int -> Bool
 leqInt x y = x <= y
+{-# INLINE leqInt #-}
 
 {-@ leqIntTotal :: x:Int -> y:Int -> { leqInt x y || leqInt y x } @-}
 leqIntTotal :: Int -> Int -> Proof

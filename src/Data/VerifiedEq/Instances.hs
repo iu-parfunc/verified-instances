@@ -14,6 +14,7 @@ import Language.Haskell.Liquid.ProofCombinators
 {-@ axiomatize eqUnit @-}
 eqUnit :: () -> () -> Bool
 eqUnit () () = True
+{-# INLINE eqUnit #-}
 
 {-@ eqUnitRefl :: x:() -> { eqUnit x x } @-}
 eqUnitRefl :: () -> Proof
@@ -33,6 +34,7 @@ veqUnit = VerifiedEq eqUnit eqUnitRefl eqUnitSym eqUnitTrans
 {-@ axiomatize eqInt @-}
 eqInt :: Int -> Int -> Bool
 eqInt x y = x == y
+{-# INLINE eqInt #-}
 
 {-@ eqIntRefl :: x:Int -> { eqInt x x } @-}
 eqIntRefl :: Int -> Proof

@@ -12,6 +12,7 @@ eqProd :: (a -> a -> Bool) -> (b -> b -> Bool)
        -> (a, b) -> (a, b) -> Bool
 eqProd eqa eqb p q =
   eqa (fst p) (fst q) && eqb (snd p) (snd q)
+{-# INLINE eqProd #-}
 
 {-@ eqProdRefl :: eqa:(a -> a -> Bool) -> eqaRefl:(x:a -> { Prop (eqa x x) })
                -> eqb:(b -> b -> Bool) -> eqbRefl:(y:b -> { Prop (eqb y y) })
