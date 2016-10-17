@@ -10,4 +10,4 @@ import Data.VerifiedEq.Instances.Contra
 import Language.Haskell.Liquid.ProofCombinators
 
 veqIso :: Iso a b -> VerifiedEq a -> VerifiedEq b
-veqIso (Iso _ g _ _) veqa = contramap g veqa
+veqIso (Iso _ from _ _) = contramap from
