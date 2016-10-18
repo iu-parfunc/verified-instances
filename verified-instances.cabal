@@ -21,6 +21,7 @@ library
                      , Data.VerifiedEq
                      , Data.VerifiedEq.Instances
                      , Data.VerifiedEq.Instances.Contra
+                     , Data.VerifiedEq.Instances.Generics
                      , Data.VerifiedEq.Instances.Iso
                      , Data.VerifiedEq.Instances.Sum
                      , Data.VerifiedEq.Instances.Prod
