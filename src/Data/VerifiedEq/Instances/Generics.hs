@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
+{-# LANGUAGE EmptyCase            #-}
 
 module Data.VerifiedEq.Instances.Generics where
 
@@ -7,23 +8,30 @@ import GHC.Generics
 import Data.VerifiedEq
 import Language.Haskell.Liquid.ProofCombinators
 
-{-@ data V1 @-}
+{-@ data V1 [elimV1] @-}
+
+{-@ measure elimV1 @-}
+elimV1 :: V1 p -> Bool
+elimV1 x = case x of {}
 
 {-@ axiomatize eqV1 @-}
 eqV1 :: V1 p -> V1 p -> Bool
-eqV1 _ _ = True
+eqV1 x _ = elimV1 x
+
+absurd :: V1 p -> a
+absurd x = case x of {}
 
 {-@ eqV1Refl :: x:V1 p -> { eqV1 x x } @-}
 eqV1Refl :: V1 p -> Proof
-eqV1Refl x = eqV1 x x *** QED
+eqV1Refl x = absurd x
 
 {-@ eqV1Sym :: x:V1 p -> y:V1 p -> { eqV1 x y ==> eqV1 y x } @-}
 eqV1Sym :: V1 p -> V1 p -> Proof
-eqV1Sym x y = eqV1 x y ==. eqV1 y x *** QED
+eqV1Sym x _ = absurd x
 
 {-@ eqV1Trans :: x:V1 p -> y:V1 p -> z:V1 p -> { eqV1 x y && eqV1 y z ==> eqV1 x z } @-}
 eqV1Trans :: V1 p -> V1 p -> V1 p -> Proof
-eqV1Trans x y z = (eqV1 x y && eqV1 y z) ==. eqV1 x z *** QED
+eqV1Trans x _ _ = absurd x
 
 veqV1 :: VerifiedEq (V1 p)
 veqV1 = VerifiedEq eqV1 eqV1Refl eqV1Sym eqV1Trans
@@ -56,7 +64,7 @@ eqPar1 :: (p -> p -> Bool) -> Par1 p -> Par1 p -> Bool
 eqPar1 eqP x y = eqP (unPar1 x) (unPar1 y)
 
 {-@ eqPar1Refl :: eqP:(p -> p -> Bool) -> eqPRefl:(x:p -> { Prop (eqP x x) })
-	       -> x:Par1 p -> { eqPar1 eqP x x } @-}
+            -> x:Par1 p -> { eqPar1 eqP x x } @-}
 eqPar1Refl :: (p -> p -> Bool) -> (p -> Proof) -> Par1 p -> Proof
 eqPar1Refl eqP eqPRefl x
   =   eqPar1 eqP x x
@@ -65,7 +73,7 @@ eqPar1Refl eqP eqPRefl x
   *** QED
 
 {-@ eqPar1Sym :: eqP:(p -> p -> Bool) -> eqPSym:(x:p -> y:p -> { Prop (eqP x y) ==> Prop (eqP y x) })
-	      -> x:Par1 p -> y:Par1 p -> { eqPar1 eqP x y ==> eqPar1 eqP y x } @-}
+           -> x:Par1 p -> y:Par1 p -> { eqPar1 eqP x y ==> eqPar1 eqP y x } @-}
 eqPar1Sym :: (p -> p -> Bool) -> (p -> p -> Proof)
           -> Par1 p -> Par1 p -> Proof
 eqPar1Sym eqP eqPSym x y
@@ -76,9 +84,9 @@ eqPar1Sym eqP eqPSym x y
   *** QED
 
 {-@ eqPar1Trans :: eqP:(p -> p -> Bool) -> eqPTrans:(x:p -> y:p -> z:p -> { Prop (eqP x y) && Prop (eqP y z) ==> Prop (eqP x z) })
-		-> x:Par1 p -> y:Par1 p -> z:Par1 p -> { eqPar1 eqP x y && eqPar1 eqP y z ==> eqPar1 eqP x z } @-}
+              -> x:Par1 p -> y:Par1 p -> z:Par1 p -> { eqPar1 eqP x y && eqPar1 eqP y z ==> eqPar1 eqP x z } @-}
 eqPar1Trans :: (p -> p -> Bool) -> (p -> p -> p -> Proof)
-	    -> Par1 p -> Par1 p -> Par1 p -> Proof
+          -> Par1 p -> Par1 p -> Par1 p -> Proof
 eqPar1Trans eqP eqPTrans x y z
   =   (eqPar1 eqP x y && eqPar1 eqP y z)
   ==. (eqP (unPar1 x) (unPar1 y) && eqP (unPar1 y) (unPar1 z))
@@ -89,9 +97,9 @@ eqPar1Trans eqP eqPTrans x y z
 veqPar1 :: VerifiedEq p -> VerifiedEq (Par1 p)
 veqPar1 (VerifiedEq eqP eqPRefl eqPSym eqPTrans)
   = VerifiedEq (eqPar1 eqP)
-	       (eqPar1Refl eqP eqPRefl)
-	       (eqPar1Sym eqP eqPSym)
-	       (eqPar1Trans eqP eqPTrans)
+             (eqPar1Refl eqP eqPRefl)
+             (eqPar1Sym eqP eqPSym)
+             (eqPar1Trans eqP eqPTrans)
 
 {-
 {-@ data (:+:) f g p = L1 (f p) | R1 (g p) @-}
