@@ -3,12 +3,13 @@
 
 module Data.VerifiedOrd.Instances (vordUnit, vordInt, module X) where
 
-import Data.VerifiedOrd.Instances.Iso  as X
-import Data.VerifiedOrd.Instances.Prod as X
-import Data.VerifiedOrd.Instances.Sum  as X
+import Data.VerifiedOrd.Instances.Inj           as X
+import Data.VerifiedOrd.Instances.Iso           as X
+import Data.VerifiedOrd.Instances.Prod          as X
+import Data.VerifiedOrd.Instances.Sum           as X
 
-import Data.VerifiedOrd
 import Data.VerifiedEq.Instances
+import Data.VerifiedOrd
 import Language.Haskell.Liquid.ProofCombinators
 
 {-@ axiomatize leqUnit @-}

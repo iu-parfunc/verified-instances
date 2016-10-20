@@ -27,11 +27,13 @@ library
                      , Data.VerifiedEq.Instances.Prod
                      , Data.VerifiedOrd
                      , Data.VerifiedOrd.Instances
+                     , Data.VerifiedOrd.Instances.Inj
                      , Data.VerifiedOrd.Instances.Iso
                      , Data.VerifiedOrd.Instances.Sum
                      , Data.VerifiedOrd.Instances.Prod
                      , Data.VerifiedMonoid
                      , Data.VerifiedSemigroup
+                     , Data.Inj
                      , Data.Iso
                      , Language.Haskell.Liquid.ProofCombinators
   other-extensions:    MultiParamTypeClasses
