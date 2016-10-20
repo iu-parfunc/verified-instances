@@ -4,10 +4,10 @@
 
 module Data.VerifiedOrd.Instances.Sum (vordSum) where
 
-import Data.VerifiedEq
-import Data.VerifiedOrd
-import Data.VerifiedEq.Instances
 import Data.VerifiableConstraint
+import Data.VerifiedEq
+import Data.VerifiedEq.Instances
+import Data.VerifiedOrd
 import Language.Haskell.Liquid.ProofCombinators
 
 {-@ data Either a b = Left a | Right b @-}
@@ -15,9 +15,9 @@ import Language.Haskell.Liquid.ProofCombinators
 {-@ axiomatize leqSum @-}
 leqSum :: (a -> a -> Bool) -> (b -> b -> Bool)
        -> Either a b -> Either a b -> Bool
-leqSum leqa leqb (Left x) (Left y) = leqa x y
-leqSum leqa leqb (Left x) (Right y) = True
-leqSum leqa leqb (Right x) (Left y) = False
+leqSum leqa leqb (Left x) (Left y)   = leqa x y
+leqSum leqa leqb (Left x) (Right y)  = True
+leqSum leqa leqb (Right x) (Left y)  = False
 leqSum leqa leqb (Right x) (Right y) = leqb x y
 {-# INLINE leqSum #-}
 
@@ -38,33 +38,6 @@ leqSumRefl leqa leqaRefl leqb leqbRefl p@(Right y) =
       leqSum leqa leqb p p
   ==. leqb y y
   ==. True ? leqbRefl y
-  *** QED
-
-{-@ leqSumTotal :: leqa:(a -> a -> Bool) -> leqaTotal:(x:a -> y:a -> { Prop (leqa x y) || Prop (leqa y x) })
-                -> leqb:(b -> b -> Bool) -> leqbTotal:(x:b -> y:b -> { Prop (leqb x y) || Prop (leqb y x) })
-                -> p:Either a b -> q:Either a b
-                -> { leqSum leqa leqb p q || leqSum leqa leqb q p }
-@-}
-leqSumTotal :: (a -> a -> Bool) -> (a -> a -> Proof)
-            -> (b -> b -> Bool) -> (b -> b -> Proof)
-            -> Either a b -> Either a b -> Proof
-leqSumTotal leqa leqaTotal leqb leqbTotal p@(Left x) q@(Left y) =
-      (leqSum leqa leqb p q || leqSum leqa leqb q p)
-  ==. (leqa x y || leqa y x)
-  ==. True ? leqaTotal x y
-  *** QED
-leqSumTotal leqa leqaTotal leqb leqbTotal p@(Left x) q@(Right y) =
-      (leqSum leqa leqb p q || leqSum leqa leqb q p)
-  ==. (True || True)
-  *** QED
-leqSumTotal leqa leqaTotal leqb leqbTotal p@(Right x) q@(Left y) =
-      (leqSum leqa leqb p q || leqSum leqa leqb q p)
-  ==. (False || False)
-  *** QED
-leqSumTotal leqa leqaTotal leqb leqbTotal p@(Right x) q@(Right y) =
-      (leqSum leqa leqb p q || leqSum leqa leqb q p)
-  ==. (leqb x y || leqb y x)
-  ==. True ? leqbTotal x y
   *** QED
 
 {-@ leqSumAntisym :: leqa:(a -> a -> Bool) -> leqaAntisym:(x:a -> y:a -> { Prop (leqa x y) && Prop (leqa y x) ==> x == y })
@@ -157,11 +130,39 @@ leqSumTrans leqa leqaTrans leqb leqbTrans p@(Right x) q@(Right y) r@(Right z) =
   ==. leqSum leqa leqb p r
   *** QED
 
+{-@ leqSumTotal :: leqa:(a -> a -> Bool) -> leqaTotal:(x:a -> y:a -> { Prop (leqa x y) || Prop (leqa y x) })
+                -> leqb:(b -> b -> Bool) -> leqbTotal:(x:b -> y:b -> { Prop (leqb x y) || Prop (leqb y x) })
+                -> p:Either a b -> q:Either a b
+                -> { leqSum leqa leqb p q || leqSum leqa leqb q p }
+@-}
+leqSumTotal :: (a -> a -> Bool) -> (a -> a -> Proof)
+            -> (b -> b -> Bool) -> (b -> b -> Proof)
+            -> Either a b -> Either a b -> Proof
+leqSumTotal leqa leqaTotal leqb leqbTotal p@(Left x) q@(Left y) =
+      (leqSum leqa leqb p q || leqSum leqa leqb q p)
+  ==. (leqa x y || leqa y x)
+  ==. True ? leqaTotal x y
+  *** QED
+leqSumTotal leqa leqaTotal leqb leqbTotal p@(Left x) q@(Right y) =
+      (leqSum leqa leqb p q || leqSum leqa leqb q p)
+  ==. (True || True)
+  *** QED
+leqSumTotal leqa leqaTotal leqb leqbTotal p@(Right x) q@(Left y) =
+      (leqSum leqa leqb p q || leqSum leqa leqb q p)
+  ==. (False || False)
+  *** QED
+leqSumTotal leqa leqaTotal leqb leqbTotal p@(Right x) q@(Right y) =
+      (leqSum leqa leqb p q || leqSum leqa leqb q p)
+  ==. (leqb x y || leqb y x)
+  ==. True ? leqbTotal x y
+  *** QED
+
 vordSum :: VerifiedOrd a -> VerifiedOrd b -> VerifiedOrd (Either a b)
-vordSum (VerifiedOrd leqa leqaTotal leqaAntisym leqaTrans veqa) (VerifiedOrd leqb leqbTotal leqbAntisym leqbTrans veqb) =
+vordSum (VerifiedOrd leqa leqaRefl leqaAntisym leqaTrans leqaTotal veqa) (VerifiedOrd leqb leqbRefl leqbAntisym leqbTrans leqbTotal veqb) =
   VerifiedOrd
     (leqSum leqa leqb)
-    (leqSumTotal leqa leqaTotal leqb leqbTotal)
+    (leqSumRefl leqa leqaRefl leqb leqbRefl)
     (leqSumAntisym leqa leqaAntisym leqb leqbAntisym veqa veqb)
     (leqSumTrans leqa leqaTrans leqb leqbTrans)
+    (leqSumTotal leqa leqaTotal leqb leqbTotal)
     (veqSum veqa veqb)

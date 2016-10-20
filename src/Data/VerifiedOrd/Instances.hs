@@ -17,9 +17,9 @@ leqUnit :: () -> () -> Bool
 leqUnit () () = True
 {-# INLINE leqUnit #-}
 
-{-@ leqUnitTotal :: x:() -> y:() -> { leqUnit x y || leqUnit y x } @-}
-leqUnitTotal :: () -> () -> Proof
-leqUnitTotal () () = (leqUnit () () || leqUnit () ()) ==. True *** QED
+{-@ leqUnitRefl :: x:() -> { leqUnit x x } @-}
+leqUnitRefl :: () -> Proof
+leqUnitRefl () = leqUnit () () ==. True *** QED
 
 {-@ leqUnitAntisym :: x:() -> y:() -> { leqUnit x y && leqUnit y x ==> x == y } @-}
 leqUnitAntisym :: () -> () -> Proof
@@ -29,17 +29,21 @@ leqUnitAntisym () () = (leqUnit () () && leqUnit () ()) ==. True *** QED
 leqUnitTrans :: () -> () -> () -> Proof
 leqUnitTrans () () () = (leqUnit () () && leqUnit () ()) ==. True *** QED
 
+{-@ leqUnitTotal :: x:() -> y:() -> { leqUnit x y || leqUnit y x } @-}
+leqUnitTotal :: () -> () -> Proof
+leqUnitTotal () () = (leqUnit () () || leqUnit () ()) ==. True *** QED
+
 vordUnit :: VerifiedOrd ()
-vordUnit = VerifiedOrd leqUnit leqUnitTotal leqUnitAntisym leqUnitTrans veqUnit
+vordUnit = VerifiedOrd leqUnit leqUnitRefl leqUnitAntisym leqUnitTrans leqUnitTotal veqUnit
 
 {-@ axiomatize leqInt @-}
 leqInt :: Int -> Int -> Bool
 leqInt x y = x <= y
 {-# INLINE leqInt #-}
 
-{-@ leqIntTotal :: x:Int -> y:Int -> { leqInt x y || leqInt y x } @-}
-leqIntTotal :: Int -> Int -> Proof
-leqIntTotal x y = (leqInt x y || leqInt y x) ==. (x <= y || y <= x) *** QED
+{-@ leqIntRefl :: x:Int -> { leqInt x x } @-}
+leqIntRefl :: Int -> Proof
+leqIntRefl x = leqInt x x ==. x <= x *** QED
 
 {-@ leqIntAntisym :: x:Int -> y:Int -> { leqInt x y && leqInt y x ==> x == y } @-}
 leqIntAntisym :: Int -> Int -> Proof
@@ -49,5 +53,9 @@ leqIntAntisym x y = (leqInt x y && leqInt y x) ==. (x <= y && y <= x) ==. x == y
 leqIntTrans :: Int -> Int -> Int -> Proof
 leqIntTrans x y z = (leqInt x y && leqInt y z) ==. (x <= y && y <= z) ==. x <= z ==. leqInt x z *** QED
 
+{-@ leqIntTotal :: x:Int -> y:Int -> { leqInt x y || leqInt y x } @-}
+leqIntTotal :: Int -> Int -> Proof
+leqIntTotal x y = (leqInt x y || leqInt y x) ==. (x <= y || y <= x) *** QED
+
 vordInt :: VerifiedOrd Int
-vordInt = VerifiedOrd leqInt leqIntTotal leqIntAntisym leqIntTrans veqInt
+vordInt = VerifiedOrd leqInt leqIntRefl leqIntAntisym leqIntTrans leqIntTotal veqInt

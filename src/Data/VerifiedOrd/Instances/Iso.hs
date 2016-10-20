@@ -12,5 +12,5 @@ import Language.Haskell.Liquid.ProofCombinators
 
 {-# INLINE vordIso #-}
 vordIso :: Iso a b -> VerifiedOrd a -> VerifiedOrd b
-vordIso iso@(Iso _ f _ _) ord@(VerifiedOrd _ _ _ _ veqa) =
+vordIso iso@(Iso _ f _ _) ord@(VerifiedOrd _ _ _ _ _ veqa) =
   vordInj (fromIsoR (veqContra f veqa) iso) ord
