@@ -33,6 +33,7 @@ eqV1Sym x _ = absurd x
 eqV1Trans :: V1 p -> V1 p -> V1 p -> Proof
 eqV1Trans x _ _ = absurd x
 
+{-@ veqV1 :: VerifiedEq (V1 p) @-}
 veqV1 :: VerifiedEq (V1 p)
 veqV1 = VerifiedEq eqV1 eqV1Refl eqV1Sym eqV1Trans
 
@@ -54,6 +55,7 @@ eqU1Sym x y = eqU1 x y ==. eqU1 y x *** QED
 eqU1Trans :: U1 p -> U1 p -> U1 p -> Proof
 eqU1Trans x y z = (eqU1 x y && eqU1 y z) ==. eqU1 x z *** QED
 
+{-@ veqU1 :: VerifiedEq (U1 p) @-}
 veqU1 :: VerifiedEq (U1 p)
 veqU1 = VerifiedEq eqU1 eqU1Refl eqU1Sym eqU1Trans
 
@@ -64,7 +66,7 @@ eqPar1 :: (p -> p -> Bool) -> Par1 p -> Par1 p -> Bool
 eqPar1 eqP x y = eqP (unPar1 x) (unPar1 y)
 
 {-@ eqPar1Refl :: eqP:(p -> p -> Bool) -> eqPRefl:(x:p -> { Prop (eqP x x) })
-            -> x:Par1 p -> { eqPar1 eqP x x } @-}
+               -> x:Par1 p -> { eqPar1 eqP x x } @-}
 eqPar1Refl :: (p -> p -> Bool) -> (p -> Proof) -> Par1 p -> Proof
 eqPar1Refl eqP eqPRefl x
   =   eqPar1 eqP x x
@@ -73,7 +75,7 @@ eqPar1Refl eqP eqPRefl x
   *** QED
 
 {-@ eqPar1Sym :: eqP:(p -> p -> Bool) -> eqPSym:(x:p -> y:p -> { Prop (eqP x y) ==> Prop (eqP y x) })
-           -> x:Par1 p -> y:Par1 p -> { eqPar1 eqP x y ==> eqPar1 eqP y x } @-}
+             -> x:Par1 p -> y:Par1 p -> { eqPar1 eqP x y ==> eqPar1 eqP y x } @-}
 eqPar1Sym :: (p -> p -> Bool) -> (p -> p -> Proof)
           -> Par1 p -> Par1 p -> Proof
 eqPar1Sym eqP eqPSym x y
@@ -84,9 +86,9 @@ eqPar1Sym eqP eqPSym x y
   *** QED
 
 {-@ eqPar1Trans :: eqP:(p -> p -> Bool) -> eqPTrans:(x:p -> y:p -> z:p -> { Prop (eqP x y) && Prop (eqP y z) ==> Prop (eqP x z) })
-              -> x:Par1 p -> y:Par1 p -> z:Par1 p -> { eqPar1 eqP x y && eqPar1 eqP y z ==> eqPar1 eqP x z } @-}
+                -> x:Par1 p -> y:Par1 p -> z:Par1 p -> { eqPar1 eqP x y && eqPar1 eqP y z ==> eqPar1 eqP x z } @-}
 eqPar1Trans :: (p -> p -> Bool) -> (p -> p -> p -> Proof)
-          -> Par1 p -> Par1 p -> Par1 p -> Proof
+            -> Par1 p -> Par1 p -> Par1 p -> Proof
 eqPar1Trans eqP eqPTrans x y z
   =   (eqPar1 eqP x y && eqPar1 eqP y z)
   ==. (eqP (unPar1 x) (unPar1 y) && eqP (unPar1 y) (unPar1 z))
@@ -94,12 +96,13 @@ eqPar1Trans eqP eqPTrans x y z
   ==. eqPar1 eqP x z
   *** QED
 
+{-@ veqPar1 :: VerifiedEq p -> VerifiedEq (Par1 p) @-}
 veqPar1 :: VerifiedEq p -> VerifiedEq (Par1 p)
 veqPar1 (VerifiedEq eqP eqPRefl eqPSym eqPTrans)
   = VerifiedEq (eqPar1 eqP)
-             (eqPar1Refl eqP eqPRefl)
-             (eqPar1Sym eqP eqPSym)
-             (eqPar1Trans eqP eqPTrans)
+               (eqPar1Refl  eqP eqPRefl)
+               (eqPar1Sym   eqP eqPSym)
+               (eqPar1Trans eqP eqPTrans)
 
 {-
 {-@ data (:+:) f g p = L1 (f p) | R1 (g p) @-}
