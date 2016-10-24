@@ -99,10 +99,145 @@ eqPar1Trans eqP eqPTrans x y z
 {-@ veqPar1 :: VerifiedEq p -> VerifiedEq (Par1 p) @-}
 veqPar1 :: VerifiedEq p -> VerifiedEq (Par1 p)
 veqPar1 (VerifiedEq eqP eqPRefl eqPSym eqPTrans)
-  = VerifiedEq (eqPar1 eqP)
+  = VerifiedEq (eqPar1      eqP)
                (eqPar1Refl  eqP eqPRefl)
                (eqPar1Sym   eqP eqPSym)
                (eqPar1Trans eqP eqPTrans)
+
+{-@ newtype Rec1 f p = Rec1 { unRec1 :: f p } @-}
+
+{-@ axiomatize eqRec1 @-}
+eqRec1 :: (f p -> f p -> Bool) -> Rec1 f p -> Rec1 f p -> Bool
+eqRec1 eqFp x y = eqFp (unRec1 x) (unRec1 y)
+
+{-@ eqRec1Refl :: eqFp:(f p -> f p -> Bool) -> eqFpRefl:(x:f p -> { Prop (eqFp x x) })
+               -> x:Rec1 f p -> { eqRec1 eqFp x x } @-}
+eqRec1Refl :: (f p -> f p -> Bool) -> (f p -> Proof) -> Rec1 f p -> Proof
+eqRec1Refl eqFp eqFpRefl x
+  =   eqRec1 eqFp x x
+  ==. eqFp (unRec1 x) (unRec1 x)
+  ==. True ? eqFpRefl (unRec1 x)
+  *** QED
+
+{-@ eqRec1Sym :: eqFp:(f p -> f p -> Bool) -> eqFpSym:(x:f p -> y:f p -> { Prop (eqFp x y) ==> Prop (eqFp y x) })
+              -> x:Rec1 f p -> y:Rec1 f p -> { eqRec1 eqFp x y ==> eqRec1 eqFp y x } @-}
+eqRec1Sym :: (f p -> f p -> Bool) -> (f p -> f p -> Proof)
+          -> Rec1 f p -> Rec1 f p -> Proof
+eqRec1Sym eqFp eqFpSym x y
+  =   eqRec1 eqFp x y
+  ==. eqFp (unRec1 x) (unRec1 y)
+  ==. eqFp (unRec1 y) (unRec1 x) ? eqFpSym (unRec1 x) (unRec1 y)
+  ==. eqRec1 eqFp y x
+  *** QED
+
+{-@ eqRec1Trans :: eqFp:(f p -> f p -> Bool) -> eqFpTrans:(x:f p -> y:f p -> z:f p -> { Prop (eqFp x y) && Prop (eqFp y z) ==> Prop (eqFp x z) })
+                -> x:Rec1 f p -> y:Rec1 f p -> z:Rec1 f p -> { eqRec1 eqFp x y && eqRec1 eqFp y z ==> eqRec1 eqFp x z } @-}
+eqRec1Trans :: (f p -> f p -> Bool) -> (f p -> f p -> f p -> Proof)
+            -> Rec1 f p -> Rec1 f p -> Rec1 f p -> Proof
+eqRec1Trans eqFp eqFpTrans x y z
+  =   (eqRec1 eqFp x y && eqRec1 eqFp y z)
+  ==. (eqFp (unRec1 x) (unRec1 y) && eqFp (unRec1 y) (unRec1 z))
+  ==. eqFp (unRec1 x) (unRec1 z) ? eqFpTrans (unRec1 x) (unRec1 y) (unRec1 z)
+  ==. eqRec1 eqFp x z
+  *** QED
+
+{-@ veqRec1 :: VerifiedEq (f p) -> VerifiedEq (Rec1 f p) @-}
+veqRec1 :: VerifiedEq (f p) -> VerifiedEq (Rec1 f p)
+veqRec1 (VerifiedEq eqFp eqFpRefl eqFpSym eqFpTrans)
+  = VerifiedEq (eqRec1      eqFp)
+               (eqRec1Refl  eqFp eqFpRefl)
+               (eqRec1Sym   eqFp eqFpSym)
+               (eqRec1Trans eqFp eqFpTrans)
+
+{-@ newtype K1 i c p = K1 { unK1 :: c } @-}
+
+{-@ axiomatize eqK1 @-}
+eqK1 :: (c -> c -> Bool) -> K1 i c p -> K1 i c p -> Bool
+eqK1 eqC x y = eqC (unK1 x) (unK1 y)
+
+{-@ eqK1Refl :: eqC:(c -> c -> Bool) -> eqCRefl:(x:c -> { Prop (eqC x x) })
+             -> x:K1 i c p -> { eqK1 eqC x x } @-}
+eqK1Refl :: (c -> c -> Bool) -> (c -> Proof) -> K1 i c p -> Proof
+eqK1Refl eqC eqCRefl x
+  =   eqK1 eqC x x
+  ==. eqC (unK1 x) (unK1 x)
+  ==. True ? eqCRefl (unK1 x)
+  *** QED
+
+{-@ eqK1Sym :: eqC:(c -> c -> Bool) -> eqCSym:(x:c -> y:c -> { Prop (eqC x y) ==> Prop (eqC y x) })
+            -> x:K1 i c p -> y:K1 i c p -> { eqK1 eqC x y ==> eqK1 eqC y x } @-}
+eqK1Sym :: (c -> c -> Bool) -> (c -> c -> Proof)
+        -> K1 i c p -> K1 i c p -> Proof
+eqK1Sym eqC eqCSym x y
+  =   eqK1 eqC x y
+  ==. eqC (unK1 x) (unK1 y)
+  ==. eqC (unK1 y) (unK1 x) ? eqCSym (unK1 x) (unK1 y)
+  ==. eqK1 eqC y x
+  *** QED
+
+{-@ eqK1Trans :: eqC:(c -> c -> Bool) -> eqCTrans:(x:c -> y:c -> z:c -> { Prop (eqC x y) && Prop (eqC y z) ==> Prop (eqC x z) })
+              -> x:K1 i c p -> y:K1 i c p -> z:K1 i c p -> { eqK1 eqC x y && eqK1 eqC y z ==> eqK1 eqC x z } @-}
+eqK1Trans :: (c -> c -> Bool) -> (c -> c -> c -> Proof)
+          -> K1 i c p -> K1 i c p -> K1 i c p -> Proof
+eqK1Trans eqC eqCTrans x y z
+  =   (eqK1 eqC x y && eqK1 eqC y z)
+  ==. (eqC (unK1 x) (unK1 y) && eqC (unK1 y) (unK1 z))
+  ==. eqC (unK1 x) (unK1 z) ? eqCTrans (unK1 x) (unK1 y) (unK1 z)
+  ==. eqK1 eqC x z
+  *** QED
+
+{-@ veqK1 :: VerifiedEq c -> VerifiedEq (K1 i c p) @-}
+veqK1 :: VerifiedEq c -> VerifiedEq (K1 i c p)
+veqK1 (VerifiedEq eqC eqCRefl eqCSym eqCTrans)
+  = VerifiedEq (eqK1      eqC)
+               (eqK1Refl  eqC eqCRefl)
+               (eqK1Sym   eqC eqCSym)
+               (eqK1Trans eqC eqCTrans)
+
+{-@ newtype M1 i c f p = M1 { unM1 :: f p } @-}
+
+{-@ axiomatize eqM1 @-}
+eqM1 :: (f p -> f p -> Bool) -> M1 i c f p -> M1 i c f p -> Bool
+eqM1 eqFp x y = eqFp (unM1 x) (unM1 y)
+
+{-@ eqM1Refl :: eqFp:(f p -> f p -> Bool) -> eqFpRefl:(x:f p -> { Prop (eqFp x x) })
+             -> x:M1 i c f p -> { eqM1 eqFp x x } @-}
+eqM1Refl :: (f p -> f p -> Bool) -> (f p -> Proof) -> M1 i c f p -> Proof
+eqM1Refl eqFp eqFpRefl x
+  =   eqM1 eqFp x x
+  ==. eqFp (unM1 x) (unM1 x)
+  ==. True ? eqFpRefl (unM1 x)
+  *** QED
+
+{-@ eqM1Sym :: eqFp:(f p -> f p -> Bool) -> eqFpSym:(x:f p -> y:f p -> { Prop (eqFp x y) ==> Prop (eqFp y x) })
+            -> x:M1 i c f p -> y:M1 i c f p -> { eqM1 eqFp x y ==> eqM1 eqFp y x } @-}
+eqM1Sym :: (f p -> f p -> Bool) -> (f p -> f p -> Proof)
+        -> M1 i c f p -> M1 i c f p -> Proof
+eqM1Sym eqFp eqFpSym x y
+  =   eqM1 eqFp x y
+  ==. eqFp (unM1 x) (unM1 y)
+  ==. eqFp (unM1 y) (unM1 x) ? eqFpSym (unM1 x) (unM1 y)
+  ==. eqM1 eqFp y x
+  *** QED
+
+{-@ eqM1Trans :: eqFp:(f p -> f p -> Bool) -> eqFpTrans:(x:f p -> y:f p -> z:f p -> { Prop (eqFp x y) && Prop (eqFp y z) ==> Prop (eqFp x z) })
+              -> x:M1 i c f p -> y:M1 i c f p -> z:M1 i c f p -> { eqM1 eqFp x y && eqM1 eqFp y z ==> eqM1 eqFp x z } @-}
+eqM1Trans :: (f p -> f p -> Bool) -> (f p -> f p -> f p -> Proof)
+          -> M1 i c f p -> M1 i c f p -> M1 i c f p -> Proof
+eqM1Trans eqFp eqFpTrans x y z
+  =   (eqM1 eqFp x y && eqM1 eqFp y z)
+  ==. (eqFp (unM1 x) (unM1 y) && eqFp (unM1 y) (unM1 z))
+  ==. eqFp (unM1 x) (unM1 z) ? eqFpTrans (unM1 x) (unM1 y) (unM1 z)
+  ==. eqM1 eqFp x z
+  *** QED
+
+{-@ veqM1 :: VerifiedEq (f p) -> VerifiedEq (M1 i c f p) @-}
+veqM1 :: VerifiedEq (f p) -> VerifiedEq (M1 i c f p)
+veqM1 (VerifiedEq eqFp eqFpRefl eqFpSym eqFpTrans)
+  = VerifiedEq (eqM1      eqFp)
+               (eqM1Refl  eqFp eqFpRefl)
+               (eqM1Sym   eqFp eqFpSym)
+               (eqM1Trans eqFp eqFpTrans)
 
 {-
 {-@ data (:+:) f g p = L1 (f p) | R1 (g p) @-}
