@@ -49,18 +49,14 @@ vordU1 = VerifiedOrd leqU1 leqU1Refl leqU1Antisym leqU1Trans leqU1Total veqU1
 leqPar1 :: (p -> p -> Bool) -> Par1 p -> Par1 p -> Bool
 leqPar1 leqP x y = leqP (unPar1 x) (unPar1 y)
 
-{-@ ap :: f:(a -> b) -> x:a -> y:a -> { x == y } -> { f x == f y } @-}
-ap :: (a -> b) -> a -> a -> Proof -> Proof
-ap f _ _ () = ()
-
-{-@ ap2 :: f:(a -> b -> c) -> x:a -> y:a -> u:b -> v:b -> { x == y } -> { u == v } -> { f x u == f y v } @-}
-ap2 :: (a -> b -> c) -> a -> a -> b -> b -> Proof -> Proof -> Proof
-ap2 f _ _ _ _ () () = ()
-
 {-@ leqPar1Refl :: leqP:(p -> p -> Bool) -> leqPRefl:(x:p -> { Prop (leqP x x) })
                 -> x:Par1 p -> { leqPar1 leqP x x } @-}
 leqPar1Refl :: (p -> p -> Bool) -> (p -> Proof) -> Par1 p -> Proof
-leqPar1Refl leqP leqPRefl p@(Par1 x) = undefined -- ap (\x -> leqPar1 leqP x x) p p (leqPRefl x)
+leqPar1Refl leqP leqPRefl x
+  =   leqPar1 leqP x x
+  ==. leqP (unPar1 x) (unPar1 x)
+  ==. True ? leqPRefl (unPar1 x)
+  *** QED
 
 {-@ leqPar1Antisym :: leqP:(p -> p -> Bool) -> leqPAntisym:(x:p -> y:p -> { Prop (leqP x y) ==> Prop (leqP y x) })
                   -> x:Par1 p -> y:Par1 p -> { leqPar1 leqP x y ==> leqPar1 leqP y x } @-}
