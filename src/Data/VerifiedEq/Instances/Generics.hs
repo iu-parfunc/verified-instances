@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
+{-@ LIQUID "--exactdc"            @-}
 {-# LANGUAGE EmptyCase            #-}
 
 module Data.VerifiedEq.Instances.Generics where
