@@ -1,24 +1,65 @@
--- IntegerSumReduction
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Main (main) where
 
 import           Data.Foldable (forM_)
 import           Data.IORef
-import           Data.Monoid (Sum(..))
 import           Data.Semigroup (Semigroup(..))
 import qualified Data.Vector as V
 import           Data.Vector (Vector)
 import qualified Data.Vector.Mutable as VM
 
+import           Language.Haskell.Liquid.ProofCombinators
+
 import           System.IO.Unsafe
 
-type DPJArrayInt     = Vector (Sum Int)
+{-@ newtype Sum = Sum { getSum :: Int } @-}
+data Sum = Sum { getSum :: Int }
+  deriving (Eq, Ord, Read, Show)
+
+{-@ axiomatize appendSum @-}
+appendSum :: Sum -> Sum -> Sum
+appendSum x y = Sum (getSum x + getSum y)
+{-# INLINE appendSum #-}
+
+instance Semigroup Sum where
+  (<>) = appendSum
+
+{-@
+getSumSumId :: x:Int -> { getSum (Sum x) == x }
+@-}
+getSumSumId :: Int -> Proof
+getSumSumId x = simpleProof
+
+{-@
+addAssoc :: x:Int -> y:Int -> z:Int -> { x + (y + z) == (x + y) + z }
+@-}
+addAssoc :: Int -> Int -> Int -> Proof
+addAssoc x y z = x + (y + z) ==. (x + y) + z *** QED
+
+{-@
+appendSumAssoc :: x:Sum -> y:Sum -> z:Sum
+               -> { appendSum x (appendSum y z) == appendSum (appendSum x y) z }
+@-}
+appendSumAssoc :: Sum -> Sum -> Sum -> Proof
+appendSumAssoc x y z
+  =   appendSum x (appendSum y z)
+  ==. appendSum x (Sum (getSum y + getSum z))
+  ==. Sum (getSum x + getSum (Sum (getSum y + getSum z)))
+  ==. Sum (getSum x + (getSum y + getSum z)) ? getSumSumId (getSum (Sum (getSum y + getSum z)))
+  ==. Sum ((getSum x + getSum y) + getSum z) ? addAssoc (getSum x) (getSum y) (getSum z)
+  ==. Sum (getSum (Sum (getSum x + getSum y)) + getSum z) ? getSumSumId (getSum (Sum (getSum x + getSum y)))
+  ==. appendSum (Sum (getSum x + getSum y)) z
+  ==. appendSum (appendSum x y) z
+  *** QED
+
+type DPJArrayInt     = Vector Sum
 type DPJPartitionInt = Vector DPJArrayInt
 
-sumRef :: IORef (Sum Int)
-sumRef = unsafePerformIO $ newIORef 0
+sumRef :: IORef Sum
+sumRef = unsafePerformIO $ newIORef $ Sum 0
 {-# NOINLINE sumRef #-}
 
-reduce :: DPJArrayInt -> Int -> IO (Sum Int)
+reduce :: DPJArrayInt -> Int -> IO Sum
 reduce arr tileSize = do
     let segs :: DPJPartitionInt
         segs = stridedPartition arr tileSize
@@ -39,9 +80,9 @@ stridedPartition v n =
      $ v
 
 -- This should use verified semigroup!
-updateSum :: Sum Int -> IO ()
+updateSum :: Sum -> IO ()
 updateSum partialSum = atomicModifyIORef' sumRef $ \x ->
-    (x `mappend` partialSum, ())
+    (x <> partialSum, ())
 
 main :: IO ()
 main = do
@@ -49,8 +90,8 @@ main = do
         sIZE     = 1000000
         tILESIZE = 1000
 
-    arr <- VM.replicate sIZE 0
-    VM.write arr 42 42
+    arr <- VM.replicate sIZE $ Sum 0
+    VM.write arr 42 $ Sum 42
     arr' <- V.freeze arr
-    sum <- reduce arr' tILESIZE
-    putStrLn $ "sum=" ++ show sum
+    theSum <- reduce arr' tILESIZE
+    putStrLn $ "sum=" ++ show theSum
