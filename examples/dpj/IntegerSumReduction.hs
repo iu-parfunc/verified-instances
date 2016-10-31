@@ -1,3 +1,4 @@
+{-@ LIQUID "--exactdc" @-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Main (main) where
 
@@ -13,7 +14,7 @@ import           Language.Haskell.Liquid.ProofCombinators
 import           System.IO.Unsafe
 
 {-@ newtype Sum = Sum { getSum :: Int } @-}
-data Sum = Sum { getSum :: Int }
+newtype Sum = Sum { getSum :: Int }
   deriving (Eq, Ord, Read, Show)
 
 {-@ axiomatize appendSum @-}
@@ -28,13 +29,7 @@ instance Semigroup Sum where
 getSumSumId :: x:Int -> { getSum (Sum x) == x }
 @-}
 getSumSumId :: Int -> Proof
-getSumSumId x = simpleProof
-
-{-@
-addAssoc :: x:Int -> y:Int -> z:Int -> { x + (y + z) == (x + y) + z }
-@-}
-addAssoc :: Int -> Int -> Int -> Proof
-addAssoc x y z = x + (y + z) ==. (x + y) + z *** QED
+getSumSumId x = getSum (Sum x) ==. x *** QED
 
 {-@
 appendSumAssoc :: x:Sum -> y:Sum -> z:Sum
@@ -46,11 +41,17 @@ appendSumAssoc x y z
   ==. appendSum x (Sum (getSum y + getSum z))
   ==. Sum (getSum x + getSum (Sum (getSum y + getSum z)))
   ==. Sum (getSum x + (getSum y + getSum z)) ? getSumSumId (getSum (Sum (getSum y + getSum z)))
-  ==. Sum ((getSum x + getSum y) + getSum z) ? addAssoc (getSum x) (getSum y) (getSum z)
+  ==. Sum ((getSum x + getSum y) + getSum z)
   ==. Sum (getSum (Sum (getSum x + getSum y)) + getSum z) ? getSumSumId (getSum (Sum (getSum x + getSum y)))
   ==. appendSum (Sum (getSum x + getSum y)) z
   ==. appendSum (appendSum x y) z
   *** QED
+
+{-
+{-@@-}
+appendSumCommute :: x:Sum -> y:Sum -> { appendSum x y == appendSum y x }
+appendSumCommute :: Sum -> Sym -> Proof
+-}
 
 type DPJArrayInt     = Vector Sum
 type DPJPartitionInt = Vector DPJArrayInt
