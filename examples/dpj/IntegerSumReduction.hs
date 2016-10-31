@@ -1,29 +1,26 @@
 -- IntegerSumReduction
 module Main (main) where
 
+import           Data.Foldable (forM_)
 import           Data.IORef
+import           Data.Monoid (Sum(..))
 import           Data.Semigroup (Semigroup(..))
-import           Data.Vector
+import qualified Data.Vector as V
+import           Data.Vector (Vector)
+import qualified Data.Vector.Mutable as VM
 
-import           Unsafe.IO
+import           System.IO.Unsafe
 
-newtype Sum = Sum Int
-  deriving (Eq, Ord, Read, Show)
-
--- This should use verified semigroup!
-instance Semigroup Sum where
-  Sum x <> Sum y = Sum (x + y)
-
-type DPJArrayInt     = Vector Sum
+type DPJArrayInt     = Vector (Sum Int)
 type DPJPartitionInt = Vector DPJArrayInt
 
-sumRef :: IORef Sum
+sumRef :: IORef (Sum Int)
 sumRef = unsafePerformIO $ newIORef 0
 {-# NOINLINE sumRef #-}
 
-reduce :: DPJArrayInt -> Int -> IO Sum
+reduce :: DPJArrayInt -> Int -> IO (Sum Int)
 reduce arr tileSize = do
-    let segs :: DPJPartitiionInt
+    let segs :: DPJPartitionInt
         segs = stridedPartition arr tileSize
 
     forM_ segs $ \seg -> forM_ seg updateSum
@@ -33,7 +30,7 @@ stridedPartition :: DPJArrayInt -> Int -> DPJPartitionInt
 stridedPartition = undefined
 
 -- This should use verified semigroup!
-updateSum :: Sum -> IO ()
+updateSum :: Sum Int -> IO ()
 updateSum partialSum = atomicModifyIORef' sumRef $ \x ->
     (x `mappend` partialSum, ())
 
@@ -43,9 +40,8 @@ main = do
         sIZE     = 1000000
         tILESIZE = 1000
 
-        arr :: DPJArrayInt
-        arr = new sIZE
-
-    write arr 42 42
-    sum <- reduce arr tILESIZE
+    arr <- VM.new sIZE
+    VM.write arr 42 42
+    arr' <- V.freeze arr
+    sum <- reduce arr' tILESIZE
     putStrLn $ "sum=" ++ show sum
