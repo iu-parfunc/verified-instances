@@ -26,8 +26,17 @@ reduce arr tileSize = do
     forM_ segs $ \seg -> forM_ seg updateSum
     readIORef sumRef
 
+-- Not efficient, but eh
 stridedPartition :: DPJArrayInt -> Int -> DPJPartitionInt
-stridedPartition = undefined
+stridedPartition v n =
+  let stride n' = takeWhile (not . null) . map (take n') . iterate (drop n')
+  in   V.map V.fromList
+     . V.fromList
+     . map (map Sum)
+     . stride n
+     . V.toList
+     . V.map getSum
+     $ v
 
 -- This should use verified semigroup!
 updateSum :: Sum Int -> IO ()
@@ -40,7 +49,7 @@ main = do
         sIZE     = 1000000
         tILESIZE = 1000
 
-    arr <- VM.new sIZE
+    arr <- VM.replicate sIZE 0
     VM.write arr 42 42
     arr' <- V.freeze arr
     sum <- reduce arr' tILESIZE
