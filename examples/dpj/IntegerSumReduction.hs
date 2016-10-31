@@ -8,6 +8,8 @@ import           Data.Semigroup (Semigroup(..))
 import qualified Data.Vector as V
 import           Data.Vector (Vector)
 import qualified Data.Vector.Mutable as VM
+import           Data.VerifiedCommutativeSemigroup
+import           Data.VerifiedSemigroup
 
 import           Language.Haskell.Liquid.ProofCombinators
 
@@ -47,11 +49,28 @@ appendSumAssoc x y z
   ==. appendSum (appendSum x y) z
   *** QED
 
-{-
-{-@@-}
+{-@
 appendSumCommute :: x:Sum -> y:Sum -> { appendSum x y == appendSum y x }
-appendSumCommute :: Sum -> Sym -> Proof
--}
+@-}
+appendSumCommute :: Sum -> Sum -> Proof
+appendSumCommute x y
+  =   appendSum x y
+  ==. Sum (getSum x + getSum y)
+  ==. Sum (getSum y + getSum x)
+  ==. appendSum y x
+  *** QED
+
+{-@
+vsemigroupSum :: VerifiedSemigroup Sum
+@-}
+vsemigroupSum :: VerifiedSemigroup Sum
+vsemigroupSum = VerifiedSemigroup appendSum appendSumAssoc
+
+{-@
+vcommutativeSemigroupSum :: VerifiedCommutativeSemigroup Sum
+@-}
+vcommutativeSemigroupSum :: VerifiedCommutativeSemigroup Sum
+vcommutativeSemigroupSum = VerifiedCommutativeSemigroup appendSumCommute vsemigroupSum
 
 type DPJArrayInt     = Vector Sum
 type DPJPartitionInt = Vector DPJArrayInt
@@ -65,7 +84,7 @@ reduce arr tileSize = do
     let segs :: DPJPartitionInt
         segs = stridedPartition arr tileSize
 
-    forM_ segs $ \seg -> forM_ seg updateSum
+    forM_ segs $ \seg -> forM_ seg (updateRef vcommutativeSemigroupSum sumRef)
     readIORef sumRef
 
 -- Not efficient, but eh
@@ -80,10 +99,11 @@ stridedPartition v n =
      . V.map getSum
      $ v
 
--- This should use verified semigroup!
-updateSum :: Sum -> IO ()
-updateSum partialSum = atomicModifyIORef' sumRef $ \x ->
-    (x <> partialSum, ())
+updateRef :: VerifiedCommutativeSemigroup a -> IORef a -> a -> IO ()
+updateRef vcs sumref partialSum = atomicModifyIORef' sumref $ \x ->
+    (x <<>> partialSum, ())
+  where
+    (<<>>) = prod (verifiedSemigroup vcs)
 
 main :: IO ()
 main = do
