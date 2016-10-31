@@ -1,8 +1,9 @@
 {-@ LIQUID "--exactdc" @-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Main (main) where
 
-import           Data.Foldable (forM_)
+import qualified Control.Monad.Parallel as Parallel
+
+import qualified Data.Foldable as Sequential (forM_)
 import           Data.IORef
 import           Data.Semigroup (Semigroup(..))
 import qualified Data.Vector as V
@@ -12,8 +13,6 @@ import           Data.VerifiedCommutativeSemigroup
 import           Data.VerifiedSemigroup
 
 import           Language.Haskell.Liquid.ProofCombinators
-
-import           System.IO.Unsafe
 
 {-@ newtype Sum = Sum { getSum :: Int } @-}
 newtype Sum = Sum { getSum :: Int }
@@ -75,17 +74,14 @@ vcommutativeSemigroupSum = VerifiedCommutativeSemigroup appendSumCommute vsemigr
 type DPJArrayInt     = Vector Sum
 type DPJPartitionInt = Vector DPJArrayInt
 
-sumRef :: IORef Sum
-sumRef = unsafePerformIO $ newIORef $ Sum 0
-{-# NOINLINE sumRef #-}
-
-reduce :: DPJArrayInt -> Int -> IO Sum
-reduce arr tileSize = do
+reduce :: DPJArrayInt -> Int -> IORef Sum -> IO Sum
+reduce arr tileSize sumref = do
     let segs :: DPJPartitionInt
         segs = stridedPartition arr tileSize
 
-    forM_ segs $ \seg -> forM_ seg (updateRef vcommutativeSemigroupSum sumRef)
-    readIORef sumRef
+    Parallel.forM_ (V.toList segs) $ \seg ->
+        Sequential.forM_ seg $ updateRef vcommutativeSemigroupSum sumref
+    readIORef sumref
 
 -- Not efficient, but eh
 stridedPartition :: DPJArrayInt -> Int -> DPJPartitionInt
@@ -111,8 +107,9 @@ main = do
         sIZE     = 1000000
         tILESIZE = 1000
 
+    sumref <- newIORef $ Sum 0
     arr <- VM.replicate sIZE $ Sum 0
     VM.write arr 42 $ Sum 42
     arr' <- V.freeze arr
-    theSum <- reduce arr' tILESIZE
+    theSum <- reduce arr' tILESIZE sumref
     putStrLn $ "sum=" ++ show theSum

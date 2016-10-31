@@ -54,6 +54,7 @@ library
 executable dpj
   main-is:             IntegerSumReduction.hs
   build-depends:       base >= 4.8 && < 5
+                     , monad-parallel
                      , vector
                      , verified-instances
   hs-source-dirs:      examples/dpj
