@@ -1,8 +1,13 @@
 module Main (main) where
 
+import Control.Monad (when)
 import Data.Foldable (forM_)
+import System.Directory (doesFileExist, removeFile)
 import System.FilePath ((<.>))
 import System.Process (callProcess)
+
+caps :: [Int]
+caps = [1..16]
 
 runIt :: String -> IO ()
 runIt filename = do
@@ -14,13 +19,15 @@ runIt filename = do
                 , "-rtsopts"
                 ]
   callProcess "ghc" ghcArgs
-  forM_ [1..16] $ \i -> do
+  forM_ caps $ \i -> do
     let dumpPrefix = filename ++ "-" ++ show i
+        dumpJSON   = dumpPrefix <.> "json"
+        dumpCSV    = dumpPrefix <.> "csv"
         exeArgs = [ "+RTS"
                   , "-N" ++ show i
                   , "-T"
                   , "-RTS"
-                  , "--json=" ++ dumpPrefix <.> "json"
+                  , "--json=" ++ dumpJSON
                   , "--regress=allocated:iters"
                   , "--regress=bytesCopied:iters"
                   , "--regress=cycles:iters"
@@ -29,10 +36,18 @@ runIt filename = do
                   , "--regress=gcWallSeconds:iters"
                   , "--regress=cpuTime:iters"
                   ]
+
+    e1 <- doesFileExist dumpJSON
+    when e1 $ removeFile dumpJSON
+
+    e2 <- doesFileExist dumpCSV
+    when e2 $ removeFile dumpCSV
+
     callProcess ("./" ++ filename) exeArgs
     let hfucArgs = [ "--noupload"
-                   , "--csv=" ++ dumpPrefix <.> "csv"
+                   , "--csv=" ++ dumpCSV
                    , "--json"
+                   , "--custom=CAPABILITIES," ++ show i
                    , dumpPrefix <.> "json"
                    ]
     callProcess "hsbencher-fusion-upload-criterion" hfucArgs
