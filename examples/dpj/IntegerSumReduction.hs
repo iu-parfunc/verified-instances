@@ -16,6 +16,8 @@ import qualified Data.Vector.Mutable as VM
 import           Data.VerifiedCommutativeSemigroup
 import           Data.VerifiedSemigroup
 
+import           GHC.Conc (getNumCapabilities)
+
 import           Language.Haskell.Liquid.ProofCombinators
 
 {-@ newtype Sum = Sum { getSum :: Int } @-}
@@ -113,9 +115,11 @@ updateRef vcs sumref partialSum = atomicModifyIORef' sumref $ \x ->
     (<<>>) = prod (verifiedSemigroup vcs)
 
 main :: IO ()
-main = defaultMain
-  [ env setup $ \arr -> bench "reduce" $ nfIO $ reduce arr tILESIZE
-  ]
+main = do
+  c <- getNumCapabilities
+  defaultMain
+    [env setup $ \arr -> bench ("reduce (" ++ show c ++ " threads)")
+                           $ nfIO $ reduce arr tILESIZE]
 
 sIZE, tILESIZE :: Int
 sIZE     = 1000000

@@ -13,6 +13,8 @@ import qualified Data.Vector as V
 import           Data.Vector (Vector)
 import qualified Data.Vector.Mutable as VM
 
+import           GHC.Conc (getNumCapabilities)
+
 newtype Sum = Sum { getSum :: Int }
   deriving (Eq, Ord, Read, Show)
 
@@ -59,9 +61,11 @@ updateRef sumref partialSum = atomicModifyIORef' sumref $ \x ->
     (x <> partialSum, ())
 
 main :: IO ()
-main = defaultMain
-  [ env setup $ \arr -> bench "reduce" $ nfIO $ reduce arr tILESIZE
-  ]
+main = do
+  c <- getNumCapabilities
+  defaultMain
+    [env setup $ \arr -> bench ("reduce (" ++ show c ++ " threads)")
+                           $ nfIO $ reduce arr tILESIZE]
 
 sIZE, tILESIZE :: Int
 sIZE     = 1000000
