@@ -1,6 +1,7 @@
 module Main (main) where
 
 import Data.Foldable (forM_)
+import System.FilePath ((<.>))
 import System.Process (callProcess)
 
 runIt :: String -> IO ()
@@ -14,10 +15,12 @@ runIt filename = do
                 ]
   callProcess "ghc" ghcArgs
   forM_ [1..16] $ \i -> do
-    let exeArgs = [ "+RTS"
+    let dumpPrefix = filename ++ "-" ++ show i
+        exeArgs = [ "+RTS"
                   , "-N" ++ show i
                   , "-T"
                   , "-RTS"
+                  , "--json=" ++ dumpPrefix <.> "json"
                   , "--regress=allocated:iters"
                   , "--regress=bytesCopied:iters"
                   , "--regress=cycles:iters"
@@ -27,8 +30,14 @@ runIt filename = do
                   , "--regress=cpuTime:iters"
                   ]
     callProcess ("./" ++ filename) exeArgs
+    let hfucArgs = [ "--noupload"
+                   , "--csv=" ++ dumpPrefix <.> "csv"
+                   , "--json"
+                   , dumpPrefix <.> "json"
+                   ]
+    callProcess "hsbencher-fusion-upload-criterion" hfucArgs
 
 main :: IO ()
 main = do
-  -- runIt "IntegerSumReduction"
+  runIt "IntegerSumReduction"
   runIt "IntegerSumReductionNoVerification"
