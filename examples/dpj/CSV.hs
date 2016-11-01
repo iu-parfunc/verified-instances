@@ -23,16 +23,15 @@ filenames :: [String]
 filenames = ["IntegerSumReduction", "IntegerSumReductionNoVerification"]
 
 caps :: [Int]
-caps = [1..16]
+caps = [1..18]
 
 main :: IO ()
 main = do
   filename:_ <- getArgs
+  putStrLn "THREADS,TIME"
   forM_ caps $ \i -> do
       !csvData <- BL.readFile $ filename ++ "-" ++ show i <.> "csv"
       case decodeByName csvData of
         Left err -> putStrLn err
-        Right (_, v) -> do
-          putStrLn "THREADS,TIME"
-          V.forM_ v $ \p ->
-            putStrLn $ show (capabilities p) ++ "," ++ show (maxTime p)
+        Right (_, v) -> V.forM_ v $ \p ->
+          putStrLn $ show (capabilities p) ++ "," ++ show (maxTime p)

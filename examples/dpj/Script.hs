@@ -7,7 +7,7 @@ import System.FilePath ((<.>))
 import System.Process (callProcess)
 
 caps :: [Int]
-caps = [1..16]
+caps = [1..18]
 
 runIt :: String -> IO ()
 runIt filename = do
