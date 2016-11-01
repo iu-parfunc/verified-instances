@@ -1,8 +1,12 @@
 {-@ LIQUID "--exactdc" @-}
 module Main (main) where
 
+import           Control.DeepSeq (NFData(..))
 import qualified Control.Monad.Parallel as Parallel
 
+import           Criterion.Main
+
+import           Data.Coerce
 import qualified Data.Foldable as Sequential (forM_)
 import           Data.IORef
 import           Data.Semigroup (Semigroup(..))
@@ -25,6 +29,9 @@ appendSum x y = Sum (getSum x + getSum y)
 
 instance Semigroup Sum where
   (<>) = appendSum
+
+instance NFData Sum where
+  rnf (Sum x) = rnf x
 
 {-@
 getSumSumId :: x:Int -> { getSum (Sum x) == x }
@@ -74,14 +81,18 @@ vcommutativeSemigroupSum = VerifiedCommutativeSemigroup appendSumCommute vsemigr
 type DPJArrayInt     = Vector Sum
 type DPJPartitionInt = Vector DPJArrayInt
 
-reduce :: DPJArrayInt -> Int -> IORef Sum -> IO Sum
-reduce arr tileSize sumref = do
+reduce :: DPJArrayInt -> Int -> IO Sum
+reduce arr tileSize = do
     let segs :: DPJPartitionInt
         segs = stridedPartition arr tileSize
 
+    sumref <- newIORef $ Sum 0
     Parallel.forM_ (V.toList segs) $ \seg ->
-        Sequential.forM_ seg $ updateRef vcommutativeSemigroupSum sumref
+        updateRef vcommutativeSemigroupSum sumref $ Sum $ V.sum $ unwrapV seg
     readIORef sumref
+  where
+    unwrapV :: Vector Sum -> Vector Int
+    unwrapV = coerce
 
 -- Not efficient, but eh
 stridedPartition :: DPJArrayInt -> Int -> DPJPartitionInt
@@ -102,14 +113,16 @@ updateRef vcs sumref partialSum = atomicModifyIORef' sumref $ \x ->
     (<<>>) = prod (verifiedSemigroup vcs)
 
 main :: IO ()
-main = do
-    let sIZE, tILESIZE :: Int
-        sIZE     = 1000000
-        tILESIZE = 1000
+main = defaultMain
+  [ env setup $ \arr -> bench "reduce" $ nfIO $ reduce arr tILESIZE
+  ]
 
-    sumref <- newIORef $ Sum 0
+sIZE, tILESIZE :: Int
+sIZE     = 1000000
+tILESIZE = 1000
+
+setup :: IO DPJArrayInt
+setup = do
     arr <- VM.replicate sIZE $ Sum 0
     VM.write arr 42 $ Sum 42
-    arr' <- V.freeze arr
-    theSum <- reduce arr' tILESIZE sumref
-    putStrLn $ "sum=" ++ show theSum
+    V.freeze arr
