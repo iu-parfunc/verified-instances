@@ -1,14 +1,13 @@
+{-# LANGUAGE BangPatterns #-}
 {-@ LIQUID "--exactdc" @-}
 module Main where
 
 import Control.DeepSeq
--- import Control.Monad.Par.IO
-import Control.Monad.IO.Class
 import Data.IORef
 import Data.Semigroup (Semigroup(..))
 
 import Control.LVish
-import Control.LVish.Unsafe -- for MonadIO Par instance
+import Control.LVish.Internal
 
 import Data.Vector.Unboxed as V hiding ((++)) 
 import Data.Time.Clock
@@ -132,7 +131,7 @@ sumStrided2 v =
 sumStrided3 :: Vector Int -> Int
 sumStrided3 v =
    unsafePerformIO $ 
-   do ref <- runParIO par
+   do ref <- runParPolyIO par
       fmap getSum $ readIORef ref
  where
   par :: Par d s (IORef Sum)
@@ -142,9 +141,10 @@ sumStrided3 v =
     acc <- newRV $ Sum 0
     -- hp <- newHandlerPool
     -- Note this is asynchronous and will return immediately:    
-    parForTree (0,numTiles) $ \ tid -> do 
+    parForSimple (0,numTiles) $ \ tid -> do 
       let myslice = V.slice (tid * tile) tile v
-      updateRV vcommutativeSemigroupSum acc (Sum $ V.sum myslice)
+      let x = (Sum $ V.sum myslice)
+      updateRV vcommutativeSemigroupSum acc x
 
     -- quasideterminism:
     -- quiesce hp
@@ -163,7 +163,7 @@ newtype ReductionVar s a = RV { getRV :: IORef a }
 
 -- IMAGINE that these are type class constraints:
 updateRV :: VerifiedCommutativeSemigroup a -> ReductionVar s a -> a -> Par d s ()
-updateRV vcs (RV ref) partialSum = liftIO $ atomicModifyIORef' ref $ \x ->
+updateRV vcs (RV ref) !partialSum = liftIO $ atomicModifyIORef' ref $ \x ->
       (x <<>> partialSum, ())
   where
     (<<>>) = prod (verifiedSemigroup vcs)
