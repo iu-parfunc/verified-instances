@@ -41,6 +41,7 @@ instance Semigroup Sum where
 instance NFData Sum where
   rnf (Sum x) = rnf x
 
+{-
 {-@
 getSumSumId :: x:Int -> { getSum (Sum x) == x }
 @-}
@@ -85,6 +86,7 @@ vcommutativeSemigroupSum :: VerifiedCommutativeSemigroup Sum
 @-}
 vcommutativeSemigroupSum :: VerifiedCommutativeSemigroup Sum
 vcommutativeSemigroupSum = VerifiedCommutativeSemigroup appendSumCommute vsemigroupSum
+-}
 
 -- Untrusted (exports sumStrided)
 --------------------------------
@@ -147,7 +149,7 @@ sumStrided3 v =
     parForSimple (0,numTiles) $ \ tid -> do 
       let myslice = V.slice (tid * tile) tile v
       let x = (Sum $ V.sum myslice)
-      updateRV vcommutativeSemigroupSum acc x
+      updateRV acc x
 
     -- quasideterminism:
     -- quiesce hp
@@ -165,11 +167,11 @@ sumStrided3 v =
 newtype ReductionVar s a = RV { getRV :: IORef a }
 
 -- IMAGINE that these are type class constraints:
-updateRV :: VerifiedCommutativeSemigroup a -> ReductionVar s a -> a -> Par d s ()
-updateRV vcs (RV ref) !partialSum = liftIO $ atomicModifyIORef' ref $ \x ->
+updateRV :: Semigroup a => ReductionVar s a -> a -> Par d s ()
+updateRV (RV ref) !partialSum = liftIO $ atomicModifyIORef' ref $ \x ->
       (x <<>> partialSum, ())
   where
-    (<<>>) = prod (verifiedSemigroup vcs)
+    (<<>>) = (<>)
 
 newRV :: a -> Par d s (ReductionVar s a)
 newRV = liftIO . fmap RV . newIORef
