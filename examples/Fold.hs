@@ -5,9 +5,9 @@
 module Fold where
 
 import Data.Traversable
+import Data.VerifiableConstraint
 import Data.VerifiedMonoid
 import Data.VerifiedSemigroup
-import Data.VerifiableConstraint
 import Language.Haskell.Liquid.ProofCombinators
 
 parFold :: Traversable t => VerifiedMonoid m -> (a -> m) -> t a -> m
@@ -42,11 +42,7 @@ multAssoc x y z =   mult x (mult y z)
                 ==. mult (mult x y) z
                 *** QED
 
-vSemigroupProd :: VerifiedSemigroup Prod
-vSemigroupProd = VerifiedSemigroup mult multAssoc
-
 {-@ axiomatize one @-}
-{-@ one :: Prod @-}
 one :: Prod
 one = Prod 1
 
@@ -69,7 +65,7 @@ oneRident x =   mult x one
             *** QED
 
 vMonoidProd :: VerifiedMonoid Prod
-vMonoidProd = VerifiedMonoid one vSemigroupProd oneLident oneRident
+vMonoidProd = VerifiedMonoid one mult oneLident oneRident multAssoc
 
 parFoldProd :: Traversable t => (a -> Prod) -> t a -> Prod
 parFoldProd = parFold vMonoidProd
