@@ -1,7 +1,7 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 
-module Data.VerifiedEq.Instances (veqInt, veqUnit, module X) where
+module Data.VerifiedEq.Instances (veqInt, veqUnit, veqDouble, module X) where
 
 import Data.VerifiedEq.Instances.Contra   as X
 import Data.VerifiedEq.Instances.Generics as X
@@ -51,3 +51,29 @@ eqIntTrans x y z = (eqInt x y && eqInt y z) ==. (x == y && y == z) ==. x == z **
 
 veqInt :: VerifiedEq Int
 veqInt = VerifiedEq eqInt eqIntRefl eqIntSym eqIntTrans
+
+{-@ axiomatize eqDouble @-}
+eqDouble :: Double -> Double -> Bool
+eqDouble x y = x == y
+{-# INLINE eqDouble #-}
+
+{-@ eqDoubleRefl :: x:Double -> { eqDouble x x } @-}
+eqDoubleRefl :: Double -> Proof
+eqDoubleRefl x = eqDouble x x ==. x == x *** QED
+
+{-@ eqDoubleSym :: x:Double -> y:Double
+                -> { eqDouble x y ==> eqDouble y x } @-}
+eqDoubleSym :: Double -> Double -> Proof
+eqDoubleSym x y = eqDouble x y ==. x == y ==. y == x *** QED
+
+{-@ eqDoubleTrans :: x:Double -> y:Double -> z:Double
+                  -> { eqDouble x y && eqDouble y z ==> eqDouble x z } @-}
+eqDoubleTrans :: Double -> Double -> Double -> Proof
+eqDoubleTrans x y z
+  =   (eqDouble x y && eqDouble y z)
+  ==. (x == y       && y == z)
+  ==. x == z
+  *** QED
+
+veqDouble :: VerifiedEq Double
+veqDouble = VerifiedEq eqDouble eqDoubleRefl eqDoubleSym eqDoubleTrans
