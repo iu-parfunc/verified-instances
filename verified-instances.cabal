@@ -32,6 +32,9 @@ library
                      , Data.VerifiedOrd.Instances.Sum
                      , Data.VerifiedOrd.Instances.Prod
                      , Data.VerifiedMonoid
+                     , Data.VerifiedMonoid.Instances
+                     , Data.VerifiedMonoid.Instances.Iso
+                     , Data.VerifiedMonoid.Instances.Prod
                      , Data.VerifiedSemigroup
                      , Data.Inj
                      , Data.Iso
