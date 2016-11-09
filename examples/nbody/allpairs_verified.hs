@@ -112,8 +112,11 @@ randomList :: Random a => Int -> [a]
 randomList seed = randoms (mkStdGen seed)
 
 genBody :: Int -> Body
+genBody = undefined
+{-
 genBody s = Body x' y' z' vx' vy' vz' m'
         where [x',y',z',vx',vy',vz',m'] = take 7 $ randomList s
+-}
 
 numBodies, numSteps :: Int
 numBodies = 1024
