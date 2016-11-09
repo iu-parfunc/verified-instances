@@ -30,14 +30,15 @@ import           System.Random
 
 -- a body consists of pos, vel and mass
 data Body = Body
-    { _x  :: {-# UNPACK #-} !Double   -- pos of x
-    , _y  :: {-# UNPACK #-} !Double   -- pos of y
-    , _z  :: {-# UNPACK #-} !Double   -- pos of z
-    , _vx :: {-# UNPACK #-} !Double   -- vel of x
-    , _vy :: {-# UNPACK #-} !Double   -- vel of y
-    , _vz :: {-# UNPACK #-} !Double   -- vel of z
-    , _m  :: {-# UNPACK #-} !Double } -- mass
-    deriving (Show,Eq)
+    { _x  :: Double   -- pos of x
+    , _y  :: Double   -- pos of y
+    , _z  :: Double   -- pos of z
+    , _vx :: Double   -- vel of x
+    , _vy :: Double   -- vel of y
+    , _vz :: Double   -- vel of z
+    , _m  :: Double } -- mass
+    deriving (Eq)
+--     deriving (Show,Eq)
 
 $(derivingUnbox "Body"
     [t| Body -> ((Double, Double, Double), (Double, Double, Double), Double) |]
@@ -84,7 +85,14 @@ randomList seed = randoms (mkStdGen seed)
 
 genBody :: Int -> Body
 genBody s = Body x' y' z' vx' vy' vz' m'
-        where [x',y',z',vx',vy',vz',m'] = take 7 $ randomList s
+  where 
+    x'  = head $ randomList s 
+    y'  = head $ randomList s
+    z'  = head $ randomList s
+    vx' = head $ randomList s
+    vy' = head $ randomList s
+    vz' = head $ randomList s
+    m'  = head $ randomList s -- (take 7 $ randomList s :: [Double])
 
 numBodies, numSteps :: Int
 numBodies = 1024
