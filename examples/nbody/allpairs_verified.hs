@@ -1,3 +1,6 @@
+{-@ LIQUID "--higherorder"        @-}
+{-@ LIQUID "--totality"           @-}
+{-@ LIQUID "--prune-unsorted"     @-}
 {-@ LIQUID "--exactdc" @-}
 
 {-# LANGUAGE BangPatterns #-}
@@ -30,6 +33,9 @@ import           Data.VerifiedEq.Instances
 
 import           GHC.Conc (numCapabilities)
 
+-- NB: This is not a redundant import! LH needs this.
+import           Language.Haskell.Liquid.ProofCombinators
+
 import           System.Random
 
 -- a body consists of pos, vel and mass
@@ -59,7 +65,6 @@ veqBodyRep = veqProd veqDouble
            $ veqProd veqDouble
            $ veqProd veqDouble veqDouble
 
--- {-@ veqBody :: VerifiedEq Body @-}
 veqBody :: VerifiedEq Body
 veqBody = veqContra toBodyRep veqBodyRep
 
