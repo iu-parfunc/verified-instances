@@ -40,13 +40,14 @@ import           System.Random
 
 -- a body consists of pos, vel and mass
 data Body = Body
-    { _x  :: Double   -- pos of x
-    , _y  :: Double   -- pos of y
-    , _z  :: Double   -- pos of z
-    , _vx :: Double   -- vel of x
-    , _vy :: Double   -- vel of y
-    , _vz :: Double   -- vel of z
-    , _m  :: Double } -- mass
+    { _x  :: {-# UNPACK #-} !Double   -- pos of x
+    , _y  :: {-# UNPACK #-} !Double   -- pos of y
+    , _z  :: {-# UNPACK #-} !Double   -- pos of z
+    , _vx :: {-# UNPACK #-} !Double   -- vel of x
+    , _vy :: {-# UNPACK #-} !Double   -- vel of y
+    , _vz :: {-# UNPACK #-} !Double   -- vel of z
+    , _m  :: {-# UNPACK #-} !Double } -- mass
+    deriving Show
 
 type BodyRep = (Double, (Double, (Double, (Double, (Double, (Double, Double))))))
 
