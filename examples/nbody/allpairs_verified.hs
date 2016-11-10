@@ -2,6 +2,7 @@
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--prune-unsorted"     @-}
 {-@ LIQUID "--exactdc"            @-}
+{-@ LIQUID "--trust-internals"    @-}
 
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
