@@ -84,15 +84,9 @@ randomList :: Random a => Int -> [a]
 randomList seed = randoms (mkStdGen seed)
 
 genBody :: Int -> Body
-genBody s = Body x' y' z' vx' vy' vz' m'
+genBody s = Body (rand!!1) (rand!!2) (rand!!3) (rand!!4) (rand!!5) (rand!!6) (rand!!7)
   where 
-    x'  = head $ randomList s 
-    y'  = head $ randomList s
-    z'  = head $ randomList s
-    vx' = head $ randomList s
-    vy' = head $ randomList s
-    vz' = head $ randomList s
-    m'  = head $ randomList s -- (take 7 $ randomList s :: [Double])
+    rand = randomList s 
 
 numBodies, numSteps :: Int
 numBodies = 1024
