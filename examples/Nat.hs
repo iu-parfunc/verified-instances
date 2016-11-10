@@ -4,8 +4,8 @@
 
 module Nat where
 
-import Data.VerifiedEq
--- import GHC.Classes.VerifiedEq
+-- import Data.VerifiedEq
+import GHC.Classes.VerifiedEq
 import Language.Haskell.Liquid.ProofCombinators
 
 {-@ data N [toInt] = Zero | Suc N @-}
@@ -70,13 +70,15 @@ eqNTrans (Suc x) (Suc y) (Suc z) =   (eqN (Suc x) (Suc y) && eqN (Suc y) (Suc z)
 instance Eq N where
   (==) = eqN
 
--- instance VerifiedEq N where
---   refl = eqNRefl
---   sym = eqNSym
---   trans = eqNTrans
+instance VerifiedEq N where
+  {-@ define $ceq = eqN @-}
+  eq   = eqN 
+  refl = eqNRefl
+  sym = eqNSym
+  trans = eqNTrans
 
-veqN :: VerifiedEq N
-veqN = VerifiedEq eqN eqNRefl eqNSym eqNTrans
+-- veqN :: VerifiedEq N
+-- veqN = VerifiedEq eqN eqNRefl eqNSym eqNTrans
 
 {-@ axiomatize addN @-}
 addN :: N -> N -> N
