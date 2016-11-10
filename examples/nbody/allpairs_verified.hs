@@ -18,7 +18,8 @@ Compile | Run
 Seq: $ ghc --make -O2 -fforce-recomp allpairs.hs | allpairs <numbodies> <steps>
 Par: $ ghc --make -O2 -threaded -rtsopts -fforce-recomp allpairs.hs | allpairs <numbodies> <steps> +RTS -Nx
 -}
-module Main (main) where
+
+module Main where
 
 import           Control.DeepSeq
 import           Control.Monad.Par
@@ -37,6 +38,10 @@ import           GHC.Conc (numCapabilities)
 import           Language.Haskell.Liquid.ProofCombinators
 
 import           System.Random
+
+
+{-@ assume (*) :: Num a => a -> a -> a @-}
+{-@ assume (/) :: Num a => a -> a -> a @-}
 
 -- a body consists of pos, vel and mass
 data Body = Body
@@ -95,6 +100,7 @@ chunksize xs = (V.length xs) `quot` (numCapabilities * 2)
 parMapChunk :: (Body -> Body) -> Int -> Vector Body -> Vector Body
 parMapChunk g n xs = V.concat ( runPar $ parMap (V.map g) (chunk n xs) )
 
+{-@ chunk :: Int -> Vector Body -> [Vector Body] @-}
 chunk :: Int -> Vector Body -> [Vector Body]
 chunk n xs 
   | V.null xs = []
@@ -115,7 +121,7 @@ genBody :: Int -> Body
 genBody s = Body (rand!!1) (rand!!2) (rand!!3) (rand!!4) (rand!!5) (rand!!6) (rand!!7)
   where 
     rand = randomList s 
-    
+
 numBodies, numSteps :: Int
 numBodies = 1024
 numSteps  = 20
@@ -154,18 +160,22 @@ doSteps s bs = doSteps (s-1) new_bs
     deductChange :: Body -> Accel -> Body
     deductChange (Body x' y' z' vx' vy' vz' m') (Accel ax' ay' az') = Body x' y' z' (vx'-ax') (vy'-ay') (vz'-az') m'
 
-    accel :: Body -> Body -> Accel
-    accel b_i b_j
-        | eq veqBody b_i b_j = Accel 0 0 0
-        | otherwise = Accel (dx*jm*mag) (dy*jm*mag) (dz*jm*mag)
-      where
-        mag, distance, dSquared, dx, dy, dz :: Double
-        mag = timeStep / (dSquared * distance)
-        distance = sqrt (dSquared)
-        dSquared = dx*dx + dy*dy + dz*dz + eps
-        dx = ix - jx
-        dy = iy - jy
-        dz = iz - jz
+accel :: Body -> Body -> Accel
+accel b_i b_j
+  | eq veqBody b_i b_j = Accel 0 0 0
+  | otherwise = Accel (dx*jm*mag) (dy*jm*mag) (dz*jm*mag)
+  where
+    mag, distance, dSquared, dx, dy, dz :: Double
+    mag = timeStep / (dSquared * distance)
+    distance = sqrt (dSquared)
+    dSquared = dx*dx + dy*dy + dz*dz + eps
+    dx = ix - jx
+    dy = iy - jy
+    dz = iz - jz
 
-        Body ix iy iz _ _ _ _  = b_i
-        Body jx jy jz _ _ _ jm = b_j
+    Body ix iy iz _ _ _ _  = b_i
+    Body jx jy jz _ _ _ jm = b_j
+
+
+
+
