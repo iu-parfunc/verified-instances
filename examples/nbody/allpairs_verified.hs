@@ -1,7 +1,7 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--prune-unsorted"     @-}
-{-@ LIQUID "--exactdc" @-}
+{-@ LIQUID "--exactdc"            @-}
 
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -96,10 +96,10 @@ parMapChunk :: (Body -> Body) -> Int -> Vector Body -> Vector Body
 parMapChunk g n xs = V.concat ( runPar $ parMap (V.map g) (chunk n xs) )
 
 chunk :: Int -> Vector Body -> [Vector Body]
-chunk n = go
-  where
-    go xs | V.null xs = []
-          | otherwise = as : chunk n bs where (as,bs) = V.splitAt n xs
+chunk n xs 
+  | V.null xs = []
+  | otherwise = as : chunk n bs 
+  where (as,bs) = V.splitAt n xs
 
 timeStep :: Double
 timeStep = 0.001
@@ -112,12 +112,10 @@ randomList :: Random a => Int -> [a]
 randomList seed = randoms (mkStdGen seed)
 
 genBody :: Int -> Body
-genBody = undefined
-{-
-genBody s = Body x' y' z' vx' vy' vz' m'
-        where [x',y',z',vx',vy',vz',m'] = take 7 $ randomList s
--}
-
+genBody s = Body (rand!!1) (rand!!2) (rand!!3) (rand!!4) (rand!!5) (rand!!6) (rand!!7)
+  where 
+    rand = randomList s 
+    
 numBodies, numSteps :: Int
 numBodies = 1024
 numSteps  = 20
