@@ -39,9 +39,14 @@ import           Language.Haskell.Liquid.ProofCombinators
 
 import           System.Random
 
-
+-- Verification time is 86.92s with the following sigs
 {-@ assume (*) :: Num a => a -> a -> a @-}
 {-@ assume (/) :: Num a => a -> a -> a @-}
+
+-- As an alternative use the liquid flag --linear
+-- to give (*) and (/) more presice signs.
+-- Then verification time is 259.96s
+
 
 -- a body consists of pos, vel and mass
 data Body = Body
