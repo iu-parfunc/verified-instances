@@ -118,12 +118,12 @@ leqProdTotal :: Eq a => (a -> a -> Bool) -> (a -> a -> Proof)
              -> (a, b) -> (a, b) -> Proof
 leqProdTotal leqa leqaTotal leqb leqbTotal p@(x1, y1) q@(x2, y2) =
       (leqProd leqa leqb p q || leqProd leqa leqb q p)
-  ==. ((if x1 == x2 then leqb y1 y2 else leqa x1 x2) || (if x2 == x1 then leqb y2 y1 else leqa x2 x1))
-  ==. ((if x1 == x2 then leqb y1 y2 else leqa x1 x2) || (if x1 == x2 then leqb y2 y1 else leqa x2 x1))
-  ==. (if x1 == x2 then leqb y1 y2 || leqb y2 y1 else leqa x1 x2 || leqa x2 x1)
+--   ==. ((if x1 == x2 then leqb y1 y2 else leqa x1 x2) || (if x2 == x1 then leqb y2 y1 else leqa x2 x1))
+--   ==. ((if x1 == x2 then leqb y1 y2 else leqa x1 x2) || (if x1 == x2 then leqb y2 y1 else leqa x2 x1))
+--   ==. (if x1 == x2 then leqb y1 y2 || leqb y2 y1 else leqa x1 x2 || leqa x2 x1)
   ==. (if x1 == x2 then True else leqa x1 x2 || leqa x2 x1) ? leqbTotal y1 y2
   ==. (if x1 == x2 then True else True)                     ? leqaTotal x1 x2
-  ==. True
+--   ==. True
   *** QED
 
 vordProd :: VerifiedOrd a -> VerifiedOrd b -> VerifiedOrd (a, b)
