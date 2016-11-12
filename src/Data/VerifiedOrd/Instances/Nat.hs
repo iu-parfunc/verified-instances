@@ -20,6 +20,12 @@ natleq Z _ = True
 natleq _ Z = False 
 natleq (S n) (S m) = natleq n m
 
+
+
+{-@ totalInt :: n:Int -> m:Int -> {(n <= m) || (m <= n)} @-}
+totalInt :: Int -> Int -> Proof
+totalInt _ _ = trivial 
+
 {-@ totalNat :: n:N -> m:N -> {(natleq n m) || (natleq m n)} / [toInt n + toInt m] @-}
 totalNat :: N -> N -> Proof 
 totalNat Z m = natleq Z m *** QED 
