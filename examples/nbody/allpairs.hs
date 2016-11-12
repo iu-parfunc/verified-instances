@@ -37,7 +37,7 @@ data Body = Body
     , _vy :: Double   -- vel of y
     , _vz :: Double   -- vel of z
     , _m  :: Double } -- mass
-    deriving (Eq)
+    deriving (Eq, Ord)
 --     deriving (Show,Eq)
 
 $(derivingUnbox "Body"
@@ -85,8 +85,8 @@ randomList seed = randoms (mkStdGen seed)
 
 genBody :: Int -> Body
 genBody s = Body (rand!!1) (rand!!2) (rand!!3) (rand!!4) (rand!!5) (rand!!6) (rand!!7)
-  where 
-    rand = randomList s 
+  where
+    rand = randomList s
 
 numBodies, numSteps :: Int
 numBodies = 1024
@@ -128,7 +128,7 @@ doSteps s bs = doSteps (s-1) new_bs
 
     accel :: Body -> Body -> Accel
     accel b_i b_j
-        | b_i == b_j = Accel 0 0 0
+        | b_i <= b_j && b_j <= b_i = Accel 0 0 0
         | otherwise = Accel (dx*jm*mag) (dy*jm*mag) (dz*jm*mag)
       where
         mag, distance, dSquared, dx, dy, dz :: Double

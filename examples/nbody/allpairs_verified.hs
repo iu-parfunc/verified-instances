@@ -27,11 +27,15 @@ import           Control.Monad.Par
 
 import           Criterion.Main
 
+import           Data.Iso
 import qualified Data.Vector.Unboxed as V
 import           Data.Vector.Unboxed (Vector)
 import           Data.Vector.Unboxed.Deriving
 import           Data.VerifiedEq
 import           Data.VerifiedEq.Instances
+import           Data.VerifiedOrd
+import           Data.VerifiedOrd.Instances
+import           Data.VerifiedOrd.Instances.Iso
 
 import           GHC.Conc (numCapabilities)
 
@@ -58,26 +62,50 @@ data Body = Body
     , _vy :: {-# UNPACK #-} !Double   -- vel of y
     , _vz :: {-# UNPACK #-} !Double   -- vel of z
     , _m  :: {-# UNPACK #-} !Double } -- mass
-    deriving Show
 
 type BodyRep = (Double, (Double, (Double, (Double, (Double, (Double, Double))))))
 
-toBodyRep :: Body -> BodyRep
-toBodyRep b = (_x b, (_y b, (_z b, (_vx b, (_vy b, (_vz b, _m b))))))
+fromBody :: Body -> BodyRep
+fromBody b = (_x b, (_y b, (_z b, (_vx b, (_vy b, (_vz b, _m b))))))
 
-fromBodyRep :: BodyRep -> Body
-fromBodyRep (x, (y, (z, (vx, (vy, (vz, m)))))) = Body x y z vx vy vz m
+toBody :: BodyRep -> Body
+toBody (x, (y, (z, (vx, (vy, (vz, m)))))) = Body x y z vx vy vz m
 
-veqBodyRep :: VerifiedEq BodyRep
-veqBodyRep = veqProd veqDouble
-           $ veqProd veqDouble
-           $ veqProd veqDouble
-           $ veqProd veqDouble
-           $ veqProd veqDouble
-           $ veqProd veqDouble veqDouble
+{-@ tofBody :: b:Body -> { toBody (fromBody b) == b } @-}
+tofBody :: Body -> Proof
+tofBody b
+  =   toBody (fromBody b)
+  ==. toBody (_x b, (_y b, (_z b, (_vx b, (_vy b, (_vz b, _m b))))))
+  ==. Body (_x b) (_y b) (_z b) (_vx b) (_vy b) (_vz b) (_m b)
+  ==. b
+  *** QED
 
-veqBody :: VerifiedEq Body
-veqBody = veqContra toBodyRep veqBodyRep
+{-@ fotBody :: br:BodyRep -> { fromBody (toBody br) == br } @-}
+fotBody :: BodyRep -> Proof
+fotBody (x, (y, (z, (vx, (vy, (vz, m))))))
+  =   fromBody (toBody (x, (y, (z, (vx, (vy, (vz, m)))))))
+  ==. fromBody (Body x y z vx vy vz m)
+  ==. (x, (y, (z, (vx, (vy, (vz, m))))))
+  *** QED
+
+bodyIso :: Iso BodyRep Body
+bodyIso = Iso
+  { to   = toBody
+  , from = fromBody
+  , tof  = tofBody
+  , fot  = fotBody
+  }
+
+vordBodyRep :: VerifiedOrd BodyRep
+vordBodyRep = vordProd vordDouble
+            $ vordProd vordDouble
+            $ vordProd vordDouble
+            $ vordProd vordDouble
+            $ vordProd vordDouble
+            $ vordProd vordDouble vordDouble
+
+vordBody :: VerifiedOrd Body
+vordBody = vordIso bodyIso vordBodyRep
 
 $(derivingUnbox "Body"
     [t| Body -> ((Double, Double, Double), (Double, Double, Double), Double) |]
@@ -108,9 +136,9 @@ parMapChunk g n xs = V.concat ( runPar $ parMap (V.map g) (chunk n xs) )
 
 {-@ chunk :: Int -> Vector Body -> [Vector Body] @-}
 chunk :: Int -> Vector Body -> [Vector Body]
-chunk n xs 
+chunk n xs
   | V.null xs = []
-  | otherwise = as : chunk n bs 
+  | otherwise = as : chunk n bs
   where (as,bs) = V.splitAt n xs
 
 timeStep :: Double
@@ -125,8 +153,8 @@ randomList seed = randoms (mkStdGen seed)
 
 genBody :: Int -> Body
 genBody s = Body (rand!!1) (rand!!2) (rand!!3) (rand!!4) (rand!!5) (rand!!6) (rand!!7)
-  where 
-    rand = randomList s 
+  where
+    rand = randomList s
 
 numBodies, numSteps :: Int
 numBodies = 1024
@@ -168,7 +196,7 @@ doSteps s bs = doSteps (s-1) new_bs
 
 accel :: Body -> Body -> Accel
 accel b_i b_j
-  | eq veqBody b_i b_j = Accel 0 0 0
+  | leq vordBody b_i b_j && leq vordBody b_j b_i = Accel 0 0 0
   | otherwise = Accel (dx*jm*mag) (dy*jm*mag) (dz*jm*mag)
   where
     mag, distance, dSquared, dx, dy, dz :: Double
@@ -181,7 +209,3 @@ accel b_i b_j
 
     Body ix iy iz _ _ _ _  = b_i
     Body jx jy jz _ _ _ jm = b_j
-
-
-
-

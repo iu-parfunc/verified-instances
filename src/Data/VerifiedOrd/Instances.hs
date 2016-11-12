@@ -1,7 +1,7 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 
-module Data.VerifiedOrd.Instances (vordUnit, vordInt, module X) where
+module Data.VerifiedOrd.Instances (vordUnit, vordInt, vordDouble, module X) where
 
 import Data.VerifiedOrd.Instances.Inj           as X
 import Data.VerifiedOrd.Instances.Iso           as X
@@ -51,3 +51,39 @@ leqIntTrans x y z = (leqInt x y && leqInt y z) ==. (x <= y && y <= z) ==. x <= z
 
 vordInt :: VerifiedOrd Int
 vordInt = VerifiedOrd leqInt leqIntTotal leqIntAntisym leqIntTrans veqInt
+
+{-@ axiomatize leqDouble @-}
+leqDouble :: Double -> Double -> Bool
+leqDouble x y = x <= y
+{-# INLINE leqDouble #-}
+
+{-@ leqDoubleTotal :: x:Double -> y:Double
+                   -> { leqDouble x y || leqDouble y x } @-}
+leqDoubleTotal :: Double -> Double -> Proof
+leqDoubleTotal x y
+  =   (leqDouble x y || leqDouble y x)
+  ==. (x <= y || y <= x)
+  *** QED
+
+{-@ leqDoubleAntisym :: x:Double -> y:Double
+                     -> { leqDoule x y && leqDouble y x ==> x == y } @-}
+leqDoubleAntisym :: Double -> Double -> Proof
+leqDoubleAntisym x y
+  =   (leqDouble x y && leqDouble y x)
+  ==. (x <= y && y <= x)
+  ==. x == y
+  *** QED
+
+{-@ leqDoubleTrans :: x:Double -> y:Double -> z:Double
+ -                 -> { leqDouble x y && leqDouble y z ==> leqDouble x z } @-}
+leqDoubleTrans :: Double -> Double -> Double -> Proof
+leqDoubleTrans x y z
+  =   (leqDouble x y && leqDouble y z)
+  ==. (x <= y && y <= z)
+  ==. x <= z
+  ==. leqDouble x z
+  *** QED
+
+vordDouble :: VerifiedOrd Double
+vordDouble = VerifiedOrd leqDouble leqDoubleTotal
+                         leqDoubleAntisym leqDoubleTrans veqDouble
