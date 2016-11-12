@@ -53,7 +53,6 @@ eqIntTrans x y z = (eqInt x y && eqInt y z) ==. (x == y && y == z) ==. x == z **
 veqInt :: VerifiedEq Int
 veqInt = VerifiedEq eqInt eqIntRefl eqIntSym eqIntTrans
 
-<<<<<<< HEAD
 {-@ axiomatize eqInt64 @-}
 eqInt64 :: Int64 -> Int64 -> Bool
 eqInt64 x y = x == y
@@ -73,7 +72,7 @@ eqInt64Trans x y z = (eqInt64 x y && eqInt64 y z) ==. (x == y && y == z) ==. x =
 
 veqInt64 :: VerifiedEq Int64
 veqInt64 = VerifiedEq eqInt64 eqInt64Refl eqInt64Sym eqInt64Trans
-=======
+
 {-@ axiomatize eqDouble @-}
 eqDouble :: Double -> Double -> Bool
 eqDouble x y = x == y
@@ -99,4 +98,3 @@ eqDoubleTrans x y z
 
 veqDouble :: VerifiedEq Double
 veqDouble = VerifiedEq eqDouble eqDoubleRefl eqDoubleSym eqDoubleTrans
->>>>>>> dpj

@@ -60,7 +60,6 @@ leqIntTotal :: Int -> Int -> Proof
 leqIntTotal x y = (leqInt x y || leqInt y x) ==. (x <= y || y <= x) *** QED
 
 vordInt :: VerifiedOrd Int
-<<<<<<< HEAD
 vordInt = VerifiedOrd leqInt leqIntRefl leqIntAntisym leqIntTrans leqIntTotal veqInt
 
 {-@ axiomatize leqInt64 @-}
@@ -86,13 +85,15 @@ leqInt64Total x y = (leqInt64 x y || leqInt64 y x) ==. (x <= y || y <= x) *** QE
 
 vordInt64 :: VerifiedOrd Int64
 vordInt64 = VerifiedOrd leqInt64 leqInt64Refl leqInt64Antisym leqInt64Trans leqInt64Total veqInt64
-=======
-vordInt = VerifiedOrd leqInt leqIntTotal leqIntAntisym leqIntTrans veqInt
 
 {-@ axiomatize leqDouble @-}
 leqDouble :: Double -> Double -> Bool
 leqDouble x y = x <= y
 {-# INLINE leqDouble #-}
+
+{-@ leqDoubleRefl :: x:Double -> { leqDouble x x } @-}
+leqDoubleRefl :: Double -> Proof
+leqDoubleRefl x = leqDouble x x ==. x <= x *** QED
 
 {-@ leqDoubleTotal :: x:Double -> y:Double
                    -> { leqDouble x y || leqDouble y x } @-}
@@ -122,6 +123,5 @@ leqDoubleTrans x y z
   *** QED
 
 vordDouble :: VerifiedOrd Double
-vordDouble = VerifiedOrd leqDouble leqDoubleTotal
-                         leqDoubleAntisym leqDoubleTrans veqDouble
->>>>>>> dpj
+vordDouble = VerifiedOrd leqDouble leqDoubleRefl leqDoubleAntisym
+                         leqDoubleTrans leqDoubleTotal veqDouble
