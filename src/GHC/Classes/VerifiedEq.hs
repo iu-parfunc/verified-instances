@@ -18,19 +18,24 @@ class Eq a => VerifiedEq a where
   sym :: a -> a -> Proof
   trans :: a -> a -> a -> Proof
 
-{-@ eqIntRefl :: x:Int -> { x == x } @-}
+{-@ axiomatize eqInt @-}
+eqInt :: Int -> Int -> Bool
+eqInt x y = x == y
+
+{-@ eqIntRefl :: x:Int -> { eqInt x x } @-}
 eqIntRefl :: Int -> Proof
-eqIntRefl _x = simpleProof
+eqIntRefl x = eqInt x x *** QED
 
-{-@ eqIntSym :: x:Int -> y:Int -> { x == y ==> y == x } @-}
+{-@ eqIntSym :: x:Int -> y:Int -> { eqInt x y ==> eqInt y x } @-}
 eqIntSym :: Int -> Int -> Proof
-eqIntSym _x _y = simpleProof
+eqIntSym x y = eqInt x y *** QED
 
-{-@ eqIntTrans :: x:Int -> y:Int -> z:Int -> { x == y && y == z ==> x == z } @-}
+{-@ eqIntTrans :: x:Int -> y:Int -> z:Int -> { eqInt x y && eqInt y z ==> eqInt x z } @-}
 eqIntTrans :: Int -> Int -> Int -> Proof
-eqIntTrans _x _y _z = simpleProof
+eqIntTrans x y z = eqInt x y && eqInt y z *** QED
 
--- instance VerifiedEq Int where
---   refl = eqIntRefl
---   sym = eqIntSym
---   trans = eqIntTrans
+instance VerifiedEq Int where
+  {-@ define $ceq = eqInt @-}
+  refl = eqIntRefl
+  sym = eqIntSym
+  trans = eqIntTrans
