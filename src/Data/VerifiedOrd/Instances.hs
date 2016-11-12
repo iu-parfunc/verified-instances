@@ -66,7 +66,7 @@ leqDoubleTotal x y
   *** QED
 
 {-@ leqDoubleAntisym :: x:Double -> y:Double
-                     -> { leqDoule x y && leqDouble y x ==> x == y } @-}
+                     -> { leqDouble x y && leqDouble y x ==> x == y } @-}
 leqDoubleAntisym :: Double -> Double -> Proof
 leqDoubleAntisym x y
   =   (leqDouble x y && leqDouble y x)
@@ -75,7 +75,7 @@ leqDoubleAntisym x y
   *** QED
 
 {-@ leqDoubleTrans :: x:Double -> y:Double -> z:Double
- -                 -> { leqDouble x y && leqDouble y z ==> leqDouble x z } @-}
+                   -> { leqDouble x y && leqDouble y z ==> leqDouble x z } @-}
 leqDoubleTrans :: Double -> Double -> Double -> Proof
 leqDoubleTrans x y z
   =   (leqDouble x y && leqDouble y z)

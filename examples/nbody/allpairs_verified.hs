@@ -53,6 +53,16 @@ import           System.Random
 -- Then verification time is 259.96s
 
 
+{-@
+data Body = Body
+  { _x  :: Double
+  , _y  :: Double
+  , _z  :: Double
+  , _vx :: Double
+  , _vy :: Double
+  , _vz :: Double
+  , _m  :: Double }
+@-}
 -- a body consists of pos, vel and mass
 data Body = Body
     { _x  :: {-# UNPACK #-} !Double   -- pos of x
@@ -63,31 +73,48 @@ data Body = Body
     , _vz :: {-# UNPACK #-} !Double   -- vel of z
     , _m  :: {-# UNPACK #-} !Double } -- mass
 
+{-@
+type BodyRep = (Double, (Double, (Double, (Double, (Double, (Double, Double))))))
+@-}
 type BodyRep = (Double, (Double, (Double, (Double, (Double, (Double, Double))))))
 
+{-@ axiomatize fromBody @-}
 fromBody :: Body -> BodyRep
-fromBody b = (_x b, (_y b, (_z b, (_vx b, (_vy b, (_vz b, _m b))))))
+fromBody (Body x y z vx vy vz m) = (x, (y, (z, (vx, (vy, (vz, m))))))
+-- fromBody b = (_x b, (_y b, (_z b, (_vx b, (_vy b, (_vz b, _m b))))))
 
+{-@ axiomatize toBody @-}
 toBody :: BodyRep -> Body
 toBody (x, (y, (z, (vx, (vy, (vz, m)))))) = Body x y z vx vy vz m
 
 {-@ tofBody :: b:Body -> { toBody (fromBody b) == b } @-}
 tofBody :: Body -> Proof
-tofBody b
+tofBody b@(Body x y z vx vy vz m)
   =   toBody (fromBody b)
-  ==. toBody (_x b, (_y b, (_z b, (_vx b, (_vy b, (_vz b, _m b))))))
-  ==. Body (_x b) (_y b) (_z b) (_vx b) (_vy b) (_vz b) (_m b)
+  ==. toBody (fromBody (Body x y z vx vy vz m))
+  ==. toBody (x, (y, (z, (vx, (vy, (vz, m))))))
+  ==. Body x y z vx vy vz m
   ==. b
   *** QED
 
+{-
 {-@ fotBody :: br:BodyRep -> { fromBody (toBody br) == br } @-}
 fotBody :: BodyRep -> Proof
 fotBody (x, (y, (z, (vx, (vy, (vz, m))))))
   =   fromBody (toBody (x, (y, (z, (vx, (vy, (vz, m)))))))
   ==. fromBody (Body x y z vx vy vz m)
+  ==. (_x (Body x y z vx vy vz m),
+      (_y (Body x y z vx vy vz m),
+      (_z (Body x y z vx vy vz m),
+      (_vx (Body x y z vx vy vz m),
+      (_vy (Body x y z vx vy vz m),
+      (_vz (Body x y z vx vy vz m),
+      _m (Body x y z vx vy vz m)))))))
   ==. (x, (y, (z, (vx, (vy, (vz, m))))))
   *** QED
+-}
 
+{-
 bodyIso :: Iso BodyRep Body
 bodyIso = Iso
   { to   = toBody
@@ -111,7 +138,12 @@ $(derivingUnbox "Body"
     [t| Body -> ((Double, Double, Double), (Double, Double, Double), Double) |]
     [| \(Body x' y' z' vx' vy' vz' m') -> ((x', y', z'), (vx', vy', vz'), m') |]
     [| \((x', y', z'), (vx', vy', vz'), m') -> Body x' y' z' vx' vy' vz' m' |])
+-}
 
+main :: IO ()
+main = return ()
+
+{-
 -- acceleration
 data Accel = Accel
     { _ax :: {-# UNPACK #-} !Double
@@ -209,3 +241,4 @@ accel b_i b_j
 
     Body ix iy iz _ _ _ _  = b_i
     Body jx jy jz _ _ _ jm = b_j
+-}
