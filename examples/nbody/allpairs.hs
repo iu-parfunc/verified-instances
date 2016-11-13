@@ -1,5 +1,6 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 
@@ -20,8 +21,9 @@ import           Control.Monad.Par
 
 import           Criterion.Main
 
+import           Data.List (foldl')
 import qualified Data.Vector.Unboxed as V
-import           Data.Vector.Unboxed (Vector)
+import           Data.Vector.Unboxed (Vector, Unbox)
 import           Data.Vector.Unboxed.Deriving
 
 import           GHC.Conc (numCapabilities)
@@ -37,8 +39,7 @@ data Body = Body
     , _vy :: Double   -- vel of y
     , _vz :: Double   -- vel of z
     , _m  :: Double } -- mass
-    deriving (Eq, Ord)
---     deriving (Show,Eq)
+    deriving Eq
 
 $(derivingUnbox "Body"
     [t| Body -> ((Double, Double, Double), (Double, Double, Double), Double) |]
@@ -51,6 +52,12 @@ data Accel = Accel
     , _ay :: {-# UNPACK #-} !Double
     , _az :: {-# UNPACK #-} !Double }
 
+-- Basically Sum
+instance Monoid Accel where
+  mempty = Accel 0 0 0
+  mappend (Accel x1 y1 z1) (Accel x2 y2 z2)
+    = Accel (x1 + x2) (y1 + y2) (z1 + z2)
+
 $(derivingUnbox "Accel"
     [t| Accel -> (Double, Double, Double) |]
     [| \(Accel ax' ay' az') -> (ax', ay', az') |]
@@ -60,14 +67,14 @@ instance NFData Body where rnf !_ = ()
 instance NFData Accel where rnf !_ = ()
 
 -- chunksize xs = (length xs) `quot` (numCapabilities * 1)
-chunksize :: Vector Body -> Int
+chunksize :: Unbox a => Vector a -> Int
 chunksize xs = (V.length xs) `quot` (numCapabilities * 2)
 -- chunksize xs = (length xs) `quot` (numCapabilities * 4)
 
-parMapChunk :: (Body -> Body) -> Int -> Vector Body -> Vector Body
+parMapChunk :: (Unbox a, Unbox b) => (a -> b) -> Int -> Vector a -> Vector b
 parMapChunk g n xs = V.concat ( runPar $ parMap (V.map g) (chunk n xs) )
 
-chunk :: Int -> Vector Body -> [Vector Body]
+chunk :: Unbox a => Int -> Vector a -> [Vector a]
 chunk n = go
   where
     go xs | V.null xs = []
@@ -110,6 +117,24 @@ main = defaultMain
 f :: Double -> Body -> Double
 f acc (Body x' y' z' vx' vy' vz' m') = acc+x'+y'+z'+vx'+vy'+vz'+m'
 
+parFold :: forall a. (NFData a, Unbox a) => (a -> a -> a) -> a -> Vector a -> Par a
+parFold f' z xs
+    | V.null xs = return z
+    | otherwise = res
+  where
+    parts :: [Vector a]
+    parts = chunk (chunksize xs) xs
+
+    partsRs :: Par [a]
+    partsRs = parMap (V.foldl' f' z) parts
+
+    res :: Par a
+    res = fmap (foldl' f' z) partsRs
+
+parMapFold :: (Unbox a, Monoid b, NFData b, Unbox b)
+           => (b -> b -> b) -> (a -> b) -> Vector a -> b
+parMapFold f' g xs = runPar $ parFold f' mempty (parMapChunk g (chunksize xs) xs)
+
 doSteps :: Int -> Vector Body -> Vector Body
 doSteps 0 bs = bs
 doSteps s bs = doSteps (s-1) new_bs
@@ -121,14 +146,15 @@ doSteps s bs = doSteps (s-1) new_bs
     updatePos (Body x' y' z' vx' vy' vz' m') = Body (x'+timeStep*vx') (y'+timeStep*vy') (z'+timeStep*vz') vx' vy' vz' m'
 
     updateVel :: Body -> Body
-    updateVel b = V.foldl' deductChange b (V.map (accel b) bs)
+    -- updateVel b = V.foldl' deductChange b (V.map (accel b) bs)
+    updateVel b = deductChange b (parMapFold mappend (accel b) bs)
 
     deductChange :: Body -> Accel -> Body
     deductChange (Body x' y' z' vx' vy' vz' m') (Accel ax' ay' az') = Body x' y' z' (vx'-ax') (vy'-ay') (vz'-az') m'
 
     accel :: Body -> Body -> Accel
     accel b_i b_j
-        | b_i <= b_j && b_j <= b_i = Accel 0 0 0
+        | b_i == b_j = Accel 0 0 0
         | otherwise = Accel (dx*jm*mag) (dy*jm*mag) (dz*jm*mag)
       where
         mag, distance, dSquared, dx, dy, dz :: Double
