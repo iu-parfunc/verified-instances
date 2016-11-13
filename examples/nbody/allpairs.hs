@@ -71,8 +71,8 @@ chunksize :: Unbox a => Vector a -> Int
 chunksize xs = (V.length xs) `quot` (numCapabilities * 2)
 -- chunksize xs = (length xs) `quot` (numCapabilities * 4)
 
-parMapChunk :: (Unbox a, Unbox b) => (a -> b) -> Int -> Vector a -> Vector b
-parMapChunk g n xs = V.concat ( runPar $ parMap (V.map g) (chunk n xs) )
+parMapChunk :: (Unbox a, Unbox b) => (a -> b) -> Int -> Vector a -> Par (Vector b)
+parMapChunk g n xs = fmap V.concat $ parMap (V.map g) (chunk n xs)
 
 chunk :: Unbox a => Int -> Vector a -> [Vector a]
 chunk n = go
@@ -136,14 +136,16 @@ parFold f' z xs
 
 parMapFold :: (Unbox a, Monoid b, NFData b, Unbox b)
            => (b -> b -> b) -> (a -> b) -> Vector a -> b
-parMapFold f' g xs = runPar $ seqFold f' mempty (parMapChunk g (chunksize xs) xs)
+parMapFold f' g xs = runPar $ do
+  xs' <- parMapChunk g (chunksize xs) xs
+  parFold f' mempty xs'
 
 doSteps :: Int -> Vector Body -> Vector Body
 doSteps 0 bs = bs
 doSteps s bs = doSteps (s-1) new_bs
   where
     new_bs :: Vector Body
-    new_bs = parMapChunk (updatePos . updateVel) (chunksize bs) bs
+    new_bs = runPar $ parMapChunk (updatePos . updateVel) (chunksize bs) bs
 
     updatePos :: Body -> Body
     updatePos (Body x' y' z' vx' vy' vz' m') = Body (x'+timeStep*vx') (y'+timeStep*vy') (z'+timeStep*vz') vx' vy' vz' m'
