@@ -5,7 +5,7 @@ docker:
 packages:
 - '.'
 - location:
-    git: git@github.com:iu-parfunc/lvars.git
+    git: https://github.com/iu-parfunc/lvars.git
     commit: 51df52ec577d825deb1c8f642553350890a4041a
   subdirs:
     - src/par-classes
