@@ -25,6 +25,8 @@ library
                      , Data.VerifiedEq.Instances.Iso
                      , Data.VerifiedEq.Instances.Sum
                      , Data.VerifiedEq.Instances.Prod
+                     , Data.VerifiedFunctor
+                     , Data.VerifiedFunctor.Instances.List
                      , Data.VerifiedOrd
                      , Data.VerifiedOrd.Instances
                      , Data.VerifiedOrd.Instances.Inj
@@ -49,4 +51,36 @@ library
                      , semigroups >=0.18 && <0.19
   hs-source-dirs:      src
   ghc-options:         -O2 -Wall -fno-warn-orphans
+  default-language:    Haskell2010
+
+executable dpj2
+  main-is:             IntegerSumReduction2.hs
+  build-depends:       base >= 4.8 && < 5
+                     , monad-parallel
+                     , semigroups
+                     , vector
+                     , verified-instances
+                     , deepseq, criterion
+                     , lvish, transformers
+                     , time
+  hs-source-dirs:      examples/dpj
+  ghc-options:         -O2 -Wall -threaded -rtsopts
+  default-language:    Haskell2010
+
+executable nbody-allpairs
+  main-is:             allpairs.hs
+  build-depends:       base >= 4.8 && < 5
+                     , monad-par, monad-par-extras
+                     , semigroups
+                     , vector
+--                     , verified-instances
+                     , deepseq, criterion
+--                     , lvish
+                     , transformers
+                     , random
+                     , time
+                     , vector-th-unbox
+                     , clock
+  hs-source-dirs:      examples/nbody/
+  ghc-options:         -O2 -Wall -threaded -rtsopts
   default-language:    Haskell2010

@@ -1,4 +1,5 @@
-HS = $(shell find src examples -type f -name '*.hs')
+HS = $(shell find src examples -type f -name '*.hs' \
+	-not -path 'examples/dpj/*' -not -path 'examples/nbody/*')
 # Dummy target
 CHS = $(subst hs,chs,$(HS))
 

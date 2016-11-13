@@ -4,7 +4,28 @@ docker:
   image: "liquidhaskell"
 packages:
 - '.'
-extra-deps: []
+- location:
+    git: https://github.com/iu-parfunc/lvars.git
+    commit: 51df52ec577d825deb1c8f642553350890a4041a
+  subdirs:
+    - src/par-classes
+    - src/par-collections
+    - src/lvish
+    - deps/concurrent-skiplist
+    - deps/ctrie
+
+extra-deps:
+- bits-atomic-0.1.3
+- chaselev-deque-0.5.0.5
+- thread-local-storage-0.1.0.4
+- tslogger-0.1.0.0
+- pcg-random-0.1.3.4
+
+# This is just for benchmarks:
+# - monad-par-0.3.4.8
+
 flags: {}
 extra-package-dbs: []
+
+allow-newer: True
 compiler-check: newer-minor
