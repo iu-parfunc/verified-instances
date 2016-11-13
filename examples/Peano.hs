@@ -7,22 +7,25 @@ module Peano where
 import Data.Iso
 import Language.Haskell.Liquid.ProofCombinators
 
-{-@ data Peano = Z | S Peano @-}
+{-@ data Peano [toNat] = Z | S Peano @-}
 data Peano = Z | S Peano
 
 {-@ type Nat = { v:Int | 0 <= v } @-}
 type Nat = Int
 
+{-@ measure toNat @-}
 {-@ axiomatize toNat @-}
+{-@ toNat :: Peano -> Nat @-}
 toNat :: Peano -> Nat
 toNat Z     = 0
 toNat (S n) = 1 + toNat n
 
 {-@ axiomatize fromNat @-}
+{-@ fromNat :: Nat -> Peano @-}
 fromNat :: Nat -> Peano
 fromNat n
   | n == 0 = Z
-  | n > 0 = S (fromNat (n - 1))
+  | otherwise = S (fromNat (n - 1))
 
 {-@ toFrom :: x:Nat -> { toNat (fromNat x) == x } @-}
 toFrom :: Nat -> Proof
@@ -45,5 +48,6 @@ fromTo (S n) = fromNat (toNat (S n))
            ==. S n ? fromTo n
            *** QED
 
+{-@ isoPeanoNat :: Iso Peano Nat @-}
 isoPeanoNat :: Iso Peano Nat
 isoPeanoNat = Iso toNat fromNat toFrom fromTo
