@@ -16,7 +16,7 @@ before_install:
   - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ${HOME}/.local/bin '*/stack'
   - stack --version
   # force http clone instead of git
-  - git config --global url."https://".insteadOf git://
+  - git config --global url."https://github.com/".insteadOf "git@github.com:"
 
 script:
   - make
