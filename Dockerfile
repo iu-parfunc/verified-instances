@@ -2,6 +2,9 @@ FROM fpco/stack-build:lts-6
 
 RUN apt-get -y install z3
 
+# force http clone instead of git
+RUN git config --global url."https://".insteadOf git://
+
 RUN git clone --recursive https://github.com/ucsd-progsys/liquidhaskell.git /opt/liquidhaskell
 WORKDIR /opt/liquidhaskell
 
