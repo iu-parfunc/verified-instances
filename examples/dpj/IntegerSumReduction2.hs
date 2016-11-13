@@ -1,30 +1,34 @@
 {-# LANGUAGE BangPatterns #-}
-{-@ LIQUID "--exactdc" @-}
+{-@ LIQUID "--higherorder"    @-}
+{-@ LIQUID "--totality"       @-}
+{-@ LIQUID "--exactdc"        @-}
+{-@ LIQUID "--prune-unsorted" @-}
+
 module Main where
 
 import Criterion.Main
-import GHC.Conc (getNumCapabilities)
+import GHC.Conc                                 (getNumCapabilities)
 
 import Control.DeepSeq
 import Data.IORef
-import Data.Semigroup (Semigroup(..))
+import Data.Semigroup                           (Semigroup (..))
 
 import Control.LVish
 import Control.LVish.Internal
 
-import Data.Vector.Unboxed as V hiding ((++)) 
-import Data.Time.Clock
 import Control.Exception
-import Prelude as P
+import Data.Time.Clock
+import Data.Vector.Unboxed                      as V hiding ((++))
+import Prelude                                  as P
 import System.Environment
-import System.IO.Unsafe (unsafePerformIO)
+import System.IO.Unsafe                         (unsafePerformIO)
 
-import           Data.VerifiedCommutativeSemigroup
-import           Data.VerifiedSemigroup
+import Data.VerifiedCommutativeSemigroup
+import Data.VerifiedSemigroup
 
-import           GHC.Conc
+import GHC.Conc
 
-import           Language.Haskell.Liquid.ProofCombinators
+import Language.Haskell.Liquid.ProofCombinators
 
 {-@ newtype Sum = Sum { getSum :: Int } @-}
 newtype Sum = Sum { getSum :: Int }
@@ -121,8 +125,8 @@ sumStrided2 v =
   -- Parallel for loop over tile_1 .. tile_n
   let (numTiles,0) = V.length v `quotRem` tile
   -- Hypothetical, parForTree is just for effect:
-  ls <- parForTree Nothing (0,numTiles) $ \ tid -> do 
-     let myslice = V.slice v (tid * tile) tile 
+  ls <- parForTree Nothing (0,numTiles) $ \ tid -> do
+     let myslice = V.slice v (tid * tile) tile
      return (V.sum myslice)
   sum ls
 -}
@@ -133,7 +137,7 @@ sumStrided2 v =
 
 sumStrided3 :: Vector Int -> Int
 sumStrided3 v =
-   unsafePerformIO $ 
+   unsafePerformIO $
    do ref <- runParPolyIO par
       fmap getSum $ readIORef ref
  where
@@ -143,15 +147,15 @@ sumStrided3 v =
     let (numTiles,0) = V.length v `quotRem` tile
     acc <- newRV $ Sum 0
     -- hp <- newHandlerPool
-    -- Note this is asynchronous and will return immediately:    
-    parForSimple (0,numTiles) $ \ tid -> do 
+    -- Note this is asynchronous and will return immediately:
+    parForSimple (0,numTiles) $ \ tid -> do
       let myslice = V.slice (tid * tile) tile v
       let x = (Sum $ V.sum myslice)
       updateRV vcommutativeSemigroupSum acc x
 
     -- quasideterminism:
     -- quiesce hp
-    -- freeze acc    
+    -- freeze acc
     -- We can return the var itself from the computation:
     return $ getRV acc
 
@@ -161,7 +165,7 @@ sumStrided3 v =
 
 -- LVar instance would provide Frz type family:
 -- Frz(ReductionVar s Int) -> ReductionVar Frzn Int
-  
+
 newtype ReductionVar s a = RV { getRV :: IORef a }
 
 -- IMAGINE that these are type class constraints:
@@ -197,9 +201,9 @@ doIt vecsize = do
   en <- getCurrentTime
   putStrLn $ "Sum: "  ++ show sm
   putStrLn $ "Time: " ++ show (diffUTCTime en st)
--} 
+-}
 
-{-  
+{-
 main :: IO ()
 main = do
   c <- getNumCapabilities
