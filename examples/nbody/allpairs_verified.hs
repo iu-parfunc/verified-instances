@@ -24,7 +24,7 @@ Par: $ ghc --make -O2 -threaded -rtsopts -fforce-recomp allpairs.hs | allpairs <
 module Main (main) where
 import           Language.Haskell.Liquid.ProofCombinators
 
-{- 
+{-
 import           Control.DeepSeq
 import           Control.Monad.Par
 
@@ -33,9 +33,11 @@ import           Criterion.Main
 import qualified Data.Vector.Unboxed as V
 import           Data.Vector.Unboxed (Vector, Unbox)
 import           Data.Vector.Unboxed.Deriving
+-}
 
-import           Data.Iso
+-- import           Data.Iso
 
+{-
 import           Data.Time.Clock
 import           GHC.Conc (numCapabilities)
 import           System.Random
