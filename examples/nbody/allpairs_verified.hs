@@ -42,6 +42,7 @@ import           System.Random
 {-@ assume (*) :: Num a => a -> a -> a @-}
 {-@ assume (/) :: Num a => a -> a -> a @-}
 
+{-
 -- a body consists of pos, vel and mass
 data Body = Body
     { _x  :: Double   -- pos of x
@@ -57,19 +58,39 @@ $(derivingUnbox "Body"
     [t| Body -> ((Double, Double, Double), (Double, Double, Double), Double) |]
     [| \(Body x' y' z' vx' vy' vz' m') -> ((x', y', z'), (vx', vy', vz'), m') |]
     [| \((x', y', z'), (vx', vy', vz'), m') -> Body x' y' z' vx' vy' vz' m' |])
+-}
 
 -- acceleration
+{-@
+data Accel = Accel
+  { _ax :: Double
+  , _ay :: Double
+  , _az :: Double }
+@-}
 data Accel = Accel
     { _ax :: {-# UNPACK #-} !Double
     , _ay :: {-# UNPACK #-} !Double
     , _az :: {-# UNPACK #-} !Double }
 
+{-
 -- Basically Sum
 instance Monoid Accel where
   mempty = Accel 0 0 0
   mappend (Accel x1 y1 z1) (Accel x2 y2 z2)
     = Accel (x1 + x2) (y1 + y2) (z1 + z2)
+-}
 
+{-@
+data VerifiedAbelianMonoid a = VAM {
+     empty  :: a
+   , append :: a -> a -> a
+   , commutes :: x:a -> y:a -> { append x y == append y x }
+   , assoc    :: x:a -> y:a -> z:a
+              -> { append x (append y z) == append (append x y) z}
+   , lident   :: x:a -> { append empty x == x }
+   , rident   :: x:a -> { append x empty == x }
+   }
+@-}
 data VerifiedAbelianMonoid a = VAM {
     empty  :: a
   , append :: a -> a -> a
@@ -79,14 +100,20 @@ data VerifiedAbelianMonoid a = VAM {
   , rident   :: a -> Proof
   }
 
+{-@ axiomatize emptyDouble @-}
 emptyDouble :: Double
 emptyDouble = 0
 {-# INLINE emptyDouble #-}
 
+{-@ axiomatize appendDouble @-}
 appendDouble :: Double -> Double -> Double
 appendDouble x y = x + y
 {-# INLINE appendDouble #-}
 
+{-@
+commutesDouble :: x:Double -> y:Double
+               -> { appendDouble x y == appendDouble y x }
+@-}
 commutesDouble :: Double -> Double -> Proof
 commutesDouble x y
   =   appendDouble x y
@@ -95,6 +122,10 @@ commutesDouble x y
   ==. appendDouble y x
   *** QED
 
+{-@
+assocDouble :: x:Double -> y:Double -> z:Double
+            -> { appendDouble x (appendDouble y z) == appendDouble (appendDouble x y) z }
+@-}
 assocDouble :: Double -> Double -> Double -> Proof
 assocDouble x y z
   =   appendDouble x (appendDouble y z)
@@ -103,24 +134,34 @@ assocDouble x y z
   ==. appendDouble (appendDouble x y) z
   *** QED
 
+{-@
+lidentDouble :: x:Double -> { appendDouble emptyDouble x == x }
+@-}
 lidentDouble :: Double -> Proof
 lidentDouble x
   =   appendDouble emptyDouble x
+  ==. appendDouble 0 x
   ==. 0 + x
   ==. x
   *** QED
 
+{-@
+ridentDouble :: x:Double -> { appendDouble x emptyDouble == x }
+@-}
 ridentDouble :: Double -> Proof
 ridentDouble x
   =   appendDouble x emptyDouble
+  ==. appendDouble x 0
   ==. x + 0
   ==. x
   *** QED
 
+{-@ vamDouble :: VerifiedAbelianMonoid Double @-}
 vamDouble :: VerifiedAbelianMonoid Double
 vamDouble = VAM emptyDouble appendDouble commutesDouble
                 assocDouble lidentDouble ridentDouble
 
+{-
 {-@ data Pair a b = Pair { fstOf :: a, sndOf :: b } @-}
 data Pair a b = Pair { fstOf :: a, sndOf :: b }
 
@@ -240,7 +281,9 @@ vamIso (Iso t f _ _) (VAM emp app comm asso liden riden)
 
 vamAccel :: VerifiedAbelianMonoid Accel
 vamAccel = vamIso isoAccel vamAccelRep
+-}
 
+{-
 $(derivingUnbox "Accel"
     [t| Accel -> (Double, Double, Double) |]
     [| \(Accel ax' ay' az') -> (ax', ay', az') |]
@@ -248,7 +291,11 @@ $(derivingUnbox "Accel"
 
 instance NFData Body where rnf !_ = ()
 instance NFData Accel where rnf !_ = ()
+-}
 
+main = return ()
+
+{-
 -- chunksize xs = (length xs) `quot` (numCapabilities * 1)
 chunksize :: Unbox a => Vector a -> Int
 chunksize xs = (V.length xs) `quot` (numCapabilities * 2)
@@ -409,3 +456,4 @@ stepLoop s bs = do
 
         Body ix iy iz _ _ _ _  = b_i
         Body jx jy jz _ _ _ jm = b_j
+-}
