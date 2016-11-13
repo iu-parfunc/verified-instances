@@ -117,6 +117,9 @@ main = defaultMain
 f :: Double -> Body -> Double
 f acc (Body x' y' z' vx' vy' vz' m') = acc+x'+y'+z'+vx'+vy'+vz'+m'
 
+seqFold :: forall a. (NFData a, Unbox a) => (a -> a -> a) -> a -> Vector a -> Par a
+seqFold f z = return . V.foldl' f z
+
 parFold :: forall a. (NFData a, Unbox a) => (a -> a -> a) -> a -> Vector a -> Par a
 parFold f' z xs
     | V.null xs = return z
@@ -133,7 +136,7 @@ parFold f' z xs
 
 parMapFold :: (Unbox a, Monoid b, NFData b, Unbox b)
            => (b -> b -> b) -> (a -> b) -> Vector a -> b
-parMapFold f' g xs = runPar $ parFold f' mempty (parMapChunk g (chunksize xs) xs)
+parMapFold f' g xs = runPar $ seqFold f' mempty (parMapChunk g (chunksize xs) xs)
 
 doSteps :: Int -> Vector Body -> Vector Body
 doSteps 0 bs = bs
