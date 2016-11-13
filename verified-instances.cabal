@@ -51,18 +51,6 @@ library
   ghc-options:         -O2 -Wall -fno-warn-orphans
   default-language:    Haskell2010
 
-executable dpj
-  main-is:             IntegerSumReduction.hs
-  build-depends:       base >= 4.8 && < 5
-                     , monad-parallel
-                     , semigroups
-                     , vector
-                     , verified-instances
-                     , deepseq, criterion
-  hs-source-dirs:      examples/dpj
-  ghc-options:         -O2 -Wall
-  default-language:    Haskell2010
-
 executable dpj2
   main-is:             IntegerSumReduction2.hs
   build-depends:       base >= 4.8 && < 5
