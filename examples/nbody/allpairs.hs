@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -26,8 +27,8 @@ import qualified Data.Vector.Unboxed as V
 import           Data.Vector.Unboxed (Vector, Unbox)
 import           Data.Vector.Unboxed.Deriving
 
+import           Data.Time.Clock
 import           GHC.Conc (numCapabilities)
-
 import           System.Random
 
 -- a body consists of pos, vel and mass
@@ -39,7 +40,7 @@ data Body = Body
     , _vy :: Double   -- vel of y
     , _vz :: Double   -- vel of z
     , _m  :: Double } -- mass
-    deriving Eq
+    deriving (Eq,Show)
 
 $(derivingUnbox "Body"
     [t| Body -> ((Double, Double, Double), (Double, Double, Double), Double) |]
@@ -71,9 +72,11 @@ chunksize :: Unbox a => Vector a -> Int
 chunksize xs = (V.length xs) `quot` (numCapabilities * 2)
 -- chunksize xs = (length xs) `quot` (numCapabilities * 4)
 
+-- | Parallel map over a vector with a given chunk size.
 parMapChunk :: (Unbox a, Unbox b) => (a -> b) -> Int -> Vector a -> Par (Vector b)
 parMapChunk g n xs = fmap V.concat $ parMap (V.map g) (chunk n xs)
 
+-- | This uses lists, but only at a coarse grain.
 chunk :: Unbox a => Int -> Vector a -> [Vector a]
 chunk n = go
   where
@@ -99,15 +102,28 @@ numBodies, numSteps :: Int
 numBodies = 1024
 numSteps  = 20
 
+-- | Do just enough computation to ensure it's evaluated.   Don't need a fold:
+forceIt :: forall a. Unbox a => Vector a -> a
+forceIt v = v V.! 0
+
 main :: IO ()
-main = defaultMain
-    [env (return setup) $ \ ~(bs', _) ->
-        bench ("n-body (" ++ show numCapabilities ++ " threads)")
-              (nf (V.foldl' f 0 . doSteps numSteps) bs')]
+main =
+    direct
+    -- critMode
   where
+    critMode = defaultMain
+               [env (return setup) $ \ ~(bs', _) ->
+                    bench ("n-body (" ++ show numCapabilities ++ " threads)")
+                              (nf (forceIt . doSteps numSteps) bs')]
+    direct = do st <- getCurrentTime
+                print $ forceIt $ doSteps numSteps bs
+                en <- getCurrentTime
+                putStrLn $ "SELFTIMED: "++show (diffUTCTime en st)
+               
     setup :: (Vector Body, Double)
     setup = (bs, res1)
 
+    -- Initial locations of bodies in space.
     bs :: Vector Body
     bs = V.map genBody $ V.enumFromN 0 numBodies
 
@@ -134,6 +150,7 @@ parFold f' z xs
     res :: Par a
     res = fmap (foldl' f' z) partsRs
 
+{-# INLINE parMapFold #-}
 parMapFold :: (Unbox a, Monoid b, NFData b, Unbox b)
            => (b -> b -> b) -> (a -> b) -> Vector a -> b
 parMapFold f' g xs = runPar $ do
@@ -141,12 +158,15 @@ parMapFold f' g xs = runPar $ do
   parFold f' mempty xs'
 
 doSteps :: Int -> Vector Body -> Vector Body
-doSteps 0 bs = bs
-doSteps s bs = doSteps (s-1) new_bs
-  where
-    new_bs :: Vector Body
-    new_bs = runPar $ parMapChunk (updatePos . updateVel) (chunksize bs) bs
+doSteps s bs = runPar (stepLoop s bs)
 
+stepLoop :: Int -> Vector Body -> Par (Vector Body)
+stepLoop 0 bs = return bs
+stepLoop s bs = do
+    -- This needs to become a monadic map:
+    new_bs <- parMapChunk (updatePos . updateVel) (chunksize bs) bs
+    stepLoop (s-1) new_bs
+  where    
     updatePos :: Body -> Body
     updatePos (Body x' y' z' vx' vy' vz' m') = Body (x'+timeStep*vx') (y'+timeStep*vy') (z'+timeStep*vz') vx' vy' vz' m'
 

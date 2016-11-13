@@ -21,6 +21,9 @@ extra-deps:
 - tslogger-0.1.0.0
 - pcg-random-0.1.3.4
 
+# This is just for benchmarks:
+# - monad-par-0.3.4.8
+
 flags: {}
 extra-package-dbs: []
 
