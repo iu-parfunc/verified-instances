@@ -100,7 +100,8 @@ genBody s = Body (rand!!1) (rand!!2) (rand!!3) (rand!!4) (rand!!5) (rand!!6) (ra
     rand = randomList s
 
 numBodies, numSteps :: Int
-(numBodies, numSteps) = (2048, 5)
+numBodies = 2048
+numSteps  = 5
 -- (numBodies, numSteps) = (1024, 20)
 
 -- | Do just enough computation to ensure it's evaluated.   Don't need a fold:
@@ -110,8 +111,8 @@ forceIt v = v V.! 0
 main :: IO ()
 main = do
     putStrLn $ "Running for bodies/steps = "++show (numBodies,numSteps)
-    direct
-    -- critMode
+    -- direct
+    critMode
   where
     critMode = defaultMain
                [env (return setup) $ \ ~(bs', _) ->
@@ -121,7 +122,7 @@ main = do
                 print $ forceIt $ doSteps numSteps bs
                 en <- getCurrentTime
                 putStrLn $ "SELFTIMED: "++show (diffUTCTime en st)
-               
+
     setup :: (Vector Body, Double)
     setup = (bs, res1)
 
@@ -139,9 +140,9 @@ seqFold :: forall a. (NFData a, Unbox a) => (a -> a -> a) -> a -> Vector a -> Pa
 seqFold f z = return . V.foldl' f z
 
 seqMapFold :: (Unbox a, Monoid b, NFData b, Unbox b)
-           => (b -> b -> b) -> (a -> b) -> Vector a -> Par b 
+           => (b -> b -> b) -> (a -> b) -> Vector a -> Par b
 seqMapFold f g vec = return $! V.foldl' (\ b a -> f b (g a)) mempty vec
-              
+
 {-
 parFold :: forall a. (NFData a, Unbox a) => (a -> a -> a) -> a -> Vector a -> Par a
 parFold f' z xs
@@ -166,42 +167,42 @@ parMapFold f' g xs = runPar $ do
 
 {-# INLINE parMapFold #-}
 parMapFold :: (Unbox a, Monoid b, NFData b, Unbox b)
-           => (b -> b -> b) -> (a -> b) -> Vector a -> Par b 
-parMapFold f g vec = do 
+           => (b -> b -> b) -> (a -> b) -> Vector a -> Par b
+parMapFold f g vec = do
     let len = V.length vec
         -- Could do many more chunks than this as long as they are bigger than some minimum granularity:
         tasks = numCapabilities
         (chunksize,rem) = len `quotRem` tasks
     parMapReduceRangeThresh 1 (InclusiveRange 0 (tasks-1))
        (\ix ->
-          let mine = if ix==tasks-1 then chunksize+rem else chunksize 
+          let mine = if ix==tasks-1 then chunksize+rem else chunksize
               slice = V.slice (ix*chunksize) mine vec in
           return $! V.foldl' (\ b a -> f b (g a)) mempty slice)
        (\b1 b2 -> return $! f b1 b2)
        mempty
-          
+
 doSteps :: Int -> Vector Body -> Vector Body
 doSteps s bs = runPar (stepLoop s bs)
 
 whichFold :: (Accel -> Accel -> Accel) -> (Body -> Accel) -> Vector Body -> Par Accel
 -- whichFold = seqMapFold
 whichFold = parMapFold
-               
+
 stepLoop :: Int -> Vector Body -> Par (Vector Body)
 stepLoop 0 bs = return bs
 stepLoop s bs = do
     -- This needs to become a monadic map:
     new_bs <- parMapChunk (fmap updatePos . updateVel) (chunksize bs) bs
-              
+
     stepLoop (s-1) new_bs
-  where    
+  where
     updatePos :: Body -> Body
     updatePos (Body x' y' z' vx' vy' vz' m') = Body (x'+timeStep*vx') (y'+timeStep*vy') (z'+timeStep*vz') vx' vy' vz' m'
 
     updateVel :: Body -> Par Body
     -- Sequential inner loop:
     -- updateVel b = V.foldl' deductChange b (V.map (accel b) bs)
-    -- Nested parallelism:                 
+    -- Nested parallelism:
     updateVel b = do totalAccel <- whichFold mappend (accel b) bs
                      return $! deductChange b totalAccel
 

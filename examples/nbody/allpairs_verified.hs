@@ -2,10 +2,12 @@
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--prune-unsorted"     @-}
 {-@ LIQUID "--exactdc"            @-}
-{-@ LIQUID "--trust-internals"    @-}
+{-@ LIQUID "--trust-internals" @-}
 
+{-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 
@@ -19,136 +21,225 @@ Compile | Run
 Seq: $ ghc --make -O2 -fforce-recomp allpairs.hs | allpairs <numbodies> <steps>
 Par: $ ghc --make -O2 -threaded -rtsopts -fforce-recomp allpairs.hs | allpairs <numbodies> <steps> +RTS -Nx
 -}
-
-module Main where
+module Main (main) where
 
 import           Control.DeepSeq
 import           Control.Monad.Par
 
 import           Criterion.Main
 
-import           Data.Iso
 import qualified Data.Vector.Unboxed as V
-import           Data.Vector.Unboxed (Vector)
+import           Data.Vector.Unboxed (Vector, Unbox)
 import           Data.Vector.Unboxed.Deriving
-import           Data.VerifiedEq
-import           Data.VerifiedEq.Instances
-import           Data.VerifiedOrd
-import           Data.VerifiedOrd.Instances
-import           Data.VerifiedOrd.Instances.Iso
 
-import           GHC.Conc (numCapabilities)
-
--- NB: This is not a redundant import! LH needs this.
+import           Data.Iso
 import           Language.Haskell.Liquid.ProofCombinators
 
+import           Data.Time.Clock
+import           GHC.Conc (numCapabilities)
 import           System.Random
 
--- Verification time is 86.92s with the following sigs
 {-@ assume (*) :: Num a => a -> a -> a @-}
 {-@ assume (/) :: Num a => a -> a -> a @-}
 
--- As an alternative use the liquid flag --linear
--- to give (*) and (/) more presice signs.
--- Then verification time is 259.96s
-
-
-{-@
-data Body = Body
-  { _x  :: Double
-  , _y  :: Double
-  , _z  :: Double
-  , _vx :: Double
-  , _vy :: Double
-  , _vz :: Double
-  , _m  :: Double }
-@-}
 -- a body consists of pos, vel and mass
 data Body = Body
-    { _x  :: {-# UNPACK #-} !Double   -- pos of x
-    , _y  :: {-# UNPACK #-} !Double   -- pos of y
-    , _z  :: {-# UNPACK #-} !Double   -- pos of z
-    , _vx :: {-# UNPACK #-} !Double   -- vel of x
-    , _vy :: {-# UNPACK #-} !Double   -- vel of y
-    , _vz :: {-# UNPACK #-} !Double   -- vel of z
-    , _m  :: {-# UNPACK #-} !Double } -- mass
-
-{-@
-type BodyRep = (Double, (Double, (Double, (Double, (Double, (Double, Double))))))
-@-}
-type BodyRep = (Double, (Double, (Double, (Double, (Double, (Double, Double))))))
-
-{-@ axiomatize fromBody @-}
-fromBody :: Body -> BodyRep
-fromBody (Body x y z vx vy vz m) = (x, (y, (z, (vx, (vy, (vz, m))))))
--- fromBody b = (_x b, (_y b, (_z b, (_vx b, (_vy b, (_vz b, _m b))))))
-
-{-@ axiomatize toBody @-}
-toBody :: BodyRep -> Body
-toBody (x, (y, (z, (vx, (vy, (vz, m)))))) = Body x y z vx vy vz m
-
-{-@ tofBody :: b:Body -> { toBody (fromBody b) == b } @-}
-tofBody :: Body -> Proof
-tofBody b@(Body x y z vx vy vz m)
-  =   toBody (fromBody b)
-  ==. toBody (fromBody (Body x y z vx vy vz m))
-  ==. toBody (x, (y, (z, (vx, (vy, (vz, m))))))
-  ==. Body x y z vx vy vz m
-  ==. b
-  *** QED
-
-{-
-{-@ fotBody :: br:BodyRep -> { fromBody (toBody br) == br } @-}
-fotBody :: BodyRep -> Proof
-fotBody (x, (y, (z, (vx, (vy, (vz, m))))))
-  =   fromBody (toBody (x, (y, (z, (vx, (vy, (vz, m)))))))
-  ==. fromBody (Body x y z vx vy vz m)
-  ==. (_x (Body x y z vx vy vz m),
-      (_y (Body x y z vx vy vz m),
-      (_z (Body x y z vx vy vz m),
-      (_vx (Body x y z vx vy vz m),
-      (_vy (Body x y z vx vy vz m),
-      (_vz (Body x y z vx vy vz m),
-      _m (Body x y z vx vy vz m)))))))
-  ==. (x, (y, (z, (vx, (vy, (vz, m))))))
-  *** QED
--}
-
-{-
-bodyIso :: Iso BodyRep Body
-bodyIso = Iso
-  { to   = toBody
-  , from = fromBody
-  , tof  = tofBody
-  , fot  = fotBody
-  }
-
-vordBodyRep :: VerifiedOrd BodyRep
-vordBodyRep = vordProd vordDouble
-            $ vordProd vordDouble
-            $ vordProd vordDouble
-            $ vordProd vordDouble
-            $ vordProd vordDouble
-            $ vordProd vordDouble vordDouble
-
-vordBody :: VerifiedOrd Body
-vordBody = vordIso bodyIso vordBodyRep
+    { _x  :: Double   -- pos of x
+    , _y  :: Double   -- pos of y
+    , _z  :: Double   -- pos of z
+    , _vx :: Double   -- vel of x
+    , _vy :: Double   -- vel of y
+    , _vz :: Double   -- vel of z
+    , _m  :: Double } -- mass
+    deriving (Eq,Show)
 
 $(derivingUnbox "Body"
     [t| Body -> ((Double, Double, Double), (Double, Double, Double), Double) |]
     [| \(Body x' y' z' vx' vy' vz' m') -> ((x', y', z'), (vx', vy', vz'), m') |]
     [| \((x', y', z'), (vx', vy', vz'), m') -> Body x' y' z' vx' vy' vz' m' |])
--}
 
-main :: IO ()
-main = return ()
-
-{-
 -- acceleration
 data Accel = Accel
     { _ax :: {-# UNPACK #-} !Double
     , _ay :: {-# UNPACK #-} !Double
     , _az :: {-# UNPACK #-} !Double }
+
+-- Basically Sum
+instance Monoid Accel where
+  mempty = Accel 0 0 0
+  mappend (Accel x1 y1 z1) (Accel x2 y2 z2)
+    = Accel (x1 + x2) (y1 + y2) (z1 + z2)
+
+data VerifiedAbelianMonoid a = VAM {
+    empty  :: a
+  , append :: a -> a -> a
+  , commutes :: a -> a -> Proof
+  , assoc    :: a -> a -> a -> Proof
+  , lident   :: a -> Proof
+  , rident   :: a -> Proof
+  }
+
+emptyDouble :: Double
+emptyDouble = 0
+{-# INLINE emptyDouble #-}
+
+appendDouble :: Double -> Double -> Double
+appendDouble x y = x + y
+{-# INLINE appendDouble #-}
+
+commutesDouble :: Double -> Double -> Proof
+commutesDouble x y
+  =   appendDouble x y
+  ==. x + y
+  ==. y + x
+  ==. appendDouble y x
+  *** QED
+
+assocDouble :: Double -> Double -> Double -> Proof
+assocDouble x y z
+  =   appendDouble x (appendDouble y z)
+  ==. x + (y + z)
+  ==. (x + y) + z
+  ==. appendDouble (appendDouble x y) z
+  *** QED
+
+lidentDouble :: Double -> Proof
+lidentDouble x
+  =   appendDouble emptyDouble x
+  ==. 0 + x
+  ==. x
+  *** QED
+
+ridentDouble :: Double -> Proof
+ridentDouble x
+  =   appendDouble x emptyDouble
+  ==. x + 0
+  ==. x
+  *** QED
+
+vamDouble :: VerifiedAbelianMonoid Double
+vamDouble = VAM emptyDouble appendDouble commutesDouble
+                assocDouble lidentDouble ridentDouble
+
+{-@ data Pair a b = Pair { fstOf :: a, sndOf :: b } @-}
+data Pair a b = Pair { fstOf :: a, sndOf :: b }
+
+emptyPair :: a -> b -> Pair a b
+emptyPair x y = Pair x y
+{-# INLINE emptyPair #-}
+
+appendPair :: (a -> a -> a) -> (b -> b -> b)
+           -> Pair a b -> Pair a b -> Pair a b
+appendPair appA appB p1 p2
+  = Pair (appA (fstOf p1) (fstOf p2)) (appB (sndOf p1) (sndOf p2))
+{-# INLINE appendPair #-}
+
+commutesPair :: (a -> a -> a) -> (a -> a -> Proof)
+             -> (b -> b -> b) -> (b -> b -> Proof)
+             -> Pair a b -> Pair a b -> Proof
+commutesPair appA commutesA appB commutesB p1 p2
+  =   appendPair appA appB p1 p2
+  ==. Pair (appA (fstOf p1) (fstOf p2)) (appB (sndOf p1) (sndOf p2))
+  ==. Pair (appA (fstOf p2) (fstOf p1)) (appB (sndOf p1) (sndOf p2)) ? commutesA (fstOf p1) (fstOf p2)
+  ==. Pair (appA (fstOf p2) (fstOf p1)) (appB (sndOf p2) (sndOf p1)) ? commutesB (sndOf p1) (sndOf p2)
+  ==. appendPair appA appB p2 p1
+  *** QED
+
+assocPair :: (a -> a -> a) -> (a -> a -> a -> Proof)
+          -> (b -> b -> b) -> (b -> b -> b -> Proof)
+          -> Pair a b -> Pair a b -> Pair a b -> Proof
+assocPair = undefined
+{-
+assocPair appA assocA appB assocB p1 p2 p3
+  =   appendPair appA appB p1 (appendPair appA appB p2 p3)
+  ==. Pair (appA (fstOf p1) (fstOf (appendPair appA appB p2 p3))) (appB (sndOf p1) (sndOf (appendPair appA appB p2 p3)))
+  ==.
+-}
+
+lidentPair :: a -> (a -> a -> a) -> (a -> Proof)
+           -> b -> (b -> b -> b) -> (b -> Proof)
+           -> Pair a b -> Proof
+lidentPair emptyA appA lidentA emptyB appB lidentB p
+  =   appendPair appA appB (emptyPair emptyA emptyB) p
+  ==. appendPair appA appB (Pair emptyA emptyB) p
+  ==. Pair (appA (fstOf (Pair emptyA emptyB)) (fstOf p)) (appB (sndOf (Pair emptyA emptyB)) (sndOf p))
+  ==. Pair (appA emptyA (fstOf p)) (appB emptyB (sndOf p))
+  ==. Pair (fstOf p) (appB emptyB (sndOf p)) ? lidentA (fstOf p)
+  ==. Pair (fstOf p) (sndOf p)               ? lidentB (sndOf p)
+  ==. p
+  *** QED
+
+ridentPair :: a -> (a -> a -> a) -> (a -> Proof)
+           -> b -> (b -> b -> b) -> (b -> Proof)
+           -> Pair a b -> Proof
+ridentPair emptyA appA ridentA emptyB appB ridentB p
+  =   appendPair appA appB p (emptyPair emptyA emptyB)
+  ==. appendPair appA appB p (Pair emptyA emptyB)
+  ==. Pair (appA (fstOf p) (fstOf (Pair emptyA emptyB))) (appB (sndOf p) (sndOf (Pair emptyA emptyB)))
+  ==. Pair (appA (fstOf p) emptyA) (appB (sndOf p) emptyB)
+  ==. Pair (fstOf p) (appB (sndOf p) emptyB) ? ridentA (fstOf p)
+  ==. Pair (fstOf p) (sndOf p)               ? ridentB (sndOf p)
+  ==. p
+  *** QED
+
+vamPair :: VerifiedAbelianMonoid a -> VerifiedAbelianMonoid b
+        -> VerifiedAbelianMonoid (Pair a b)
+vamPair (VAM emptyA appendA commutesA assocA lidentA ridentA)
+        (VAM emptyB appendB commutesB assocB lidentB ridentB)
+  = VAM (emptyPair emptyA emptyB)
+        (appendPair appendA appendB)
+        (commutesPair appendA commutesA appendB commutesB)
+        (assocPair appendA assocA appendB assocB)
+        (lidentPair emptyA appendA lidentA emptyB appendB lidentB)
+        (ridentPair emptyA appendA lidentA emptyB appendB lidentB)
+
+{-@ type AccelRep = Pair Double (Pair Double Double) @-}
+type AccelRep = Pair Double (Pair Double Double)
+
+toAccel :: AccelRep -> Accel
+toAccel (Pair x (Pair y z)) = Accel x y z
+
+fromAccel :: Accel -> AccelRep
+fromAccel (Accel x y z) = Pair x (Pair y z)
+
+tofAccel :: Accel -> Proof
+tofAccel (Accel x y z)
+  =   toAccel (fromAccel (Accel x y z))
+  ==. toAccel (Pair x (Pair y z))
+  ==. Accel x y z
+  *** QED
+
+fotAccel :: AccelRep -> Proof
+fotAccel (Pair x (Pair y z))
+  =   fromAccel (toAccel (Pair x (Pair y z)))
+  ==. fromAccel (Accel x y z)
+  ==. Pair x (Pair y z)
+  *** QED
+
+isoAccel :: Iso AccelRep Accel
+isoAccel = Iso {
+    to   = toAccel
+  , from = fromAccel
+  , tof  = tofAccel
+  , fot  = fotAccel
+  }
+
+vamAccelRep :: VerifiedAbelianMonoid AccelRep
+vamAccelRep = vamPair vamDouble
+            $ vamPair vamDouble vamDouble
+
+-- VAM is an invariant functor
+vamIso :: Iso a b -> VerifiedAbelianMonoid a -> VerifiedAbelianMonoid b
+vamIso (Iso t f _ _) (VAM emp app comm asso liden riden)
+ = VAM (t emp)
+       (\x y   -> t (app (f x) (f y)))
+       (\x y   -> comm (f x) (f y))
+       (\x y z -> asso (f x) (f y) (f z))
+       (liden . f)
+       (riden . f)
+
+vamAccel :: VerifiedAbelianMonoid Accel
+vamAccel = vamIso isoAccel vamAccelRep
 
 $(derivingUnbox "Accel"
     [t| Accel -> (Double, Double, Double) |]
@@ -159,19 +250,22 @@ instance NFData Body where rnf !_ = ()
 instance NFData Accel where rnf !_ = ()
 
 -- chunksize xs = (length xs) `quot` (numCapabilities * 1)
-chunksize :: Vector Body -> Int
+chunksize :: Unbox a => Vector a -> Int
 chunksize xs = (V.length xs) `quot` (numCapabilities * 2)
 -- chunksize xs = (length xs) `quot` (numCapabilities * 4)
 
-parMapChunk :: (Body -> Body) -> Int -> Vector Body -> Vector Body
-parMapChunk g n xs = V.concat ( runPar $ parMap (V.map g) (chunk n xs) )
+-- | Parallel map over a vector with a given chunk size.
+parMapChunk :: (Unbox a, Unbox b) => (a -> Par b) -> Int -> Vector a -> Par (Vector b)
+parMapChunk g n xs =
+    fmap V.concat $
+    parMapM (V.mapM g) (chunk n xs)
 
-{-@ chunk :: Int -> Vector Body -> [Vector Body] @-}
-chunk :: Int -> Vector Body -> [Vector Body]
-chunk n xs
-  | V.null xs = []
-  | otherwise = as : chunk n bs
-  where (as,bs) = V.splitAt n xs
+-- | This uses lists, but only at a coarse grain.
+chunk :: Unbox a => Int -> Vector a -> [Vector a]
+chunk n = go
+  where
+    go xs | V.null xs = []
+          | otherwise = as : chunk n bs where (as,bs) = V.splitAt n xs
 
 timeStep :: Double
 timeStep = 0.001
@@ -189,18 +283,33 @@ genBody s = Body (rand!!1) (rand!!2) (rand!!3) (rand!!4) (rand!!5) (rand!!6) (ra
     rand = randomList s
 
 numBodies, numSteps :: Int
-numBodies = 1024
-numSteps  = 20
+numBodies = 2048
+numSteps  = 5
+-- (numBodies, numSteps) = (1024, 20)
+
+-- | Do just enough computation to ensure it's evaluated.   Don't need a fold:
+forceIt :: forall a. Unbox a => Vector a -> a
+forceIt v = v V.! 0
 
 main :: IO ()
-main = defaultMain
-    [env (return setup) $ \ ~(bs', _) ->
-        bench ("n-body (" ++ show numCapabilities ++ " threads)")
-              (nf (V.foldl' f 0 . doSteps numSteps) bs')]
+main = do
+    putStrLn $ "Running for bodies/steps = "++show (numBodies,numSteps)
+    -- direct
+    critMode
   where
+    critMode = defaultMain
+               [env (return setup) $ \ ~(bs', _) ->
+                    bench ("n-body (" ++ show numCapabilities ++ " threads)")
+                              (nf (forceIt . doSteps numSteps) bs')]
+    direct = do st <- getCurrentTime
+                print $ forceIt $ doSteps numSteps bs
+                en <- getCurrentTime
+                putStrLn $ "SELFTIMED: "++show (diffUTCTime en st)
+
     setup :: (Vector Body, Double)
     setup = (bs, res1)
 
+    -- Initial locations of bodies in space.
     bs :: Vector Body
     bs = V.map genBody $ V.enumFromN 0 numBodies
 
@@ -210,35 +319,93 @@ main = defaultMain
 f :: Double -> Body -> Double
 f acc (Body x' y' z' vx' vy' vz' m') = acc+x'+y'+z'+vx'+vy'+vz'+m'
 
-doSteps :: Int -> Vector Body -> Vector Body
-doSteps 0 bs = bs
-doSteps s bs = doSteps (s-1) new_bs
-  where
-    new_bs :: Vector Body
-    new_bs = parMapChunk (updatePos . updateVel) (chunksize bs) bs
+seqFold :: forall a. (NFData a, Unbox a) => (a -> a -> a) -> a -> Vector a -> Par a
+seqFold f z = return . V.foldl' f z
 
+{-
+seqMapFold :: (Unbox a, Monoid b, NFData b, Unbox b)
+           => (b -> b -> b) -> (a -> b) -> Vector a -> Par b
+seqMapFold f g vec = return $! V.foldl' (\ b a -> f b (g a)) mempty vec
+-}
+
+{-
+parFold :: forall a. (NFData a, Unbox a) => (a -> a -> a) -> a -> Vector a -> Par a
+parFold f' z xs
+    | V.null xs = return z
+    | otherwise = res
+  where
+    parts :: [Vector a]
+    parts = chunk (chunksize xs) xs
+
+    partsRs :: Par [a]
+    partsRs = parMap (V.foldl' f' z) parts
+
+    res :: Par a
+    res = fmap (foldl' f' z) partsRs
+
+parMapFold :: (Unbox a, Monoid b, NFData b, Unbox b)
+           => (b -> b -> b) -> (a -> b) -> Vector a -> b
+parMapFold f' g xs = runPar $ do
+  xs' <- parMapChunk g (chunksize xs) xs
+  parFold f' mempty xs'
+-}
+
+{-# INLINE parMapFold #-}
+parMapFold :: (Unbox a, NFData b, Unbox b)
+           => (b -> b -> b) -> (a -> b) -> b -> Vector a -> Par b
+parMapFold f g z vec = do
+    let len = V.length vec
+        -- Could do many more chunks than this as long as they are bigger than some minimum granularity:
+        tasks = numCapabilities
+        (chunksize,rem) = len `quotRem` tasks
+    parMapReduceRangeThresh 1 (InclusiveRange 0 (tasks-1))
+       (\ix ->
+          let mine = if ix==tasks-1 then chunksize+rem else chunksize
+              slice = V.slice (ix*chunksize) mine vec in
+          return $! V.foldl' (\ b a -> f b (g a)) z slice)
+       (\b1 b2 -> return $! f b1 b2)
+       z
+
+doSteps :: Int -> Vector Body -> Vector Body
+doSteps s bs = runPar (stepLoop s bs)
+
+whichFold :: (Accel -> Accel -> Accel) -> (Body -> Accel) -> Accel -> Vector Body -> Par Accel
+-- whichFold = seqMapFold
+whichFold = parMapFold
+
+stepLoop :: Int -> Vector Body -> Par (Vector Body)
+stepLoop 0 bs = return bs
+stepLoop s bs = do
+    -- This needs to become a monadic map:
+    new_bs <- parMapChunk (fmap updatePos . updateVel) (chunksize bs) bs
+
+    stepLoop (s-1) new_bs
+  where
     updatePos :: Body -> Body
     updatePos (Body x' y' z' vx' vy' vz' m') = Body (x'+timeStep*vx') (y'+timeStep*vy') (z'+timeStep*vz') vx' vy' vz' m'
 
-    updateVel :: Body -> Body
-    updateVel b = V.foldl' deductChange b (V.map (accel b) bs)
+    updateVel :: Body -> Par Body
+    -- Sequential inner loop:
+    -- updateVel b = V.foldl' deductChange b (V.map (accel b) bs)
+    -- Nested parallelism:
+    updateVel b = do totalAccel <- whichFold (append vamAccel) (accel b) (empty vamAccel) bs
+                     return $! deductChange b totalAccel
 
     deductChange :: Body -> Accel -> Body
     deductChange (Body x' y' z' vx' vy' vz' m') (Accel ax' ay' az') = Body x' y' z' (vx'-ax') (vy'-ay') (vz'-az') m'
 
-accel :: Body -> Body -> Accel
-accel b_i b_j
-  | leq vordBody b_i b_j && leq vordBody b_j b_i = Accel 0 0 0
-  | otherwise = Accel (dx*jm*mag) (dy*jm*mag) (dz*jm*mag)
-  where
-    mag, distance, dSquared, dx, dy, dz :: Double
-    mag = timeStep / (dSquared * distance)
-    distance = sqrt (dSquared)
-    dSquared = dx*dx + dy*dy + dz*dz + eps
-    dx = ix - jx
-    dy = iy - jy
-    dz = iz - jz
+    accel :: Body -> Body -> Accel
+    accel b_i b_j
+        | b_i == b_j = Accel 0 0 0
+        | otherwise = Accel (dx*jm*mag) (dy*jm*mag) (dz*jm*mag)
+      where
+        mag, distance, dSquared, dx, dy, dz :: Double
+        mag = timeStep / (dSquared * distance)
+        distance = sqrt (dSquared)
+        dSquared = dx*dx + dy*dy + dz*dz + eps
+        dx = ix - jx
+        dy = iy - jy
+        dz = iz - jz
 
-    Body ix iy iz _ _ _ _  = b_i
-    Body jx jy jz _ _ _ jm = b_j
--}
+        Body ix iy iz _ _ _ _  = b_i
+        Body jx jy jz _ _ _ jm = b_j
