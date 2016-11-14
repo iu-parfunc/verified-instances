@@ -34,6 +34,7 @@ import           Data.Vector.Unboxed.Deriving
 
 import           Data.Iso
 import           Language.Haskell.Liquid.ProofCombinators
+import           VerifiedAbelianMonoid
 
 import           Data.Time.Clock
 import           GHC.Conc (numCapabilities)
@@ -80,169 +81,23 @@ instance Monoid Accel where
     = Accel (x1 + x2) (y1 + y2) (z1 + z2)
 -}
 
-{-@
-data VerifiedAbelianMonoid a = VAM {
-     empty  :: a
-   , append :: a -> a -> a
-   , commutes :: x:a -> y:a -> { append x y == append y x }
-   , assoc    :: x:a -> y:a -> z:a
-              -> { append x (append y z) == append (append x y) z}
-   , lident   :: x:a -> { append empty x == x }
-   , rident   :: x:a -> { append x empty == x }
-   }
-@-}
-data VerifiedAbelianMonoid a = VAM {
-    empty  :: a
-  , append :: a -> a -> a
-  , commutes :: a -> a -> Proof
-  , assoc    :: a -> a -> a -> Proof
-  , lident   :: a -> Proof
-  , rident   :: a -> Proof
-  }
-
-{-@ axiomatize emptyDouble @-}
-emptyDouble :: Double
-emptyDouble = 0
-{-# INLINE emptyDouble #-}
-
-{-@ axiomatize appendDouble @-}
-appendDouble :: Double -> Double -> Double
-appendDouble x y = x + y
-{-# INLINE appendDouble #-}
-
-{-@
-commutesDouble :: x:Double -> y:Double
-               -> { appendDouble x y == appendDouble y x }
-@-}
-commutesDouble :: Double -> Double -> Proof
-commutesDouble x y
-  =   appendDouble x y
-  ==. x + y
-  ==. y + x
-  ==. appendDouble y x
-  *** QED
-
-{-@
-assocDouble :: x:Double -> y:Double -> z:Double
-            -> { appendDouble x (appendDouble y z) == appendDouble (appendDouble x y) z }
-@-}
-assocDouble :: Double -> Double -> Double -> Proof
-assocDouble x y z
-  =   appendDouble x (appendDouble y z)
-  ==. x + (y + z)
-  ==. (x + y) + z
-  ==. appendDouble (appendDouble x y) z
-  *** QED
-
-{-@
-lidentDouble :: x:Double -> { appendDouble emptyDouble x == x }
-@-}
-lidentDouble :: Double -> Proof
-lidentDouble x
-  =   appendDouble emptyDouble x
-  ==. appendDouble 0 x
-  ==. 0 + x
-  ==. x
-  *** QED
-
-{-@
-ridentDouble :: x:Double -> { appendDouble x emptyDouble == x }
-@-}
-ridentDouble :: Double -> Proof
-ridentDouble x
-  =   appendDouble x emptyDouble
-  ==. appendDouble x 0
-  ==. x + 0
-  ==. x
-  *** QED
-
-{-@ vamDouble :: VerifiedAbelianMonoid Double @-}
-vamDouble :: VerifiedAbelianMonoid Double
-vamDouble = VAM emptyDouble appendDouble commutesDouble
-                assocDouble lidentDouble ridentDouble
-
-{-
-{-@ data Pair a b = Pair { fstOf :: a, sndOf :: b } @-}
-data Pair a b = Pair { fstOf :: a, sndOf :: b }
-
-emptyPair :: a -> b -> Pair a b
-emptyPair x y = Pair x y
-{-# INLINE emptyPair #-}
-
-appendPair :: (a -> a -> a) -> (b -> b -> b)
-           -> Pair a b -> Pair a b -> Pair a b
-appendPair appA appB p1 p2
-  = Pair (appA (fstOf p1) (fstOf p2)) (appB (sndOf p1) (sndOf p2))
-{-# INLINE appendPair #-}
-
-commutesPair :: (a -> a -> a) -> (a -> a -> Proof)
-             -> (b -> b -> b) -> (b -> b -> Proof)
-             -> Pair a b -> Pair a b -> Proof
-commutesPair appA commutesA appB commutesB p1 p2
-  =   appendPair appA appB p1 p2
-  ==. Pair (appA (fstOf p1) (fstOf p2)) (appB (sndOf p1) (sndOf p2))
-  ==. Pair (appA (fstOf p2) (fstOf p1)) (appB (sndOf p1) (sndOf p2)) ? commutesA (fstOf p1) (fstOf p2)
-  ==. Pair (appA (fstOf p2) (fstOf p1)) (appB (sndOf p2) (sndOf p1)) ? commutesB (sndOf p1) (sndOf p2)
-  ==. appendPair appA appB p2 p1
-  *** QED
-
-assocPair :: (a -> a -> a) -> (a -> a -> a -> Proof)
-          -> (b -> b -> b) -> (b -> b -> b -> Proof)
-          -> Pair a b -> Pair a b -> Pair a b -> Proof
-assocPair = undefined
-{-
-assocPair appA assocA appB assocB p1 p2 p3
-  =   appendPair appA appB p1 (appendPair appA appB p2 p3)
-  ==. Pair (appA (fstOf p1) (fstOf (appendPair appA appB p2 p3))) (appB (sndOf p1) (sndOf (appendPair appA appB p2 p3)))
-  ==.
--}
-
-lidentPair :: a -> (a -> a -> a) -> (a -> Proof)
-           -> b -> (b -> b -> b) -> (b -> Proof)
-           -> Pair a b -> Proof
-lidentPair emptyA appA lidentA emptyB appB lidentB p
-  =   appendPair appA appB (emptyPair emptyA emptyB) p
-  ==. appendPair appA appB (Pair emptyA emptyB) p
-  ==. Pair (appA (fstOf (Pair emptyA emptyB)) (fstOf p)) (appB (sndOf (Pair emptyA emptyB)) (sndOf p))
-  ==. Pair (appA emptyA (fstOf p)) (appB emptyB (sndOf p))
-  ==. Pair (fstOf p) (appB emptyB (sndOf p)) ? lidentA (fstOf p)
-  ==. Pair (fstOf p) (sndOf p)               ? lidentB (sndOf p)
-  ==. p
-  *** QED
-
-ridentPair :: a -> (a -> a -> a) -> (a -> Proof)
-           -> b -> (b -> b -> b) -> (b -> Proof)
-           -> Pair a b -> Proof
-ridentPair emptyA appA ridentA emptyB appB ridentB p
-  =   appendPair appA appB p (emptyPair emptyA emptyB)
-  ==. appendPair appA appB p (Pair emptyA emptyB)
-  ==. Pair (appA (fstOf p) (fstOf (Pair emptyA emptyB))) (appB (sndOf p) (sndOf (Pair emptyA emptyB)))
-  ==. Pair (appA (fstOf p) emptyA) (appB (sndOf p) emptyB)
-  ==. Pair (fstOf p) (appB (sndOf p) emptyB) ? ridentA (fstOf p)
-  ==. Pair (fstOf p) (sndOf p)               ? ridentB (sndOf p)
-  ==. p
-  *** QED
-
-vamPair :: VerifiedAbelianMonoid a -> VerifiedAbelianMonoid b
-        -> VerifiedAbelianMonoid (Pair a b)
-vamPair (VAM emptyA appendA commutesA assocA lidentA ridentA)
-        (VAM emptyB appendB commutesB assocB lidentB ridentB)
-  = VAM (emptyPair emptyA emptyB)
-        (appendPair appendA appendB)
-        (commutesPair appendA commutesA appendB commutesB)
-        (assocPair appendA assocA appendB assocB)
-        (lidentPair emptyA appendA lidentA emptyB appendB lidentB)
-        (ridentPair emptyA appendA lidentA emptyB appendB lidentB)
-
 {-@ type AccelRep = Pair Double (Pair Double Double) @-}
 type AccelRep = Pair Double (Pair Double Double)
 
+{-@ axiomatize toAccel @-}
 toAccel :: AccelRep -> Accel
 toAccel (Pair x (Pair y z)) = Accel x y z
+{-# INLINE toAccel #-}
 
+{-@ axiomatize fromAccel @-}
 fromAccel :: Accel -> AccelRep
 fromAccel (Accel x y z) = Pair x (Pair y z)
+{-# INLINE fromAccel #-}
 
+-- Why do we have to assume this?
+{-@
+assume tofAccel :: a:Accel -> { toAccel (fromAccel a) == a }
+@-}
 tofAccel :: Accel -> Proof
 tofAccel (Accel x y z)
   =   toAccel (fromAccel (Accel x y z))
@@ -250,11 +105,15 @@ tofAccel (Accel x y z)
   ==. Accel x y z
   *** QED
 
+{-@
+fotAccel :: ar:AccelRep -> { fromAccel (toAccel ar) == ar }
+@-}
 fotAccel :: AccelRep -> Proof
-fotAccel (Pair x (Pair y z))
-  =   fromAccel (toAccel (Pair x (Pair y z)))
+fotAccel ar@(Pair x (Pair y z))
+  =   fromAccel (toAccel ar)
   ==. fromAccel (Accel x y z)
   ==. Pair x (Pair y z)
+  ==. ar
   *** QED
 
 isoAccel :: Iso AccelRep Accel
@@ -265,23 +124,18 @@ isoAccel = Iso {
   , fot  = fotAccel
   }
 
+{-@
+vamAccelRep :: VerifiedAbelianMonoid AccelRep
+@-}
 vamAccelRep :: VerifiedAbelianMonoid AccelRep
 vamAccelRep = vamPair vamDouble
             $ vamPair vamDouble vamDouble
 
--- VAM is an invariant functor
-vamIso :: Iso a b -> VerifiedAbelianMonoid a -> VerifiedAbelianMonoid b
-vamIso (Iso t f _ _) (VAM emp app comm asso liden riden)
- = VAM (t emp)
-       (\x y   -> t (app (f x) (f y)))
-       (\x y   -> comm (f x) (f y))
-       (\x y z -> asso (f x) (f y) (f z))
-       (liden . f)
-       (riden . f)
-
+{-@
+vamAccel :: VerifiedAbelianMonoid Accel
+@-}
 vamAccel :: VerifiedAbelianMonoid Accel
 vamAccel = vamIso isoAccel vamAccelRep
--}
 
 {-
 $(derivingUnbox "Accel"
