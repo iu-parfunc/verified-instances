@@ -24,7 +24,6 @@ Par: $ ghc --make -O2 -threaded -rtsopts -fforce-recomp allpairs.hs | allpairs <
 module Main (main) where
 import           Language.Haskell.Liquid.ProofCombinators
 
-{-
 import           Control.DeepSeq
 import           Control.Monad.Par
 
@@ -33,21 +32,18 @@ import           Criterion.Main
 import qualified Data.Vector.Unboxed as V
 import           Data.Vector.Unboxed (Vector, Unbox)
 import           Data.Vector.Unboxed.Deriving
--}
 
 import           Data.Iso
 import           Language.Haskell.Liquid.ProofCombinators
 import           VerifiedAbelianMonoid
 
-{-
 import           Data.Time.Clock
 import           GHC.Conc (numCapabilities)
 import           System.Random
--}
+
 {-@ assume (*) :: Num a => a -> a -> a @-}
 {-@ assume (/) :: Num a => a -> a -> a @-}
 
-{-
 -- a body consists of pos, vel and mass
 data Body = Body
     { _x  :: Double   -- pos of x
@@ -63,7 +59,6 @@ $(derivingUnbox "Body"
     [t| Body -> ((Double, Double, Double), (Double, Double, Double), Double) |]
     [| \(Body x' y' z' vx' vy' vz' m') -> ((x', y', z'), (vx', vy', vz'), m') |]
     [| \((x', y', z'), (vx', vy', vz'), m') -> Body x' y' z' vx' vy' vz' m' |])
--}
 
 -- acceleration
 {-@
@@ -76,14 +71,6 @@ data Accel = Accel
     { _ax :: {-# UNPACK #-} !Double
     , _ay :: {-# UNPACK #-} !Double
     , _az :: {-# UNPACK #-} !Double }
-
-{-
--- Basically Sum
-instance Monoid Accel where
-  mempty = Accel 0 0 0
-  mappend (Accel x1 y1 z1) (Accel x2 y2 z2)
-    = Accel (x1 + x2) (y1 + y2) (z1 + z2)
--}
 
 {-@ type AccelRep = Pair Double (Pair Double Double) @-}
 type AccelRep = Pair Double (Pair Double Double)
@@ -141,7 +128,6 @@ vamAccel :: VerifiedAbelianMonoid Accel
 vamAccel :: VerifiedAbelianMonoid Accel
 vamAccel = vamIso isoAccel vamAccelRep
 
-{-
 $(derivingUnbox "Accel"
     [t| Accel -> (Double, Double, Double) |]
     [| \(Accel ax' ay' az') -> (ax', ay', az') |]
@@ -149,11 +135,7 @@ $(derivingUnbox "Accel"
 
 instance NFData Body where rnf !_ = ()
 instance NFData Accel where rnf !_ = ()
--}
 
-main = return ()
-
-{-
 -- chunksize xs = (length xs) `quot` (numCapabilities * 1)
 chunksize :: Unbox a => Vector a -> Int
 chunksize xs = (V.length xs) `quot` (numCapabilities * 2)
@@ -314,4 +296,3 @@ stepLoop s bs = do
 
         Body ix iy iz _ _ _ _  = b_i
         Body jx jy jz _ _ _ jm = b_j
--}
