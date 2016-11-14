@@ -12,19 +12,14 @@ import Data.Semigroup (Semigroup(..))
 import Control.LVish
 import Control.LVish.Internal
 
-import Data.Vector.Unboxed as V hiding ((++)) 
+import Data.Vector.Unboxed as V hiding ((++))
 import Data.Time.Clock
 import Control.Exception
 import Prelude as P
 import System.Environment
 import System.IO.Unsafe (unsafePerformIO)
 
-import           Data.VerifiedCommutativeSemigroup
-import           Data.VerifiedSemigroup
-
 import           GHC.Conc
-
-import           Language.Haskell.Liquid.ProofCombinators
 
 {-@ newtype Sum = Sum { getSum :: Int } @-}
 newtype Sum = Sum { getSum :: Int }
@@ -37,6 +32,10 @@ appendSum x y = Sum (getSum x + getSum y)
 
 instance Semigroup Sum where
   (<>) = appendSum
+
+instance Monoid Sum where
+  mempty  = Sum 0
+  mappend = appendSum
 
 instance NFData Sum where
   rnf (Sum x) = rnf x
@@ -123,8 +122,8 @@ sumStrided2 v =
   -- Parallel for loop over tile_1 .. tile_n
   let (numTiles,0) = V.length v `quotRem` tile
   -- Hypothetical, parForTree is just for effect:
-  ls <- parForTree Nothing (0,numTiles) $ \ tid -> do 
-     let myslice = V.slice v (tid * tile) tile 
+  ls <- parForTree Nothing (0,numTiles) $ \ tid -> do
+     let myslice = V.slice v (tid * tile) tile
      return (V.sum myslice)
   sum ls
 -}
@@ -135,7 +134,7 @@ sumStrided2 v =
 
 sumStrided3 :: Vector Int -> Int
 sumStrided3 v =
-   unsafePerformIO $ 
+   unsafePerformIO $
    do ref <- runParPolyIO par
       fmap getSum $ readIORef ref
  where
@@ -145,15 +144,15 @@ sumStrided3 v =
     let (numTiles,0) = V.length v `quotRem` tile
     acc <- newRV $ Sum 0
     -- hp <- newHandlerPool
-    -- Note this is asynchronous and will return immediately:    
-    parForSimple (0,numTiles) $ \ tid -> do 
+    -- Note this is asynchronous and will return immediately:
+    parForSimple (0,numTiles) $ \ tid -> do
       let myslice = V.slice (tid * tile) tile v
       let x = (Sum $ V.sum myslice)
       updateRV acc x
 
     -- quasideterminism:
     -- quiesce hp
-    -- freeze acc    
+    -- freeze acc
     -- We can return the var itself from the computation:
     return $ getRV acc
 
@@ -163,15 +162,15 @@ sumStrided3 v =
 
 -- LVar instance would provide Frz type family:
 -- Frz(ReductionVar s Int) -> ReductionVar Frzn Int
-  
+
 newtype ReductionVar s a = RV { getRV :: IORef a }
 
 -- IMAGINE that these are type class constraints:
-updateRV :: Semigroup a => ReductionVar s a -> a -> Par d s ()
+updateRV :: Monoid a => ReductionVar s a -> a -> Par d s ()
 updateRV (RV ref) !partialSum = liftIO $ atomicModifyIORef' ref $ \x ->
       (x <<>> partialSum, ())
   where
-    (<<>>) = (<>)
+    (<<>>) = mappend
 
 newRV :: a -> Par d s (ReductionVar s a)
 newRV = liftIO . fmap RV . newIORef
@@ -199,9 +198,9 @@ doIt vecsize = do
   en <- getCurrentTime
   putStrLn $ "Sum: "  ++ show sm
   putStrLn $ "Time: " ++ show (diffUTCTime en st)
--} 
+-}
 
-{-  
+{-
 main :: IO ()
 main = do
   c <- getNumCapabilities

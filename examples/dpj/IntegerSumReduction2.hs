@@ -23,8 +23,7 @@ import Prelude                                  as P
 import System.Environment
 import System.IO.Unsafe                         (unsafePerformIO)
 
-import Data.VerifiedCommutativeSemigroup
-import Data.VerifiedSemigroup
+import VerifiedAbelianMonoid
 
 import GHC.Conc
 
@@ -38,6 +37,11 @@ newtype Sum = Sum { getSum :: Int }
 appendSum :: Sum -> Sum -> Sum
 appendSum x y = Sum (getSum x + getSum y)
 {-# INLINE appendSum #-}
+
+{-@ axiomatize emptySum @-}
+emptySum :: Sum
+emptySum = Sum 0
+{-# INLINE emptySum #-}
 
 instance Semigroup Sum where
   (<>) = appendSum
@@ -60,9 +64,9 @@ appendSumAssoc x y z
   =   appendSum x (appendSum y z)
   ==. appendSum x (Sum (getSum y + getSum z))
   ==. Sum (getSum x + getSum (Sum (getSum y + getSum z)))
-  ==. Sum (getSum x + (getSum y + getSum z)) ? getSumSumId (getSum (Sum (getSum y + getSum z)))
+  ==. Sum (getSum x + (getSum y + getSum z))
   ==. Sum ((getSum x + getSum y) + getSum z)
-  ==. Sum (getSum (Sum (getSum x + getSum y)) + getSum z) ? getSumSumId (getSum (Sum (getSum x + getSum y)))
+  ==. Sum (getSum (Sum (getSum x + getSum y)) + getSum z)
   ==. appendSum (Sum (getSum x + getSum y)) z
   ==. appendSum (appendSum x y) z
   *** QED
@@ -79,16 +83,44 @@ appendSumCommute x y
   *** QED
 
 {-@
-vsemigroupSum :: VerifiedSemigroup Sum
+appendIntLident :: x:Int -> { 0 + x == x }
 @-}
-vsemigroupSum :: VerifiedSemigroup Sum
-vsemigroupSum = VerifiedSemigroup appendSum appendSumAssoc
+appendIntLident :: Int -> Proof
+appendIntLident x = 0 + x ==. x *** QED
 
 {-@
-vcommutativeSemigroupSum :: VerifiedCommutativeSemigroup Sum
+assume appendSumLident :: x:Sum -> { appendSum emptySum x == x }
 @-}
-vcommutativeSemigroupSum :: VerifiedCommutativeSemigroup Sum
-vcommutativeSemigroupSum = VerifiedCommutativeSemigroup appendSumCommute vsemigroupSum
+appendSumLident :: Sum -> Proof
+appendSumLident x
+  =   appendSum emptySum x
+  ==. appendSum (Sum 0) x
+  ==. Sum (getSum (Sum 0) + getSum x)
+  ==. Sum (0 + getSum x) ? getSumSumId 0
+  ==. Sum (getSum x) ? appendIntLident (getSum x)
+  ==. x
+  *** QED
+
+{-@
+assume appendSumRident :: x:Sum -> { appendSum x emptySum == x }
+@-}
+appendSumRident :: Sum -> Proof
+appendSumRident x@(Sum s)
+  =   appendSum x emptySum
+  ==. appendSum x (Sum 0)
+  ==. Sum (s + getSum (Sum 0))
+  ==. Sum (s + 0)
+  ==. Sum s
+  ==. x
+  *** QED
+
+{-@
+vamSum :: VerifiedAbelianMonoid Sum
+@-}
+vamSum :: VerifiedAbelianMonoid Sum
+vamSum = VAM emptySum         appendSum
+             appendSumCommute appendSumAssoc
+             appendSumLident  appendSumRident
 
 -- Untrusted (exports sumStrided)
 --------------------------------
@@ -151,7 +183,7 @@ sumStrided3 v =
     parForSimple (0,numTiles) $ \ tid -> do
       let myslice = V.slice (tid * tile) tile v
       let x = (Sum $ V.sum myslice)
-      updateRV vcommutativeSemigroupSum acc x
+      updateRV vamSum acc x
 
     -- quasideterminism:
     -- quiesce hp
@@ -169,11 +201,11 @@ sumStrided3 v =
 newtype ReductionVar s a = RV { getRV :: IORef a }
 
 -- IMAGINE that these are type class constraints:
-updateRV :: VerifiedCommutativeSemigroup a -> ReductionVar s a -> a -> Par d s ()
-updateRV vcs (RV ref) !partialSum = liftIO $ atomicModifyIORef' ref $ \x ->
+updateRV :: VerifiedAbelianMonoid a -> ReductionVar s a -> a -> Par d s ()
+updateRV vam (RV ref) !partialSum = liftIO $ atomicModifyIORef' ref $ \x ->
       (x <<>> partialSum, ())
   where
-    (<<>>) = prod (verifiedSemigroup vcs)
+    (<<>>) = append vam
 
 newRV :: a -> Par d s (ReductionVar s a)
 newRV = liftIO . fmap RV . newIORef
