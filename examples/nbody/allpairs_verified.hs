@@ -22,7 +22,9 @@ Seq: $ ghc --make -O2 -fforce-recomp allpairs.hs | allpairs <numbodies> <steps>
 Par: $ ghc --make -O2 -threaded -rtsopts -fforce-recomp allpairs.hs | allpairs <numbodies> <steps> +RTS -Nx
 -}
 module Main (main) where
+import           Language.Haskell.Liquid.ProofCombinators
 
+{-
 import           Control.DeepSeq
 import           Control.Monad.Par
 
@@ -31,15 +33,17 @@ import           Criterion.Main
 import qualified Data.Vector.Unboxed as V
 import           Data.Vector.Unboxed (Vector, Unbox)
 import           Data.Vector.Unboxed.Deriving
+-}
 
 import           Data.Iso
 import           Language.Haskell.Liquid.ProofCombinators
 import           VerifiedAbelianMonoid
 
+{-
 import           Data.Time.Clock
 import           GHC.Conc (numCapabilities)
 import           System.Random
-
+-}
 {-@ assume (*) :: Num a => a -> a -> a @-}
 {-@ assume (/) :: Num a => a -> a -> a @-}
 
