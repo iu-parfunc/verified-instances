@@ -11,7 +11,7 @@ module Control.SimplePar
     where
 
 import Control.Monad    
-import Data.IntMap as M
+import Data.IntMap as M hiding (fromList)
 import Data.List as L
 
     
@@ -77,11 +77,19 @@ instance Monad Par where
     return = pure
     m >>= k  = Par $ \c -> runCont m $ \a -> runCont (k a) c
 
-    
---------------------------------------------------------------------------------              
+
+data InfList a = Cons a (InfList a)
+
+fromList :: [a] -> InfList a
+fromList (a:b) = Cons a (fromList b)
+fromList [] = error "fromList: cannot convert finite list to infinite list!"
+
+--------------------------------------------------------------------------------
+-- The scheduler itself
+--------------------------------------------------------------------------------
 
 -- Take a stream of random numbers for scheduling decisions             
-runPar :: [Word] -> Par Val -> Val
+runPar :: InfList Word -> Par Val -> Val
 runPar randoms p = finalVal
  where
   Just finalVal = finalHeap M.! 0
@@ -90,17 +98,16 @@ runPar randoms p = finalVal
   initThreads = [runCont p (\v -> Put (IVar 0) v Done)]
   initHeap = M.singleton 0 Nothing
 
+  sched :: InfList Word -> [Trace] -> M.IntMap [Val -> Trace] -> Int -> Heap -> Heap
   sched _ [] blkd _ heap =
     if M.null blkd
     then heap
     else error $ "no runnable threads, but "++show (sum (L.map length (M.elems blkd)))
                ++" thread(s) blocked on these IVars: "++ show (M.keys blkd)
 
-  sched (rnd:rs) threads blkd cntr heap =
+  sched (Cons rnd rs) threads blkd cntr heap =
     let (thrds',blkd', cntr',heap') = step (yank rnd threads) blkd cntr heap
     in sched rs thrds' blkd' cntr' heap'
-
-  sched [] _ _ _ _ = error "impossible: random supply cannot run out"
 
   step (trc,others) blkd cntr heap =
     case trc of
@@ -125,17 +132,22 @@ runPar randoms p = finalVal
   yank n ls =
     let (hd,x:tl) = splitAt (fromIntegral n `mod` length ls) ls 
     in (x, hd++tl)
+
+--------------------------------------------------------------------------------
+       
+roundRobin :: InfList Word
+roundRobin = fromList [0..]
                             
 main :: IO ()
 main = do
-  print $ runPar [0..] (return 3.99)
+  print $ runPar roundRobin (return 3.99)
 
-  print $ runPar [0..] (do v <- new; put v 3.12; get v)
-
+  print $ runPar roundRobin (do v <- new; put v 3.12; get v)
+                                    
 -- | Example error
 err :: IO ()
-err = print $ runPar [0..] (do v <- new; put v 3.12; put v 4.5; get v)
+err = print $ runPar roundRobin (do v <- new; put v 3.12; put v 4.5; get v)
 
 -- | Example deadlock
 deadlock :: IO ()
-deadlock = print $ runPar [0..] (do v <- new; get v)
+deadlock = print $ runPar roundRobin (do v <- new; get v)
