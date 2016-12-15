@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 #!/usr/bin/env stack
 -- stack --resolver lts-6.20 --install-ghc runghc --package containers
 
@@ -6,7 +7,7 @@
 module Control.SimplePar
     ( new,put,get
     , IVar, Par
-    , main, err, deadlock
+    , main, err, deadlock, loop
     )
     where
 
@@ -151,3 +152,10 @@ err = print $ runPar roundRobin (do v <- new; put v 3.12; put v 4.5; get v)
 -- | Example deadlock
 deadlock :: IO ()
 deadlock = print $ runPar roundRobin (do v <- new; get v)
+
+-- | runPar can be nonterminating of course.
+loop :: IO ()
+loop = print $ runPar roundRobin (do v <- new; put v 4.1; loopit 0.0 v)
+
+loopit :: Val -> IVar Val -> Par b
+loopit !acc vr = do n <- get vr; loopit (acc+n) vr
