@@ -12,6 +12,7 @@ module Control.SimplePar
 
 import Control.Monad    
 import Data.IntMap as M
+import Data.List as L
 
     
 --------------------------------------------------------------------------------
@@ -84,31 +85,40 @@ runPar :: [Word] -> Par Val -> Val
 runPar randoms p = finalVal
  where
   Just finalVal = finalHeap M.! 0
-  finalHeap = sched randoms initThreads 1 initHeap
+  finalHeap = sched randoms initThreads M.empty 1 initHeap
   initThreads :: [Trace] 
   initThreads = [runCont p (\v -> Put (IVar 0) v Done)]
   initHeap = M.singleton 0 Nothing
-  sched _ [] _ heap = heap
-  sched (rnd:rs) threads cntr heap =
-    let (thrds',cntr',heap') = step (yank rnd threads) cntr heap
-    in sched rs thrds' cntr' heap'
-  sched [] _ _ _ = error "impossible"
 
-  -- TODO: should explicitly separate out blocked computations:
-  step (trc,others) cntr heap =
+  sched _ [] blkd _ heap =
+    if M.null blkd
+    then heap
+    else error $ "no runnable threads, but "++show (sum (L.map length (M.elems blkd)))
+               ++" thread(s) blocked on these IVars: "++ show (M.keys blkd)
+
+  sched (rnd:rs) threads blkd cntr heap =
+    let (thrds',blkd', cntr',heap') = step (yank rnd threads) blkd cntr heap
+    in sched rs thrds' blkd' cntr' heap'
+
+  sched [] _ _ _ _ = error "impossible: random supply cannot run out"
+
+  step (trc,others) blkd cntr heap =
     case trc of
-      Done       -> (      others, cntr,heap)
-      Fork t1 t2 -> (t1:t2:others, cntr,heap)
-      New  k     -> (k (IVar cntr) : others,
+      Done       -> (      others, blkd,cntr,heap)
+      Fork t1 t2 -> (t1:t2:others, blkd,cntr,heap)
+      New  k     -> (k (IVar cntr) : others, blkd,
                      cntr+1, M.insert cntr Nothing heap)
       Get (IVar ix) k -> case heap M.! ix of
-                           -- HACK: just put it back if it cannot run:
-                           -- The order doesn't really matter, because dispatch is random.
-                           Nothing -> (trc:others, cntr,heap)
-                           Just v  -> (k v:others, cntr,heap)
+                           Nothing -> (others, M.insertWith (++) ix [k] blkd, cntr,heap)
+                           Just v  -> (k v:others, blkd, cntr,heap)
       Put (IVar ix) v t2 ->
+          let heap' = M.insert ix (Just v) heap in
           case heap M.! ix of
-            Nothing -> (t2:others, cntr, M.insert ix (Just v) heap)
+            Nothing ->
+                case M.lookup ix blkd of
+                  Nothing -> (t2:others, blkd, cntr, heap')
+                  Just ls -> ( t2: [ k v | k <- ls] ++ others
+                             , M.delete ix blkd, cntr, heap')
             Just v0 -> error $ "multiple put, attempt to put "++show v
                          ++" to IVar "++show ix++" already containing "++show v0
 
