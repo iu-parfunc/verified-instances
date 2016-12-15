@@ -89,7 +89,7 @@ fromList [] = error "fromList: cannot convert finite list to infinite list!"
 -- The scheduler itself
 --------------------------------------------------------------------------------
 
--- Take a stream of random numbers for scheduling decisions             
+-- | Run a Par computation.  Take a stream of random numbers for scheduling decisions.
 runPar :: InfList Word -> Par Val -> Val
 runPar randoms p = finalVal
  where
@@ -130,9 +130,8 @@ runPar randoms p = finalVal
             Just v0 -> error $ "multiple put, attempt to put "++show v
                          ++" to IVar "++show ix++" already containing "++show v0
 
-  yank n ls =
-    let (hd,x:tl) = splitAt (fromIntegral n `mod` length ls) ls 
-    in (x, hd++tl)
+  yank n ls = let (hd,x:tl) = splitAt (fromIntegral n `mod` length ls) ls 
+              in (x, hd++tl)
 
 --------------------------------------------------------------------------------
        
