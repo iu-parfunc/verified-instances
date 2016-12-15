@@ -38,6 +38,10 @@ library
                      , Data.Inj
                      , Data.Iso
                      , Language.Haskell.Liquid.ProofCombinators
+
+                     -- Experiments with Monads:
+                     , Control.SimplePar
+
   other-extensions:    MultiParamTypeClasses
                      , FlexibleInstances
                      , FlexibleContexts
@@ -49,6 +53,7 @@ library
                      , newtype >= 0.2 && <0.3
                      , reflection >=2.1.2 && <2.2
                      , semigroups >=0.18 && <0.19
+                     , containers
   hs-source-dirs:      src
   ghc-options:         -O2 -Wall -fno-warn-orphans
   default-language:    Haskell2010
