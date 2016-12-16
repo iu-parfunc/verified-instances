@@ -7,7 +7,7 @@
 module Control.SimplePar
     ( new,put,get
     , IVar, Par
-    , main, err, deadlock, loop
+    , main, err, deadlock, loop, dag
     )
     where
 
@@ -58,6 +58,10 @@ get v = Par $ \c -> Get v c
 put :: IVar Val -> Val -> Par ()
 put v a = Par $ \c -> Put v a (c ())
 
+fork :: Par () -> Par ()
+-- Child thread executes with no continuation:        
+fork (Par k1) = Par (\k2 -> Fork (k1 (\() -> Done)) (k2 ()))
+
 --------------------------------------------------------------------------------          
              
 newtype Par a = Par {
@@ -88,6 +92,21 @@ fromList [] = error "fromList: cannot convert finite list to infinite list!"
 --------------------------------------------------------------------------------
 -- The scheduler itself
 --------------------------------------------------------------------------------
+
+-- Goal: Prove that every schedule is equivalent to a canonical schedule:
+-- Theorem: forall p l1 . runPar l1 p == runPar (repeat 0) p
+
+-- | TODO: change result of runPar to (Either Exn Val)
+data Exn = MultiplePut | Deadlock
+
+-- we can syntactically describe parallel evaluation contexts if we like:
+--   fork (a1 >>= k1) (a2 >>= k2)
+
+-- lemma: the heap is used linearly and grows monotonically towards deterministic final state
+
+-- noninteference lemma:  i /= j  =>  get (IVar i) # put (IVar j) v
+
+
 
 -- | Run a Par computation.  Take a stream of random numbers for scheduling decisions.
 runPar :: InfList Word -> Par Val -> Val
@@ -143,7 +162,10 @@ main = do
   print $ runPar roundRobin (return 3.99)
 
   print $ runPar roundRobin (do v <- new; put v 3.12; get v)
-                                    
+
+-- TODO: make this into a quickcheck test harness.
+
+                                     
 -- | Example error
 err :: IO ()
 err = print $ runPar roundRobin (do v <- new; put v 3.12; put v 4.5; get v)
@@ -158,3 +180,20 @@ loop = print $ runPar roundRobin (do v <- new; put v 4.1; loopit 0.0 v)
 
 loopit :: Val -> IVar Val -> Par b
 loopit !acc vr = do n <- get vr; loopit (acc+n) vr
+
+-- | A program that cannot execute sequentially.
+dag :: Par Val
+dag = do a <- new
+         b <- new
+         fork $ do x <- get a
+--                 put b 3 -- Control dependence without information flow.
+                   put b x -- Control dependence PLUS information flow.
+         put a 100
+         get b
+
+-- [2016.12.15] Notes from call:
+-- Possibly related:             
+-- "Core calculus of dependency": https://people.mpi-sws.org/~dg/teaching/lis2014/modules/ifc-3-abadi99.pdf
+-- Also check out "Partial order reduction" in model checking.
+
+                         
