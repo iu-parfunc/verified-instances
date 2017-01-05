@@ -17,7 +17,7 @@ leqFrom :: (a -> a -> Bool)
 leqFrom leqa from x y = leqa (from x) (from y)
 {-# INLINE leqFrom #-}
 
-{-@ leqFromRefl :: leqa:(a -> a -> Bool) -> leqaRefl:(x:a -> { Prop (leqa x x) })
+{-@ leqFromRefl :: leqa:(a -> a -> Bool) -> leqaRefl:(x:a -> { leqa x x })
                 -> from:(b -> a)
                 -> x:b -> { leqFrom leqa from x x }
 @-}
@@ -31,7 +31,7 @@ leqFromRefl leqa leqaRefl from x =
   *** QED
 
 {-@ leqFromAntisym :: leqa:(a -> a -> Bool)
-                   -> leqaAntisym:(x:a -> y:a -> { Prop (leqa x y) && Prop (leqa y x) ==> x == y })
+                   -> leqaAntisym:(x:a -> y:a -> { leqa x y && leqa y x ==> x == y })
                    -> VerifiedEq a
                    -> from:(b -> a) -> fromInj:(x:b -> y:b -> { from x == from y ==> x == y })
                    -> x:b -> y:b -> { leqFrom leqa from x y && leqFrom leqa from y x ==> x == y }
@@ -50,7 +50,7 @@ leqFromAntisym leqa leqaAntisym veqa from fromInj x y =
   *** QED
 
 {-@ leqFromTrans :: leqa:(a -> a -> Bool)
-                 -> leqaTrans:(x:a -> y:a -> z:a -> { Prop (leqa x y) && Prop (leqa y z) ==> Prop (leqa x z) })
+                 -> leqaTrans:(x:a -> y:a -> z:a -> { leqa x y && leqa y z ==> leqa x z })
                  -> from:(b -> a)
                  -> x:b -> y:b -> z:b
                  -> { leqFrom leqa from x y && leqFrom leqa from y z ==> leqFrom leqa from x z }
@@ -65,7 +65,7 @@ leqFromTrans leqa leqaTrans from x y z =
   ==. leqFrom leqa from x z
   *** QED
 
-{-@ leqFromTotal :: leqa:(a -> a -> Bool) -> leqaTotal:(x:a -> y:a -> { Prop (leqa x y) || Prop (leqa y x) })
+{-@ leqFromTotal :: leqa:(a -> a -> Bool) -> leqaTotal:(x:a -> y:a -> { leqa x y || leqa y x })
                  -> from:(b -> a) -> x:b -> y:b -> { leqFrom leqa from x y || leqFrom leqa from y x }
 @-}
 leqFromTotal :: (a -> a -> Bool) -> (a -> a -> Proof)

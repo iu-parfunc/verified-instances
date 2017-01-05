@@ -21,8 +21,8 @@ leqProd leqa leqb (x1, y1) (x2, y2) =
 {-# INLINE leqProd #-}
 
 {-@ leqProdRefl :: Eq a
-                => leqa:(a -> a -> Bool) -> leqaRefl:(x:a -> { Prop (leqa x x) })
-                -> leqb:(b -> b -> Bool) -> leqbRefl:(y:b -> { Prop (leqb y y) })
+                => leqa:(a -> a -> Bool) -> leqaRefl:(x:a -> { leqa x x })
+                -> leqb:(b -> b -> Bool) -> leqbRefl:(y:b -> { leqb y y })
                 -> p:(a, b) -> { leqProd leqa leqb p p }
 @-}
 leqProdRefl :: Eq a
@@ -38,9 +38,9 @@ leqProdRefl leqa leqaRefl leqb leqbRefl p@(x, y) =
 
 {-@ leqProdAntisym :: (Eq a, Eq b)
                    => leqa:(a -> a -> Bool)
-                   -> leqaAntisym:(x:a -> y:a -> { Prop (leqa x y) && Prop (leqa y x) ==> x == y })
+                   -> leqaAntisym:(x:a -> y:a -> { leqa x y && leqa y x ==> x == y })
                    -> leqb:(b -> b -> Bool)
-                   -> leqbAntisym:(x:b -> y:b -> { Prop (leqb x y) && Prop (leqb y x) ==> x == y })
+                   -> leqbAntisym:(x:b -> y:b -> { leqb x y && leqb y x ==> x == y })
                    -> p:(a, b) -> q:(a, b)
                    -> { leqProd leqa leqb p q && leqProd leqa leqb q p ==> p == q }
 @-}
@@ -60,10 +60,10 @@ leqProdAntisym leqa leqaAntisym leqb leqbAntisym p@(x1, y1) q@(x2, y2) =
 
 {-@ leqProdTrans :: Eq a
                  => leqa:(a -> a -> Bool)
-                 -> leqaAntisym:(x:a -> y:a -> { Prop (leqa x y) && Prop (leqa y x) ==> x == y })
-                 -> leqaTrans:(x:a -> y:a -> z:a -> { Prop (leqa x y) && Prop (leqa y z) ==> Prop (leqa x z) })
+                 -> leqaAntisym:(x:a -> y:a -> { leqa x y && leqa y x ==> x == y })
+                 -> leqaTrans:(x:a -> y:a -> z:a -> { leqa x y && leqa y z ==> leqa x z })
                  -> leqb:(b -> b -> Bool)
-                 -> leqbTrans:(x:b -> y:b -> z:b -> { Prop (leqb x y) && Prop (leqb y z) ==> Prop (leqb x z) })
+                 -> leqbTrans:(x:b -> y:b -> z:b -> { leqb x y && leqb y z ==> leqb x z })
                  -> p:(a, b) -> q:(a, b) -> r:(a, b)
                  -> { leqProd leqa leqb p q && leqProd leqa leqb q r ==> leqProd leqa leqb p r }
 @-}
@@ -108,8 +108,8 @@ leqProdTrans leqa leqaAntisym leqaTrans leqb leqbTrans p@(x1, y1) q@(x2, y2) r@(
                 ==. leqProd leqa leqb p r
                 *** QED
 
-{-@ leqProdTotal :: Eq a => leqa:(a -> a -> Bool) -> leqaTotal:(x:a -> y:a -> { Prop (leqa x y) || Prop (leqa y x) })
-                 -> leqb:(b -> b -> Bool) -> leqbTotal:(x:b -> y:b -> { Prop (leqb x y) || Prop (leqb y x) })
+{-@ leqProdTotal :: Eq a => leqa:(a -> a -> Bool) -> leqaTotal:(x:a -> y:a -> { leqa x y || leqa y x })
+                 -> leqb:(b -> b -> Bool) -> leqbTotal:(x:b -> y:b -> { leqb x y || leqb y x })
                  -> p:(a, b) -> q:(a, b)
                  -> { leqProd leqa leqb p q || leqProd leqa leqb q p }
 @-}

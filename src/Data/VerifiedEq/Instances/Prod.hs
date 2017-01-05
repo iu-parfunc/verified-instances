@@ -14,8 +14,8 @@ eqProd eqa eqb p q =
   eqa (fst p) (fst q) && eqb (snd p) (snd q)
 {-# INLINE eqProd #-}
 
-{-@ eqProdRefl :: eqa:(a -> a -> Bool) -> eqaRefl:(x:a -> { Prop (eqa x x) })
-               -> eqb:(b -> b -> Bool) -> eqbRefl:(y:b -> { Prop (eqb y y) })
+{-@ eqProdRefl :: eqa:(a -> a -> Bool) -> eqaRefl:(x:a -> { eqa x x })
+               -> eqb:(b -> b -> Bool) -> eqbRefl:(y:b -> { eqb y y })
                -> p:(a, b)
                -> { eqProd eqa eqb p p }
 @-}
@@ -30,8 +30,8 @@ eqProdRefl eqa eqaRefl eqb eqbRefl p@(x, y) =
   ==. True
   *** QED
 
-{-@ eqProdSym :: eqa:(a -> a -> Bool) -> eqaSym:(x:a -> y:a -> { Prop (eqa x y) ==> Prop (eqa y x) })
-              -> eqb:(b -> b -> Bool) -> eqbSym:(x:b -> y:b -> { Prop (eqb x y) ==> Prop (eqb y x) })
+{-@ eqProdSym :: eqa:(a -> a -> Bool) -> eqaSym:(x:a -> y:a -> { eqa x y ==> eqa y x })
+              -> eqb:(b -> b -> Bool) -> eqbSym:(x:b -> y:b -> { eqb x y ==> eqb y x })
               -> p:(a, b) -> q:(a, b)
               -> { eqProd eqa eqb p q ==> eqProd eqa eqb q p }
 @-}
@@ -47,8 +47,8 @@ eqProdSym eqa eqaSym eqb eqbSym p@(x1, y1) q@(x2, y2) =
   ==. eqProd eqa eqb q p
   *** QED
 
-{-@ eqProdTrans :: eqa:(a -> a -> Bool) -> eqaTrans:(x:a -> y:a -> z:a -> { Prop (eqa x y) && Prop (eqa y z) ==> Prop (eqa x z) })
-                -> eqb:(b -> b -> Bool) -> eqbTrans:(x:b -> y:b -> z:b -> { Prop (eqb x y) && Prop (eqb y z) ==> Prop (eqb x z) })
+{-@ eqProdTrans :: eqa:(a -> a -> Bool) -> eqaTrans:(x:a -> y:a -> z:a -> { eqa x y && eqa y z ==> eqa x z })
+                -> eqb:(b -> b -> Bool) -> eqbTrans:(x:b -> y:b -> z:b -> { eqb x y && eqb y z ==> eqb x z })
                 -> p:(a, b) -> q:(a, b) -> r:(a, b)
                 -> { eqProd eqa eqb p q && eqProd eqa eqb q r ==> eqProd eqa eqb p r }
 @-}

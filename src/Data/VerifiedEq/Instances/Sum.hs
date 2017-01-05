@@ -12,14 +12,14 @@ import Language.Haskell.Liquid.ProofCombinators
 {-@ axiomatize eqSum @-}
 eqSum :: (a -> a -> Bool) -> (b -> b -> Bool)
       -> Either a b -> Either a b -> Bool
-eqSum eqa eqb (Left x) (Left y) = eqa x y
-eqSum eqa eqb (Left x) (Right y) = False
-eqSum eqa eqb (Right x) (Left y) = False
+eqSum eqa eqb (Left x) (Left y)   = eqa x y
+eqSum eqa eqb (Left x) (Right y)  = False
+eqSum eqa eqb (Right x) (Left y)  = False
 eqSum eqa eqb (Right x) (Right y) = eqb x y
 {-# INLINE eqSum #-}
 
-{-@ eqSumRefl :: eqa:(a -> a -> Bool) -> eqaRefl:(x:a -> { Prop (eqa x x) })
-              -> eqb:(b -> b -> Bool) -> eqbRefl:(y:b -> { Prop (eqb y y) })
+{-@ eqSumRefl :: eqa:(a -> a -> Bool) -> eqaRefl:(x:a -> { eqa x x })
+              -> eqb:(b -> b -> Bool) -> eqbRefl:(y:b -> { eqb y y })
               -> p:Either a b
               -> { eqSum eqa eqb p p }
 @-}
@@ -37,8 +37,8 @@ eqSumRefl eqa eqaRefl eqb eqbRefl p@(Right y) =
   ==. True ? eqbRefl y
   *** QED
 
-{-@ eqSumSym :: eqa:(a -> a -> Bool) -> eqaSym:(x:a -> y:a -> { Prop (eqa x y) ==> Prop (eqa y x) })
-             -> eqb:(b -> b -> Bool) -> eqbSym:(x:b -> y:b -> { Prop (eqb x y) ==> Prop (eqb y x) })
+{-@ eqSumSym :: eqa:(a -> a -> Bool) -> eqaSym:(x:a -> y:a -> { eqa x y ==> eqa y x })
+             -> eqb:(b -> b -> Bool) -> eqbSym:(x:b -> y:b -> { eqb x y ==> eqb y x })
              -> p:Either a b -> q:Either a b
              -> { eqSum eqa eqb p q ==> eqSum eqa eqb q p }
 @-}
@@ -66,8 +66,8 @@ eqSumSym eqa eqaSym eqb eqbSym p@(Right x) q@(Right y) =
   ==. eqSum eqa eqb q p
   *** QED
 
-{-@ eqSumTrans :: eqa:(a -> a -> Bool) -> eqaTrans:(x:a -> y:a -> z:a -> { Prop (eqa x y) && Prop (eqa y z) ==> Prop (eqa x z) })
-               -> eqb:(b -> b -> Bool) -> eqbTrans:(x:b -> y:b -> z:b -> { Prop (eqb x y) && Prop (eqb y z) ==> Prop (eqb x z) })
+{-@ eqSumTrans :: eqa:(a -> a -> Bool) -> eqaTrans:(x:a -> y:a -> z:a -> { eqa x y && eqa y z ==> eqa x z })
+               -> eqb:(b -> b -> Bool) -> eqbTrans:(x:b -> y:b -> z:b -> { eqb x y && eqb y z ==> eqb x z })
                -> p:Either a b -> q:Either a b -> r:Either a b
                -> { eqSum eqa eqb p q && eqSum eqa eqb q r ==> eqSum eqa eqb p r }
 @-}

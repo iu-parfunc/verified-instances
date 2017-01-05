@@ -49,7 +49,7 @@ vordU1 = VerifiedOrd leqU1 leqU1Refl leqU1Antisym leqU1Trans leqU1Total veqU1
 leqPar1 :: (p -> p -> Bool) -> Par1 p -> Par1 p -> Bool
 leqPar1 leqP x y = leqP (unPar1 x) (unPar1 y)
 
-{-@ leqPar1Refl :: leqP:(p -> p -> Bool) -> leqPRefl:(x:p -> { Prop (leqP x x) })
+{-@ leqPar1Refl :: leqP:(p -> p -> Bool) -> leqPRefl:(x:p -> { leqP x x })
                 -> x:Par1 p -> { leqPar1 leqP x x } @-}
 leqPar1Refl :: (p -> p -> Bool) -> (p -> Proof) -> Par1 p -> Proof
 leqPar1Refl leqP leqPRefl x
@@ -58,7 +58,7 @@ leqPar1Refl leqP leqPRefl x
   ==. True ? leqPRefl (unPar1 x)
   *** QED
 
-{-@ leqPar1Antisym :: leqP:(p -> p -> Bool) -> leqPAntisym:(x:p -> y:p -> { Prop (leqP x y) ==> Prop (leqP y x) })
+{-@ leqPar1Antisym :: leqP:(p -> p -> Bool) -> leqPAntisym:(x:p -> y:p -> { leqP x y ==> leqP y x })
                   -> x:Par1 p -> y:Par1 p -> { leqPar1 leqP x y ==> leqPar1 leqP y x } @-}
 leqPar1Antisym :: (p -> p -> Bool) -> (p -> p -> Proof)
                -> Par1 p -> Par1 p -> Proof
@@ -69,7 +69,7 @@ leqPar1Antisym leqP leqPAntisym x y
   ==. leqPar1 leqP y x
   *** QED
 
-{-@ leqPar1Trans :: leqP:(p -> p -> Bool) -> leqPTrans:(x:p -> y:p -> z:p -> { Prop (leqP x y) && Prop (leqP y z) ==> Prop (leqP x z) })
+{-@ leqPar1Trans :: leqP:(p -> p -> Bool) -> leqPTrans:(x:p -> y:p -> z:p -> { leqP x y && leqP y z ==> leqP x z })
                  -> x:Par1 p -> y:Par1 p -> z:Par1 p -> { leqPar1 leqP x y && leqPar1 leqP y z ==> leqPar1 leqP x z } @-}
 leqPar1Trans :: (p -> p -> Bool) -> (p -> p -> p -> Proof)
              -> Par1 p -> Par1 p -> Par1 p -> Proof

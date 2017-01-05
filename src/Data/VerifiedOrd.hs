@@ -16,10 +16,10 @@ import Language.Haskell.Liquid.ProofCombinators
 
 {-@ data VerifiedOrd a = VerifiedOrd {
       leq :: (a -> a -> Bool)
-    , refl :: (x:a -> { Prop (leq x x) })
-    , antisym :: (x:a -> y:a -> { Prop (leq x y) && Prop (leq y x) ==> x == y })
-    , trans :: (x:a -> y:a -> z:a -> { Prop (leq x y) && Prop (leq y z) ==> Prop (leq x z) })
-    , total :: (x:a -> y:a -> { Prop (leq x y) || Prop (leq y x) })
+    , refl :: (x:a -> { leq x x })
+    , antisym :: (x:a -> y:a -> { leq x y && leq y x ==> x == y })
+    , trans :: (x:a -> y:a -> z:a -> { leq x y && leq y z ==> leq x z })
+    , total :: (x:a -> y:a -> { leq x y || leq y x })
     , verifiedEq :: VerifiedEq a
     }
 @-}

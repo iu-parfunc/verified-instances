@@ -7,9 +7,9 @@ import Language.Haskell.Liquid.ProofCombinators
 
 {-@ class (Eq a) => VerifiedEq a where
       eq :: a -> a -> Bool
-      refl :: x:a -> { v:() | Prop (eq x x) }
-      sym :: x:a -> y:a -> { v:() | Prop (eq x y) ==> Prop (eq y x) }
-      trans :: x:a -> y:a -> z:a -> { v:() | Prop (eq x y) && Prop (eq y z) ==> Prop (eq x z) }
+      refl :: x:a -> { v:() | eq x x }
+      sym :: x:a -> y:a -> { v:() | eq x y ==> eq y x }
+      trans :: x:a -> y:a -> z:a -> { v:() | eq x y && eq y z ==> eq x z }
 @-}
 class Eq a => VerifiedEq a where
   eq :: a -> a -> Bool

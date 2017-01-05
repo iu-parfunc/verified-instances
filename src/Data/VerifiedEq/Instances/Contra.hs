@@ -14,7 +14,7 @@ eqContra :: (a -> a -> Bool)
 eqContra eqa g x y = eqa (g x) (g y)
 {-# INLINE eqContra #-}
 
-{-@ eqContraRefl :: eqa:(a -> a -> Bool) -> eqaRefl:(x:a -> { Prop (eqa x x) })
+{-@ eqContraRefl :: eqa:(a -> a -> Bool) -> eqaRefl:(x:a -> { eqa x x })
                  -> g:(b -> a) -> x:b -> { eqContra eqa g x x }
 @-}
 eqContraRefl :: (a -> a -> Bool) -> (a -> Proof)
@@ -25,7 +25,7 @@ eqContraRefl eqa eqaRefl g x =
   ==. True ? eqaRefl (g x)
   *** QED
 
-{-@ eqContraSym :: eqa:(a -> a -> Bool) -> eqaSym:(x:a -> y:a -> { Prop (eqa x y) ==> Prop (eqa y x) })
+{-@ eqContraSym :: eqa:(a -> a -> Bool) -> eqaSym:(x:a -> y:a -> { eqa x y ==> eqa y x })
                 -> g:(b -> a) -> x:b -> y:b -> { eqContra eqa g x y ==> eqContra eqa g y x }
 @-}
 eqContraSym :: (a -> a -> Bool) -> (a -> a -> Proof)
@@ -37,7 +37,7 @@ eqContraSym eqa eqaSym g x y =
   ==. eqContra eqa g y x
   *** QED
 
-{-@ eqContraTrans :: eqa:(a -> a -> Bool) -> eqaTrans:(x:a -> y:a -> z:a -> { Prop (eqa x y) && Prop (eqa y z) ==> Prop (eqa x z) })
+{-@ eqContraTrans :: eqa:(a -> a -> Bool) -> eqaTrans:(x:a -> y:a -> z:a -> { eqa x y && eqa y z ==> eqa x z })
                   -> g:(b -> a) -> x:b -> y:b -> z:b -> { eqContra eqa g x y && eqContra eqa g y z ==> eqContra eqa g x z }
 @-}
 eqContraTrans :: (a -> a -> Bool) -> (a -> a -> a -> Proof)

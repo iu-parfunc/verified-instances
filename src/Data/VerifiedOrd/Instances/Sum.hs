@@ -21,8 +21,8 @@ leqSum leqa leqb (Right x) (Left y)  = False
 leqSum leqa leqb (Right x) (Right y) = leqb x y
 {-# INLINE leqSum #-}
 
-{-@ leqSumRefl :: leqa:(a -> a -> Bool) -> leqaRefl:(x:a -> { Prop (leqa x x) })
-               -> leqb:(b -> b -> Bool) -> leqbRefl:(y:b -> { Prop (leqb y y) })
+{-@ leqSumRefl :: leqa:(a -> a -> Bool) -> leqaRefl:(x:a -> { leqa x x })
+               -> leqb:(b -> b -> Bool) -> leqbRefl:(y:b -> { leqb y y })
                -> p:Either a b
                -> { leqSum leqa leqb p p }
 @-}
@@ -40,8 +40,8 @@ leqSumRefl leqa leqaRefl leqb leqbRefl p@(Right y) =
   ==. True ? leqbRefl y
   *** QED
 
-{-@ leqSumAntisym :: leqa:(a -> a -> Bool) -> leqaAntisym:(x:a -> y:a -> { Prop (leqa x y) && Prop (leqa y x) ==> x == y })
-                  -> leqb:(b -> b -> Bool) -> leqbAntisym:(x:b -> y:b -> { Prop (leqb x y) && Prop (leqb y x) ==> x == y })
+{-@ leqSumAntisym :: leqa:(a -> a -> Bool) -> leqaAntisym:(x:a -> y:a -> { leqa x y && leqa y x ==> x == y })
+                  -> leqb:(b -> b -> Bool) -> leqbAntisym:(x:b -> y:b -> { leqb x y && leqb y x ==> x == y })
                   -> VerifiedEq a -> VerifiedEq b
                   -> p:Either a b -> q:Either a b
                   -> { leqSum leqa leqb p q && leqSum leqa leqb q p ==> p == q }
@@ -79,8 +79,8 @@ leqSumAntisym leqa leqaAntisym leqb leqbAntisym veqa veqb p@(Right x) q@(Right y
   ==. x == y ? leqbAntisym x y
   *** QED
 
-{-@ leqSumTrans :: leqa:(a -> a -> Bool) -> leqaTrans:(x:a -> y:a -> z:a -> { Prop (leqa x y) && Prop (leqa y z) ==> Prop (leqa x z) })
-                -> leqb:(b -> b -> Bool) -> leqbTrans:(x:b -> y:b -> z:b -> { Prop (leqb x y) && Prop (leqb y z) ==> Prop (leqb x z) })
+{-@ leqSumTrans :: leqa:(a -> a -> Bool) -> leqaTrans:(x:a -> y:a -> z:a -> { leqa x y && leqa y z ==> leqa x z })
+                -> leqb:(b -> b -> Bool) -> leqbTrans:(x:b -> y:b -> z:b -> { leqb x y && leqb y z ==> leqb x z })
                 -> p:Either a b -> q:Either a b -> r:Either a b
                 -> { leqSum leqa leqb p q && leqSum leqa leqb q r ==> leqSum leqa leqb p r }
 @-}
@@ -130,8 +130,8 @@ leqSumTrans leqa leqaTrans leqb leqbTrans p@(Right x) q@(Right y) r@(Right z) =
   ==. leqSum leqa leqb p r
   *** QED
 
-{-@ leqSumTotal :: leqa:(a -> a -> Bool) -> leqaTotal:(x:a -> y:a -> { Prop (leqa x y) || Prop (leqa y x) })
-                -> leqb:(b -> b -> Bool) -> leqbTotal:(x:b -> y:b -> { Prop (leqb x y) || Prop (leqb y x) })
+{-@ leqSumTotal :: leqa:(a -> a -> Bool) -> leqaTotal:(x:a -> y:a -> { leqa x y || leqa y x })
+                -> leqb:(b -> b -> Bool) -> leqbTotal:(x:b -> y:b -> { leqb x y || leqb y x })
                 -> p:Either a b -> q:Either a b
                 -> { leqSum leqa leqb p q || leqSum leqa leqb q p }
 @-}
