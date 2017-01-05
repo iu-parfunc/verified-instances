@@ -9,15 +9,12 @@ import GHC.Generics
 import Data.VerifiedEq
 import Language.Haskell.Liquid.ProofCombinators
 
-{-@ data V1 [elimV1] @-}
-
-{-@ measure elimV1 @-}
-elimV1 :: V1 p -> Bool
-elimV1 x = case x of {}
+{-@ data V1 @-}
 
 {-@ axiomatize eqV1 @-}
 eqV1 :: V1 p -> V1 p -> Bool
-eqV1 x _ = elimV1 x
+eqV1 _ _ = False
+-- eqV1 x _ = case x of {}
 
 absurd :: V1 p -> a
 absurd x = case x of {}
