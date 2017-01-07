@@ -9,8 +9,8 @@ RUN cp /root/.gitconfig /home/_stack/.gitconfig
 RUN git clone --recursive https://github.com/ucsd-progsys/liquidhaskell.git /opt/liquidhaskell
 WORKDIR /opt/liquidhaskell
 
-# "no-prop-new" branch
-ENV LIQUID_SHA a746397a6aa56c0b86e5b12fda590caf41f6a2c6
+# "develop" branch
+ENV LIQUID_SHA cc1c0ca3f9c604e1c60114e8ba41915eb3d40466
 RUN git fetch --all && \
     git checkout --force ${LIQUID_SHA} && \
     git submodule update --init --recursive && \
