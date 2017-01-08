@@ -3,7 +3,7 @@
 #!/usr/bin/env stack
 -- stack --resolver lts-6.20 --install-ghc runghc --package containers
 
--- | 
+-- |
 
 module Control.SimplePar
     ( new,put,get
@@ -12,11 +12,12 @@ module Control.SimplePar
     )
     where
 
-import Control.Monad    
+import Control.Monad
+import Control.Monad.Except
 import Data.IntMap as M hiding (fromList)
 import Data.List as L
 
-    
+
 --------------------------------------------------------------------------------
 
 -- Full version:
@@ -29,7 +30,7 @@ import Data.List as L
 --            | forall a . LiftIO (IO a) (a -> Trace)
 
 
--- | Restricted version:    
+-- | Restricted version:
 data Trace = Get (IVar Val) (Val -> Trace)
            | Put (IVar Val) Val Trace
            | New (IVar Val -> Trace)
@@ -48,10 +49,10 @@ data IVar a = IVar Int
 type Heap = M.IntMap (Maybe Val)
 
 -- User-facing API:
---------------------------------------------------------------------------------          
+--------------------------------------------------------------------------------
 
 new :: Par (IVar Val)
-new  = Par New 
+new  = Par New
 
 get :: IVar Val -> Par Val
 get v = Par $ \c -> Get v c
@@ -60,11 +61,11 @@ put :: IVar Val -> Val -> Par ()
 put v a = Par $ \c -> Put v a (c ())
 
 fork :: Par () -> Par ()
--- Child thread executes with no continuation:        
+-- Child thread executes with no continuation:
 fork (Par k1) = Par (\k2 -> Fork (k1 (\() -> Done)) (k2 ()))
 
---------------------------------------------------------------------------------          
-             
+--------------------------------------------------------------------------------
+
 newtype Par a = Par {
     -- A par computation takes a continuation and generates a trace
     -- incorporating it.
@@ -97,8 +98,17 @@ fromList [] = error "fromList: cannot convert finite list to infinite list!"
 -- Goal: Prove that every schedule is equivalent to a canonical schedule:
 -- Theorem: forall p l1 . runPar l1 p == runPar (repeat 0) p
 
--- | TODO: change result of runPar to (Either Exn Val)
-data Exn = MultiplePut | Deadlock
+-- | Exception thrown by runPar
+data Exn = MultiplePut Val Int Val
+         | Deadlock (M.IntMap [Val -> Trace])
+
+instance Show Exn where
+  show (MultiplePut v ix v0) =
+    "multiple put, attempt to put " ++ show v ++ " to IVar " ++
+    show ix ++ " already containing " ++ show v0
+  show (Deadlock blkd) =
+    "no runnable threads, but " ++ show (sum (L.map length (M.elems blkd))) ++
+    " thread(s) blocked on these IVars: " ++ show (M.keys blkd)
 
 -- we can syntactically describe parallel evaluation contexts if we like:
 --   fork (a1 >>= k1) (a2 >>= k2)
@@ -110,54 +120,55 @@ data Exn = MultiplePut | Deadlock
 
 
 -- | Run a Par computation.  Take a stream of random numbers for scheduling decisions.
-runPar :: InfList Word -> Par Val -> Val
-runPar randoms p = finalVal
- where
-  Just finalVal = finalHeap M.! 0
-  finalHeap = sched randoms initThreads M.empty 1 initHeap
-  initThreads :: [Trace] 
-  initThreads = [runCont p (\v -> Put (IVar 0) v Done)]
-  initHeap = M.singleton 0 Nothing
+runPar :: InfList Word -> Par Val -> Except Exn Val
+runPar randoms p = do
+  let initHeap = M.singleton 0 Nothing
+      initThreads :: [Trace]
+      initThreads = [runCont p (\v -> Put (IVar 0) v Done)]
 
-  sched :: InfList Word -> [Trace] -> M.IntMap [Val -> Trace] -> Int -> Heap -> Heap
-  sched _ [] blkd _ heap =
-    if M.null blkd
-    then heap
-    else error $ "no runnable threads, but "++show (sum (L.map length (M.elems blkd)))
-               ++" thread(s) blocked on these IVars: "++ show (M.keys blkd)
+  finalHeap <- sched randoms initThreads M.empty 1 initHeap
+  let Just finalVal = finalHeap M.! 0
+  return finalVal
 
-  sched (Cons rnd rs) threads blkd cntr heap =
-    let (thrds',blkd', cntr',heap') = step (yank rnd threads) blkd cntr heap
-    in sched rs thrds' blkd' cntr' heap'
+  where
+    sched :: InfList Word -> [Trace] -> M.IntMap [Val -> Trace] -> Int -> Heap -> Except Exn Heap
+    sched _ [] blkd _ heap = do
+      if M.null blkd
+        then return heap
+        else throwError $ Deadlock blkd
 
-  step (trc,others) blkd cntr heap =
-    case trc of
-      Done       -> (      others, blkd,cntr,heap)
-      Fork t1 t2 -> (t1:t2:others, blkd,cntr,heap)
-      New  k     -> (k (IVar cntr) : others, blkd,
-                     cntr+1, M.insert cntr Nothing heap)
-      Get (IVar ix) k -> case heap M.! ix of
-                           Nothing -> (others, M.insertWith (++) ix [k] blkd, cntr,heap)
-                           Just v  -> (k v:others, blkd, cntr,heap)
-      Put (IVar ix) v t2 ->
-          let heap' = M.insert ix (Just v) heap in
+    sched (Cons rnd rs) threads blkd cntr heap = do
+      (thrds', blkd', cntr', heap') <- step (yank rnd threads) blkd cntr heap
+      sched rs thrds' blkd' cntr' heap'
+
+    step :: (Trace, [Trace]) -> IntMap [Val -> Trace] -> Int -> IntMap (Maybe Val) -> Except Exn ([Trace], IntMap [Val -> Trace], Int, IntMap (Maybe Val))
+    step (trc, others) blkd cntr heap =
+      case trc of
+        Done -> return (others, blkd, cntr, heap)
+        Fork t1 t2 -> return (t1 : t2 : others, blkd, cntr, heap)
+        New k -> return (k (IVar cntr) : others, blkd, cntr + 1, M.insert cntr Nothing heap)
+        Get (IVar ix) k ->
           case heap M.! ix of
+            Nothing -> return (others, M.insertWith (++) ix [k] blkd, cntr, heap)
+            Just v  -> return (k v : others, blkd, cntr, heap)
+        Put (IVar ix) v t2 ->
+          let heap' = M.insert ix (Just v) heap
+          in case heap M.! ix of
             Nothing ->
-                case M.lookup ix blkd of
-                  Nothing -> (t2:others, blkd, cntr, heap')
-                  Just ls -> ( t2: [ k v | k <- ls] ++ others
-                             , M.delete ix blkd, cntr, heap')
-            Just v0 -> error $ "multiple put, attempt to put "++show v
-                         ++" to IVar "++show ix++" already containing "++show v0
+              case M.lookup ix blkd of
+                Nothing -> return (t2 : others, blkd, cntr, heap')
+                Just ls -> return (t2 : [ k v | k <- ls ] ++ others
+                                 , M.delete ix blkd, cntr, heap')
+            Just v0 -> throwError $ MultiplePut v ix v0
 
-  yank n ls = let (hd,x:tl) = splitAt (fromIntegral n `mod` length ls) ls 
-              in (x, hd++tl)
+    yank n ls = let (hd,x:tl) = splitAt (fromIntegral n `mod` length ls) ls
+                in (x, hd++tl)
 
 --------------------------------------------------------------------------------
-       
+
 roundRobin :: InfList Word
 roundRobin = fromList [0..]
-                            
+
 main :: IO ()
 main = do
   print $ runPar roundRobin (return 3.99)
@@ -166,7 +177,7 @@ main = do
 
 -- TODO: make this into a quickcheck test harness.
 
-                                     
+
 -- | Example error
 err :: IO ()
 err = print $ runPar roundRobin (do v <- new; put v 3.12; put v 4.5; get v)
@@ -193,8 +204,6 @@ dag = do a <- new
          get b
 
 -- [2016.12.15] Notes from call:
--- Possibly related:             
+-- Possibly related:
 -- "Core calculus of dependency": https://people.mpi-sws.org/~dg/teaching/lis2014/modules/ifc-3-abadi99.pdf
 -- Also check out "Partial order reduction" in model checking.
-
-                         
