@@ -1,3 +1,4 @@
+{-@ LIQUID "--higherorder" @-}
 {-# LANGUAGE BangPatterns #-}
 #!/usr/bin/env stack
 -- stack --resolver lts-6.20 --install-ghc runghc --package containers
