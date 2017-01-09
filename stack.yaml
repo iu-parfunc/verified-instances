@@ -1,4 +1,4 @@
-resolver: lts-6.20
+resolver: lts-6.27
 docker:
   enable: false
   image: "liquidhaskell"

@@ -39,9 +39,6 @@ library
                      , Data.Iso
                      , Language.Haskell.Liquid.ProofCombinators
 
-                     -- Experiments with Monads:
-                     , Control.SimplePar
-
   other-extensions:    MultiParamTypeClasses
                      , FlexibleInstances
                      , FlexibleContexts
@@ -53,8 +50,6 @@ library
                      , newtype >= 0.2 && <0.3
                      , reflection >=2.1.2 && <2.2
                      , semigroups >=0.18 && <0.19
-                     , containers
-                     , mtl
   hs-source-dirs:      src
   ghc-options:         -O2 -Wall -fno-warn-orphans
   default-language:    Haskell2010
@@ -88,5 +83,16 @@ executable nbody-allpairs
                      , vector-th-unbox
                      , clock
   hs-source-dirs:      examples/nbody/
+  ghc-options:         -O2 -Wall -threaded -rtsopts
+  default-language:    Haskell2010
+
+executable simplepar
+  main-is:             experiments/Control/SimplePar.hs
+  build-depends:       base >= 4.8 && < 5
+                     , containers
+                     , mtl
+                     , QuickCheck
+                     , tasty
+                     , tasty-quickcheck
   ghc-options:         -O2 -Wall -threaded -rtsopts
   default-language:    Haskell2010
