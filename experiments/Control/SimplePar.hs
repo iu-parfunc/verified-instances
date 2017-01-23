@@ -10,9 +10,15 @@
 -- |
 
 module Main
-    ( new,put,get
-    , IVar, Par
-    , main, err, deadlock, loop, dag
+    (
+    -- * Programmer API
+    new,put,get, IVar, Par
+
+    -- * Example programs
+    , err, deadlock, loop, dag1
+      
+    -- * Run tests
+    , main
     )
     where
 
@@ -22,7 +28,7 @@ import Control.Monad.Except
 import Data.IntMap as M hiding (fromList)
 import Data.List as L
 import Test.QuickCheck
-import Test.QuickCheck.Modifiers
+-- import Test.QuickCheck.Modifiers
 import Test.Tasty
 import Test.Tasty.QuickCheck as QC
 
@@ -193,8 +199,22 @@ runPar randoms p = do
     sched (Cons rnd rs) threads blkd cntr heap = do
       (thrds', blkd', cntr', heap') <- step (yank rnd threads) blkd cntr heap
       sched rs thrds' blkd' cntr' heap'
+            
+    -- Potential Step lemmas:
+    -- (1) Monotonicity lemma:
+    --     step a b c heap = (_,_,_,heap2)  =>  (heap <= heap2)
 
-    step :: (Trace, [Trace]) -> IntMap [Val -> Trace] -> Int -> IntMap (Maybe Val) -> Except Exn ([Trace], IntMap [Val -> Trace], Int, IntMap (Maybe Val))
+    -- (2) Independence: other stuff in the heap doesn't change our outcome.
+    --     If    step p b c h = (p2,b2,c2,h2)
+    --     then  ...
+
+    -- (3) Local confluence
+    --   If   step (a1,[a2..ai..an]) b c h => sigma1
+    --   and  step (ai,[a2..a1..an]) b c h => sigma2
+    --   then there exists sigma3, such that ...
+    -- 
+    step :: (Trace, [Trace]) -> IntMap [Val -> Trace] -> Int -> IntMap (Maybe Val)
+         -> Except Exn ([Trace], IntMap [Val -> Trace], Int, IntMap (Maybe Val))
     step (trc, others) blkd cntr heap =
       case trc of
         Done -> return (others, blkd, cntr, heap)
@@ -222,6 +242,29 @@ runPar' :: InfList Word -> Par Val -> Either Exn Val
 runPar' randoms p = runExcept (runPar randoms p)
 
 --------------------------------------------------------------------------------
+-- [2017.01.23] Some meeting notes.
+
+-- Ranjit's suggestion of a simpler starting point a la http://www.cs.nott.ac.uk/~pszgmh/ccc.pdf
+--  Can we start with programs but no scheduler?
+                    
+-- Ranjit suggests a baby version:
+----------------------------------
+{- One global Ivar, multiple threads.
+
+ What's an example of something very simple we can prove with *no schedule*?
+ Consider, for all programs p:
+
+    do put 12; p
+ 
+ The final state will satisfy either:
+ 
+  (1) final heap state is (Just 12)
+  (2) multiple Put exception.
+
+
+-}
+
+--------------------------------------------------------------------------------
 
 roundRobin :: InfList Word
 roundRobin = fromList [0..]
@@ -231,16 +274,28 @@ canonical = fromList (repeat 0)
 
 main :: IO ()
 main = defaultMain tests
-
   -- print $ runPar' roundRobin (return 3.99)
   -- print $ runPar' roundRobin (do v <- new; put v 3.12; get v)
 
+
+tests :: TestTree
 tests = testGroup "Tests"
-          [ QC.testProperty "forall p l1 . runPar l1 p == runPar (repeat 0) p" $
-            \p (l1 :: InfList (NonNegative Word)) ->
-              runPar' (getNonNegative <$> l1) p == runPar' canonical p
+          [
+-- TODO: need to fix Arbitrary instance for Par for this to work:
+           -- QC.testProperty "forall p l1 . runPar l1 p == runPar (repeat 0) p" $
+           --  \p (l1 :: InfList (NonNegative Word)) ->
+           --    runPar' (getNonNegative <$> l1) p == runPar' canonical p
+
+           QC.testProperty "determinism of dag1" $
+            \(l1 :: InfList (NonNegative Word)) ->
+              runPar' (getNonNegative <$> l1) dag1 == runPar' canonical dag1
+
           ]
 
+
+-- Example invalid programs:
+--------------------------------------------------------------------------------
+          
 -- | Example error
 err :: IO ()
 err = print $ runPar roundRobin (do v <- new; put v 3.12; put v 4.5; get v)
@@ -256,15 +311,19 @@ loop = print $ runPar roundRobin (do v <- new; put v 4.1; loopit 0.0 v)
 loopit :: Val -> IVar Val -> Par b
 loopit !acc vr = do n <- get vr; loopit (acc+n) vr
 
+
+-- A test suite of valid programs:
+--------------------------------------------------------------------------------
+
 -- | A program that cannot execute sequentially.
-dag :: Par Val
-dag = do a <- new
-         b <- new
-         fork $ do x <- get a
---                 put b 3 -- Control dependence without information flow.
-                   put b x -- Control dependence PLUS information flow.
-         put a 100
-         get b
+dag1 :: Par Val
+dag1 = do a <- new
+          b <- new
+          fork $ do x <- get a
+ --                 put b 3 -- Control dependence without information flow.
+                    put b x -- Control dependence PLUS information flow.
+          put a 100
+          get b
 
 -- [2016.12.15] Notes from call:
 -- Possibly related:
