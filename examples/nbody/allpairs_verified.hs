@@ -179,7 +179,7 @@ eps :: Double
 eps = 0.01
 
 {-@ measure omega :: Int @-}
-{-@ invariant {v:Int | omega > v} @-}
+{-@ invariant {v:Int | omega >= v} @-}
 
 {-@ assume randomList :: Int -> {v:[a]|len v == omega} @-}
 randomList :: Random a => Int -> [a]
