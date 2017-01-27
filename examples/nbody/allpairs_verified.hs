@@ -38,11 +38,27 @@ import           Language.Haskell.Liquid.ProofCombinators
 import           VerifiedAbelianMonoid
 
 import           Data.Time.Clock
-import           GHC.Conc (numCapabilities)
+import           GHC.Conc
 import           System.Random
 
 {-@ assume (*) :: Num a => a -> a -> a @-}
 {-@ assume (/) :: Num a => a -> a -> a @-}
+
+{-@ assume numCapabilities :: {v:Int|v>0} @-}
+
+{-@ measure vlen :: (Vector a) -> Int @-}
+{-@ invariant {v: Vector a | 0 <= vlen v } @-}
+
+{-@ assume Data.Vector.Unboxed.splitAt ::
+      n : Int -> i : Vector a
+  -> ( { l : Vector a | (n <= 0 <=> vlen l == 0) &&
+                       ((0 <= n && n <= vlen i) <=> vlen l == n) &&
+                       (vlen i <= n <=> vlen l == vlen i) }
+    , { r : Vector a | (n <= 0 <=> vlen r == vlen i) &&
+                       ((0 <= n && n <= vlen i) <=> vlen r == vlen i - n) &&
+                       (vlen i <= n <=> vlen r == 0) }
+    )
+@-}
 
 -- a body consists of pos, vel and mass
 data Body = Body
@@ -148,6 +164,7 @@ parMapChunk g n xs =
     parMapM (V.mapM g) (chunk n xs)
 
 -- | This uses lists, but only at a coarse grain.
+{-@ chunk :: n:Int -> i:Vector a -> {vs:[{v:Vector a|vlen v <= vlen i}] | len vs >= 0} @-}
 chunk :: Unbox a => Int -> Vector a -> [Vector a]
 chunk n = go
   where
@@ -161,6 +178,10 @@ timeStep = 0.001
 eps :: Double
 eps = 0.01
 
+{-@ measure omega :: Int @-}
+{-@ invariant {v:Int | omega > v} @-}
+
+{-@ assume randomList :: Int -> {v:[a]|len v == omega} @-}
 randomList :: Random a => Int -> [a]
 randomList seed = randoms (mkStdGen seed)
 
