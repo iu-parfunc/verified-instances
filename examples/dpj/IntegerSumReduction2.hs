@@ -125,6 +125,7 @@ vamSum = VAM emptySum         appendSum
 -- Untrusted (exports sumStrided)
 --------------------------------
 
+{-@ tile :: {v:Int|v>0} @-}
 tile :: Int
 tile = 100000
 
@@ -176,7 +177,7 @@ sumStrided3 v =
   par :: Par d s (IORef Sum)
   par = do
     -- Paralel for loop over tile_1 .. tile_n
-    let (numTiles,0) = V.length v `quotRem` tile
+    let (numTiles, _) = V.length v `quotRem` tile
     acc <- newRV $ Sum 0
     -- hp <- newHandlerPool
     -- Note this is asynchronous and will return immediately:
