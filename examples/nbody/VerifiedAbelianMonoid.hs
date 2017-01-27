@@ -29,11 +29,11 @@ data VerifiedAbelianMonoid a = VAM {
   , rident   :: a -> Proof
   }
 
-{-@ emptyDouble :: {v:Double | emptyDouble == 0 } @-}
-{-@ axiomatize emptyDouble @-}
-emptyDouble :: Double
-emptyDouble = 0
-{-# INLINE emptyDouble #-}
+-- {-@ emptyDouble :: {v:Double | emptyDouble == 0 } @-}
+-- {-@ axiomatize emptyDouble @-}
+-- emptyDouble :: Double
+-- emptyDouble = 0
+-- {-# INLINE emptyDouble #-}
 
 {-@ axiomatize appendDouble @-}
 appendDouble :: Double -> Double -> Double
@@ -65,22 +65,22 @@ assocDouble x y z
   *** QED
 
 {-@
-lidentDouble :: x:Double -> { appendDouble emptyDouble x == x }
+lidentDouble :: x:Double -> { appendDouble 0 x == x }
 @-}
 lidentDouble :: Double -> Proof
 lidentDouble x
-  =   appendDouble emptyDouble x
+  =   appendDouble 0 x
   ==. appendDouble 0 x
   ==. 0 + x
   ==. x
   *** QED
 
 {-@
-ridentDouble :: x:Double -> { appendDouble x emptyDouble == x }
+ridentDouble :: x:Double -> { appendDouble x 0 == x }
 @-}
 ridentDouble :: Double -> Proof
 ridentDouble x
-  =   appendDouble x emptyDouble
+  =   appendDouble x 0
   ==. appendDouble x 0
   ==. x + 0
   ==. x
@@ -88,7 +88,7 @@ ridentDouble x
 
 {-@ vamDouble :: VerifiedAbelianMonoid Double @-}
 vamDouble :: VerifiedAbelianMonoid Double
-vamDouble = VAM emptyDouble appendDouble commutesDouble
+vamDouble = VAM 0 appendDouble commutesDouble
                 assocDouble lidentDouble ridentDouble
 
 {-@ data Pair a b = Pair { fstOf :: a, sndOf :: b } @-}
