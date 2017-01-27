@@ -4,6 +4,7 @@ HS = $(shell find src examples -type f -name '*.hs' \
 CHS = $(subst hs,chs,$(HS))
 
 DOCKER ?= true
+TIMEIT ?=
 
 ifeq ($(DOCKER),true)
 	STACK ?= stack --docker
@@ -14,6 +15,10 @@ else
 endif
 
 LIQUID ?= $(STACK) exec liquid --
+
+ifeq ($(TIMEIT),true)
+	LIQUID := time $(LIQUID) -q >/dev/null
+endif
 
 all: $(ALL)
 
