@@ -1,0 +1,5 @@
+name: experiments
+include:
+  .
+depend:
+  agda-prelude
