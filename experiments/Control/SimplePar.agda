@@ -132,8 +132,14 @@ monotonicity : ∀ {threads} {blkd} {cntr} {heap}
              → ∀ {threads'} {blkd'} {cntr'} {heap'}
              → step threads blkd cntr heap ≡ right (threads' , blkd' , cntr' , heap')
              → heap ≤ₕ heap'
-monotonicity {Get (ivar x) k , others} p = {!!}
-monotonicity {Put (ivar x) v t₂ , others} p = {!!}
+monotonicity {Get (ivar ix) k , others} {heap = heap} p with join (find ix heap)
+monotonicity {Get (ivar ix) k , others} refl | nothing = refl≤ₕ
+monotonicity {Get (ivar ix) k , others} refl | just v  = refl≤ₕ
+monotonicity {Put (ivar ix) v t₂ , others} {heap = heap} p with join (find ix heap)
+monotonicity {Put (ivar ix) v t₂ , others} {blkd = blkd} p | nothing with find ix blkd
+monotonicity {Put (ivar ix) v t₂ , others} refl | nothing | nothing = mon≤ₕ
+monotonicity {Put (ivar ix) v t₂ , others} refl | nothing | just x = refl≤ₕ
+monotonicity {Put (ivar ix) v t₂ , others} () | just v₀
 monotonicity {New k , others} refl = mon≤ₕ
 monotonicity {Fork t₁ t₂ , others} refl = refl≤ₕ
 monotonicity {Done , others} refl = refl≤ₕ
