@@ -1,0 +1,4 @@
+[submodule "experiments/deps/agda-prelude"]
+	path = experiments/deps/agda-prelude
+	url = https://github.com/UlfNorell/agda-prelude.git
+	branch = compat-2.5.2

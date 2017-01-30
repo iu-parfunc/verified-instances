@@ -1,5 +1,4 @@
 name: experiments
 include:
   .
-depend:
-  agda-prelude
+  deps/agda-prelude/src
