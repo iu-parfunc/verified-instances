@@ -1,14 +1,8 @@
 module Control.SimplePar where
 
-open import Prelude hiding (IO)
+open import Prelude
 open import Builtin.Float
 open import Builtin.Coinduction
-
-open import Control.Monad.Identity
-import Control.Monad.State as S
-
-State : Set → Set → Set
-State S = S.StateT S Identity
 
 Val : Set
 Val = Float
@@ -71,7 +65,61 @@ insertWith f x a (y ↦ b , m) =
     then y ↦ f a b , insertWith f x a m
     else x ↦ a     , insertWith f x a m
 
-Heap = IntMap (Maybe Val)
+infix 2 _∌_
+infix 3 _↦ε,_ _↦_,_
+
+data Heap : Set
+data _∌_ : Heap → Int → Set
+
+data Heap where
+  ∅ : Heap
+  _↦ε,_ : (ix : Int) → (h : Heap) → ⦃ p : h ∌ ix ⦄ → Heap
+  _↦_,_ : (ix : Int) → (v : Val) → (h : Heap) → ⦃ p : h ∌ ix ⦄ → Heap
+
+data _∌_ where
+  ∅∌ : {ix : Int} → ∅ ∌ ix
+  ε∌ : {ix ix' : Int} {h : Heap}
+     → ⦃ p : h ∌ ix ⦄ → ¬ (ix' ≡ ix) → ix ↦ε, h ∌ ix'
+  v∌ : {ix ix' : Int} {h : Heap} {v : Val}
+     → ⦃ p : h ∌ ix ⦄ → ¬ (ix' ≡ ix) → ix ↦ v , h ∌ ix'
+
+-- data Lookup (ix : Int) (h : Heap) : Maybe Val → Dec (h ∌ ix) → Set where
+--   isn : ⦃ p : h ∌ ix ⦄ → Lookup ix h nothing (yes p)
+--   isε : ⦃ p : ¬ (h ∌ ix) ⦄ → Lookup ix h nothing (no p)
+--   isval : (v : Val) → ⦃ p : ¬ (h ∌ ix) ⦄ → Lookup ix h (just v) (no p)
+
+-- lookupHeap : (ix : Int) → (h : Heap) → Σ (Maybe Val) (λ v → Σ (Dec (h ∌ ix)) (λ p → Lookup ix h v p))
+-- lookupHeap ix ∅ = nothing , yes ∅∌ , isn
+-- lookupHeap ix (ix' ↦ε, h) with ix == ix'
+-- ... | yes refl = nothing , no (λ { (ε∌ p) → p refl }) , isε
+-- ... | no p with lookupHeap ix h
+-- ... | (.nothing , .(yes _) , isn) = nothing , yes (ε∌ p) , isn
+-- ... | (.nothing , .(no _) , isε) = nothing , yes (ε∌ p) , isn
+-- ... | (.(just v) , .(no _) , isval v) = just v , no (λ { (ε∌ q) → {!!} }) , {!isval!}
+-- lookupHeap ix (ix' ↦ v , h) = {!!}
+
+lookupHeap : (ix : Int) → (h : Heap) → Maybe Val × Dec (h ∌ ix)
+lookupHeap ix ∅ = nothing , yes ∅∌
+lookupHeap ix (ix' ↦ε, h) with ix == ix'
+... | yes refl = nothing , no λ { (ε∌ p) → p refl }
+... | no p = fst (lookupHeap ix h) , yes (ε∌ p)
+lookupHeap ix (ix' ↦ v , h) with ix == ix'
+... | yes refl = just v , no λ { (v∌ p) → p refl }
+... | no p = fst (lookupHeap ix h) , yes (v∌ p)
+
+infix 2 _≤ₕ_
+
+data _≤ₕ_ : Heap → Heap → Set where
+  h≤h : {h : Heap} → h ≤ₕ h
+  h≤ε : {h : Heap} {ix : Int} ⦃ p : h ∌ ix ⦄
+      → h ≤ₕ ix ↦ε, h
+  h≤v : {h : Heap} {ix : Int} {v : Val} ⦃ p : h ∌ ix ⦄
+      → h ≤ₕ ix ↦ v , h
+  ε≤v : {h : Heap} {ix : Int} {v : Val} ⦃ p : h ∌ ix ⦄
+      → ix ↦ε, h ≤ₕ ix ↦ v , h
+  h≤s : {h₁ h₂ : Heap} {ix : Int} {v w : Val} ⦃ p₁ : h₁ ∌ ix ⦄ ⦃ p₂ : h₂ ∌ ix ⦄
+      → h₁ ≤ₕ h₂ → v ≤ w → ix ↦ v , h₁ ≤ₕ ix ↦ w , h₂
+
 Blkd = IntMap (List (Val → Trace))
 
 data Exn : Set where
@@ -97,49 +145,46 @@ sched (rnd ∷ rs) (t ∷ ts) blkd cntr heap =
   caseM step (yank rnd t ts) blkd cntr heap of
     λ { (threads' , blkd' , cntr' , heap') →
           sched (♭ rs) threads' blkd' cntr' heap' }
-
 step (Get (ivar ix) k , others) blkd cntr heap =
-  case join (find ix heap) of
-    λ { nothing → return (others , insertWith _++_ ix [ k ] blkd , cntr , heap)
-      ; (just v) → return (k v ∷ others , blkd , cntr , heap) }
+  case lookupHeap ix heap of
+    λ { (nothing , p) → return (others , insertWith _++_ ix [ k ] blkd , cntr , heap)
+      ; (just v  , p) → return (k v ∷ others , blkd , cntr , heap) }
 step (Put (ivar ix) v t₂ , others) blkd cntr heap =
-  let heap' = ix ↦ just v , heap
-  in case join (find ix heap) of
-      λ { nothing → case find ix blkd of
-        λ { nothing → return (t₂ ∷ others , blkd , cntr , heap')
+  case lookupHeap ix heap of
+    λ { (nothing , yes p) → case find ix blkd of
+        λ { nothing → return (t₂ ∷ others , blkd , cntr , (ix ↦ v , heap) ⦃ p = p ⦄)
           ; (just ls) → return (t₂ ∷ map (λ k → k v) ls ++ others , remove ix blkd , cntr , heap) }
-        ; (just v₀) → left (MultiplePut v ix v₀) }
+      ; (nothing , no p) → case find ix blkd of
+        λ { nothing → return {!!}
+          ; (just ls) → return (t₂ ∷ map (λ k → k v) ls ++ others , remove ix blkd , cntr , heap) }
+      ; (just v₀ , _) → left (MultiplePut v ix v₀) }
+
+    -- λ { nothing → case find ix blkd of
+    --     λ { nothing → return (t₂ ∷ others , blkd , cntr , ix ↦ v , {!!})
+    --       ; (just ls) → {!!} }
+    --   ; (just v) → {!!} }
+  -- let heap' = ix ↦ v , heap
+  -- in case (lookupHeap ix heap) of
+  --     λ { nothing → case find ix blkd of
+  --       λ { nothing → return (t₂ ∷ others , blkd , cntr , heap')
+  --         ; (just ls) → return (t₂ ∷ map (λ k → k v) ls ++ others , remove ix blkd , cntr , heap) }
+  --       ; (just v₀) → left (MultiplePut v ix v₀) }
 step (New k , others) blkd cntr heap =
-  return (k (ivar cntr) ∷ others , blkd , cntr + 1 , cntr ↦ nothing , heap)
+  return (k (ivar cntr) ∷ others , blkd , cntr + 1 , {!!})
+  -- return (k (ivar cntr) ∷ others , blkd , cntr + 1 , cntr ↦ε, heap)
 step (Fork t₁ t₂ , others) blkd cntr heap =
   return (t₁ ∷ t₂ ∷ others , blkd , cntr , heap)
 step (Done , others) blkd cntr heap =
   return (others , blkd , cntr , heap)
 
-data _≤ₕ_ : Heap → Heap → Set where
-  ε≤h : ∀ {h} → ε ≤ₕ h
-  s≤h : ∀ {x a y b h₁ h₂} → h₁ ≤ₕ h₂ → (x ↦ a , h₁) ≤ₕ (y ↦ b , h₂)
-
-refl≤ₕ : ∀ {h} → h ≤ₕ h
-refl≤ₕ {ε} = ε≤h
-refl≤ₕ {(x ↦ a , h)} = s≤h refl≤ₕ
-
-mon≤ₕ : ∀ {x a h} → h ≤ₕ (x ↦ a , h)
-mon≤ₕ {h = ε} = ε≤h
-mon≤ₕ {h = (x ↦ a , h)} = s≤h mon≤ₕ
-
 monotonicity : ∀ {threads} {blkd} {cntr} {heap}
              → ∀ {threads'} {blkd'} {cntr'} {heap'}
              → step threads blkd cntr heap ≡ right (threads' , blkd' , cntr' , heap')
              → heap ≤ₕ heap'
-monotonicity {Get (ivar ix) k , others} {heap = heap} p with join (find ix heap)
-monotonicity {Get (ivar ix) k , others} refl | nothing = refl≤ₕ
-monotonicity {Get (ivar ix) k , others} refl | just v  = refl≤ₕ
-monotonicity {Put (ivar ix) v t₂ , others} {heap = heap} p with join (find ix heap)
-monotonicity {Put (ivar ix) v t₂ , others} {blkd = blkd} p | nothing with find ix blkd
-monotonicity {Put (ivar ix) v t₂ , others} refl | nothing | nothing = mon≤ₕ
-monotonicity {Put (ivar ix) v t₂ , others} refl | nothing | just x = refl≤ₕ
-monotonicity {Put (ivar ix) v t₂ , others} () | just v₀
-monotonicity {New k , others} refl = mon≤ₕ
-monotonicity {Fork t₁ t₂ , others} refl = refl≤ₕ
-monotonicity {Done , others} refl = refl≤ₕ
+monotonicity {Get (ivar ix) k , others} {heap = heap} p with (lookupHeap ix heap)
+monotonicity {Get (ivar ix) k , others} p | q = {!!}
+monotonicity {Put (ivar ix) v t₂ , others} {heap = heap} p with (lookupHeap ix heap)
+monotonicity {Put (ivar ix) v t₂ , others} {blkd = blkd} p | q = {!!}
+monotonicity {New k , others} p = {!!}
+monotonicity {Fork t₁ t₂ , others} p = {!!}
+monotonicity {Done , others} p = {!!}
