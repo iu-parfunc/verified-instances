@@ -154,10 +154,9 @@ step (Put (ivar ix) v t₂ , others) blkd cntr heap =
     λ { (nothing , yes p) → case find ix blkd of
         λ { nothing → return (t₂ ∷ others , blkd , cntr , (ix ↦ v , heap) ⦃ p = p ⦄)
           ; (just ls) → return (t₂ ∷ map (λ k → k v) ls ++ others , remove ix blkd , cntr , heap) }
-      ; (nothing , no p) → case find ix blkd of
-        λ { nothing → return {!!}
-          ; (just ls) → return (t₂ ∷ map (λ k → k v) ls ++ others , remove ix blkd , cntr , heap) }
-      ; (just v₀ , _) → left (MultiplePut v ix v₀) }
+      ; (nothing , no p) → {!!}
+      ; (just v₀ , yes p) → {!!}
+      ; (just v₀ , no p) → {!!} }
 
     -- λ { nothing → case find ix blkd of
     --     λ { nothing → return (t₂ ∷ others , blkd , cntr , ix ↦ v , {!!})
@@ -170,7 +169,7 @@ step (Put (ivar ix) v t₂ , others) blkd cntr heap =
   --         ; (just ls) → return (t₂ ∷ map (λ k → k v) ls ++ others , remove ix blkd , cntr , heap) }
   --       ; (just v₀) → left (MultiplePut v ix v₀) }
 step (New k , others) blkd cntr heap =
-  return (k (ivar cntr) ∷ others , blkd , cntr + 1 , {!!})
+  {!!}
   -- return (k (ivar cntr) ∷ others , blkd , cntr + 1 , cntr ↦ε, heap)
 step (Fork t₁ t₂ , others) blkd cntr heap =
   return (t₁ ∷ t₂ ∷ others , blkd , cntr , heap)
