@@ -1,0 +1,8 @@
+(Possible title names:
+  Scrap your proofs: a generic approach to refinement reflection [titled after "Scrap your boilerplate: a practical approach to generic programming"]
+  A generic proof mechanism for Haskell [titled after "A generic deriving mechanism for Haskell"]
+)
+
+Liquid Haskell's refinement reflection feature augments the Haskell language with theorem proving capabilities, allowing programmers to retrofit their existing code with proofs. But many of these proofs require lots of routine, boilerplate code that is tedious to write. Moreover, many such proofs do not scale well, as the size of proof terms can grow superlinearly with the size of the datatypes involved in the proofs.
+
+We present an extension to refinement reflection which solves this problem by leveraging datatype-generic programming. Our observation is that we can take any algebraic datatype, generate an equivalent _representation type_, and have Liquid Haskell automatically prove an isomorphism between the original type and the representation type. This reduces many proofs down easy theorems over simple algebraic "building block" types, allowing programmers to write generic proofs cheaply and cheerfully.
