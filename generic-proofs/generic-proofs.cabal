@@ -1,0 +1,25 @@
+name:                generic-proofs
+version:             0.1
+-- synopsis:
+-- description:
+license:             BSD3
+license-file:        LICENSE
+author:              Ryan Scott
+maintainer:          ryan.gl.scott@gmail.com
+-- copyright:
+-- category:
+build-type:          Simple
+extra-source-files:  ChangeLog.md
+cabal-version:       >=1.10
+
+library
+  exposed-modules:     GenericProofs.Iso
+                       GenericProofs.VerifiedEq
+                       GenericProofs.VerifiedEq.Generics
+
+  other-modules:       GenericProofs.Combinators
+  build-depends:       base >= 4.8 && < 5
+                     , contravariant
+  hs-source-dirs:      src
+  default-language:    Haskell2010
+  ghc-options:         -Wall

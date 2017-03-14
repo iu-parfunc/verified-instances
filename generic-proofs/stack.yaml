@@ -1,0 +1,12 @@
+resolver: lts-6.27
+docker:
+  enable: false
+  image: "liquidhaskell"
+packages:
+- '.'
+
+flags: {}
+extra-package-dbs: []
+
+allow-newer: True
+compiler-check: newer-minor
