@@ -17,6 +17,7 @@ library
                        GenericProofs.Iso
                        GenericProofs.VerifiedEq
                        GenericProofs.VerifiedEq.Generics
+                       GenericProofs.VerifiedEq.Instances
 
   other-modules:       GenericProofs.Combinators
   build-depends:       base >= 4.8 && < 5
