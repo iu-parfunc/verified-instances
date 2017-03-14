@@ -353,3 +353,72 @@ veqSum (VerifiedEq eqFp eqFpRefl eqFpSym eqFpTrans) (VerifiedEq eqGp eqGpRefl eq
              (eqSumRefl eqFp eqFpRefl eqGp eqGpRefl)
              (eqSumSym eqFp eqFpSym eqGp eqGpSym)
              (eqSumTrans eqFp eqFpTrans eqGp eqGpTrans)
+
+{-@ data (:*:) f g p = f g :*: g p @-}
+type Prod = (:*:)
+
+{-@ axiomatize eqProd @-}
+eqProd :: (f p -> f p -> Bool) -> (g p -> g p -> Bool)
+       -> (f :*: g) p -> (f :*: g) p -> Bool
+eqProd eqFp eqGp (p1 :*: p2) (q1 :*: q2) = eqFp p1 q1 && eqGp p2 q2
+
+{-@ eqProdRefl :: eqFp:(f p -> f p -> Bool) -> eqFpRefl:(x:f p -> { eqFp x x })
+               -> eqGp:(g p -> g p -> Bool) -> eqGpRefl:(y:g p -> { eqGp y y })
+               -> p:(f :*: g) p
+               -> { eqProd eqFp eqGp p p }
+@-}
+eqProdRefl :: (f p -> f p -> Bool) -> (f p -> Proof)
+           -> (g p -> g p -> Bool) -> (g p -> Proof)
+           -> (f :*: g) p -> Proof
+eqProdRefl eqFp eqFpRefl eqGp eqGpRefl p@(x :*: y) =
+      eqProd eqFp eqGp p p
+  ==. (eqFp x x && eqGp y y)
+  ==. (True && eqGp y y) ? eqFpRefl x
+  ==. (True && True)     ? eqGpRefl y
+  ==. True
+  *** QED
+
+{-@ eqProdSym :: eqFp:(f p -> f p -> Bool)
+              -> eqFpSym:(x:f p -> y:f p -> { eqFp x y ==> eqFp y x })
+              -> eqGp:(g p -> g p -> Bool)
+              -> eqGpSym:(x:g p -> y:g p -> { eqGp x y ==> eqGp y x })
+              -> p:(f :*: g) p -> q:(f :*: g) p
+              -> { eqProd eqFp eqGp p q ==> eqProd eqFp eqGp q p }
+@-}
+eqProdSym :: (f p -> f p -> Bool) -> (f p -> f p -> Proof)
+          -> (g p -> g p -> Bool) -> (g p -> g p -> Proof)
+          -> (f :*: g) p -> (f :*: g) p -> Proof
+eqProdSym eqFp eqFpSym eqGp eqGpSym p@(x1 :*: y1) q@(x2 :*: y2) =
+      eqProd eqFp eqGp p q
+  ==. (eqFp x1 x2 && eqGp y1 y2)
+  ==. (eqFp x2 x1 && eqGp y1 y2) ? eqFpSym x1 x2
+  ==. (eqFp x2 x1 && eqGp y2 y1) ? eqGpSym y1 y2
+  ==. (eqProd eqFp eqGp (x2 :*: y2) (x1 :*: y1))
+  ==. eqProd eqFp eqGp q p
+  *** QED
+
+{-@ eqProdTrans :: eqFp:(f p -> f p -> Bool)
+                 -> eqFpTrans:(x:f p -> y:f p -> z:f p -> { eqFp x y && eqFp y z ==> eqFp x z })
+                -> eqGp:(g p -> g p -> Bool)
+                -> eqGpTrans:(x:g p -> y:g p -> z:g p -> { eqGp x y && eqGp y z ==> eqGp x z })
+                -> p:(f :*: g) p -> q:(f :*: g) p -> r:(f :*: g) p
+                -> { eqProd eqFp eqGp p q && eqProd eqFp eqGp q r ==> eqProd eqFp eqGp p r }
+@-}
+eqProdTrans :: (f p -> f p -> Bool) -> (f p -> f p -> f p -> Proof)
+            -> (g p -> g p -> Bool) -> (g p -> g p -> g p -> Proof)
+            -> (f :*: g) p -> (f :*: g) p -> (f :*: g) p -> Proof
+eqProdTrans eqFp eqFpTrans eqGp eqGpTrans p@(x1 :*: y1) q@(x2 :*: y2) r@(x3 :*: y3) =
+      (eqProd eqFp eqGp p q && eqProd eqFp eqGp q r)
+  ==. ((eqFp x1 x2 && eqGp y1 y2) && (eqFp x2 x3 && eqGp y2 y3))
+  ==. ((eqFp x1 x2 && eqFp x2 x3) && (eqGp y1 y2 && eqGp y2 y3))
+  ==. (eqFp x1 x3 && (eqGp y1 y2 && eqGp y2 y3)) ? eqFpTrans x1 x2 x3
+  ==. (eqFp x1 x3 && eqGp y1 y3)                ? eqGpTrans y1 y2 y3
+  ==. eqProd eqFp eqGp p r
+  *** QED
+
+veqProd :: VerifiedEq (f p) -> VerifiedEq (g p) -> VerifiedEq ((f :*: g) p)
+veqProd (VerifiedEq eqFp eqFpRefl eqFpSym eqFpTrans) (VerifiedEq eqGp eqGpRefl eqGpSym eqGpTrans) =
+  VerifiedEq (eqProd eqFp eqGp)
+             (eqProdRefl eqFp eqFpRefl eqGp eqGpRefl)
+             (eqProdSym eqFp eqFpSym eqGp eqGpSym)
+             (eqProdTrans eqFp eqFpTrans eqGp eqGpTrans)
