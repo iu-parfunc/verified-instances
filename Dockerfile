@@ -10,7 +10,7 @@ RUN git clone --recursive https://github.com/ucsd-progsys/liquidhaskell.git /opt
 WORKDIR /opt/liquidhaskell
 
 # "develop" branch
-ENV LIQUID_SHA cc1c0ca3f9c604e1c60114e8ba41915eb3d40466
+ENV LIQUID_SHA 904e6927a97480856fe2c7d2e083f7bc7a0710c5
 RUN git fetch --all && \
     git checkout --force ${LIQUID_SHA} && \
     git submodule update --init --recursive && \
