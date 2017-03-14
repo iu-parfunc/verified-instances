@@ -354,6 +354,7 @@ veqSum (VerifiedEq eqFp eqFpRefl eqFpSym eqFpTrans) (VerifiedEq eqGp eqGpRefl eq
              (eqSumSym eqFp eqFpSym eqGp eqGpSym)
              (eqSumTrans eqFp eqFpTrans eqGp eqGpTrans)
 
+{-
 {-@ data (:*:) f g p = f g :*: g p @-}
 type Prod = (:*:)
 
@@ -422,3 +423,4 @@ veqProd (VerifiedEq eqFp eqFpRefl eqFpSym eqFpTrans) (VerifiedEq eqGp eqGpRefl e
              (eqProdRefl eqFp eqFpRefl eqGp eqGpRefl)
              (eqProdSym eqFp eqFpSym eqGp eqGpSym)
              (eqProdTrans eqFp eqFpTrans eqGp eqGpTrans)
+-}

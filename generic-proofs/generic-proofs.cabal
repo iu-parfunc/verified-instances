@@ -13,7 +13,8 @@ extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
 library
-  exposed-modules:     GenericProofs.Iso
+  exposed-modules:     GenericProofs.Classes
+                       GenericProofs.Iso
                        GenericProofs.VerifiedEq
                        GenericProofs.VerifiedEq.Generics
 
