@@ -1,6 +1,7 @@
-{-@ LIQUID "--higherorder" @-}
-{-@ LIQUID "--totality"    @-}
-{-@ LIQUID "--exactdc"     @-}
+{-@ LIQUID "--higherorder"    @-}
+{-@ LIQUID "--totality"       @-}
+{-@ LIQUID "--exactdc"        @-}
+{-@ LIQUID "--prune-unsorted" @-}
 {-# LANGUAGE EmptyCase     #-}
 {-# LANGUAGE TypeOperators #-}
 module GenericProofs.VerifiedEq.Generics where
@@ -354,8 +355,7 @@ veqSum (VerifiedEq eqFp eqFpRefl eqFpSym eqFpTrans) (VerifiedEq eqGp eqGpRefl eq
              (eqSumSym eqFp eqFpSym eqGp eqGpSym)
              (eqSumTrans eqFp eqFpTrans eqGp eqGpTrans)
 
-{-
-{-@ data (:*:) f g p = f g :*: g p @-}
+{-@ data (:*:) f g p = (:*:) (f g) (g p) @-}
 type Prod = (:*:)
 
 {-@ axiomatize eqProd @-}
@@ -365,7 +365,7 @@ eqProd eqFp eqGp (p1 :*: p2) (q1 :*: q2) = eqFp p1 q1 && eqGp p2 q2
 
 {-@ eqProdRefl :: eqFp:(f p -> f p -> Bool) -> eqFpRefl:(x:f p -> { eqFp x x })
                -> eqGp:(g p -> g p -> Bool) -> eqGpRefl:(y:g p -> { eqGp y y })
-               -> p:(f :*: g) p
+               -> p:Prod f g p
                -> { eqProd eqFp eqGp p p }
 @-}
 eqProdRefl :: (f p -> f p -> Bool) -> (f p -> Proof)
@@ -383,7 +383,7 @@ eqProdRefl eqFp eqFpRefl eqGp eqGpRefl p@(x :*: y) =
               -> eqFpSym:(x:f p -> y:f p -> { eqFp x y ==> eqFp y x })
               -> eqGp:(g p -> g p -> Bool)
               -> eqGpSym:(x:g p -> y:g p -> { eqGp x y ==> eqGp y x })
-              -> p:(f :*: g) p -> q:(f :*: g) p
+              -> p:Prod f g p -> q:Prod f g p
               -> { eqProd eqFp eqGp p q ==> eqProd eqFp eqGp q p }
 @-}
 eqProdSym :: (f p -> f p -> Bool) -> (f p -> f p -> Proof)
@@ -402,7 +402,7 @@ eqProdSym eqFp eqFpSym eqGp eqGpSym p@(x1 :*: y1) q@(x2 :*: y2) =
                  -> eqFpTrans:(x:f p -> y:f p -> z:f p -> { eqFp x y && eqFp y z ==> eqFp x z })
                 -> eqGp:(g p -> g p -> Bool)
                 -> eqGpTrans:(x:g p -> y:g p -> z:g p -> { eqGp x y && eqGp y z ==> eqGp x z })
-                -> p:(f :*: g) p -> q:(f :*: g) p -> r:(f :*: g) p
+                -> p:Prod f g p -> q:Prod f g p -> r:Prod f g p
                 -> { eqProd eqFp eqGp p q && eqProd eqFp eqGp q r ==> eqProd eqFp eqGp p r }
 @-}
 eqProdTrans :: (f p -> f p -> Bool) -> (f p -> f p -> f p -> Proof)
@@ -423,4 +423,3 @@ veqProd (VerifiedEq eqFp eqFpRefl eqFpSym eqFpTrans) (VerifiedEq eqGp eqGpRefl e
              (eqProdRefl eqFp eqFpRefl eqGp eqGpRefl)
              (eqProdSym eqFp eqFpSym eqGp eqGpSym)
              (eqProdTrans eqFp eqFpTrans eqGp eqGpTrans)
--}
