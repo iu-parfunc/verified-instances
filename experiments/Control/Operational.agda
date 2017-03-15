@@ -2,19 +2,12 @@
 
 module Control.Operational where
 
-open import Agda.Builtin.Size
 open import Prelude
+open import Builtin.Size
 open import Control.Monad.Identity
+open import Control.Delay
 
-mutual
-  data Delay (A : Set) (i : Size) : Set where
-    now   : A → Delay A i
-    later : ∞Delay A i → Delay A i
-
-  record ∞Delay (A : Set) (i : Size) : Set where
-    coinductive
-    field
-      coe : {j : Size< i} → Delay A j
+-- Operational monad transformer
 
 data OpT (E : Set → Set) (M : Set → Set) (A : Set) : Set where
   lift : (ma : M A) → OpT E M A
