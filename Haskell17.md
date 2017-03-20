@@ -12,8 +12,8 @@ vIso :: (Iso a b) -> v a -> v b`
 
 - Automatic Deriviation of Isomorphisms via Template Haskell @rgscott 
 - Applications
- - Example 1 `v := VerifiedEq`, `a := Int`, `b := MyInt`
- - Example 2 `v := VerifiedNum`, `a := Int`, `b := MyInt`
- - Example 3 `v := VerifiedNum`, `a := Nat`, `b := Peano`
- - Example 4 `v := VerifiedApplicative`, `a := List`, `b := ???`
+   - Example 1 `v := VerifiedEq`, `a := Int`, `b := MyInt`
+   - Example 2 `v := VerifiedNum`, `a := Int`, `b := MyInt`
+   - Example 3 `v := VerifiedNum`, `a := Nat`, `b := Peano`
+   - Example 4 `v := VerifiedApplicative`, `a := List`, `b := ???`
 
