@@ -55,10 +55,16 @@ module _ {M : Set → Set} where
     fork : Conc M ⊤ → Conc M ⊤
     fork m = conc λ k → Fork (action m) (k tt)
 
+    {-# TERMINATING #-}
+    size : Action M → M Nat
+    size (Atom a) = a >>= size
+    size (Fork a₁ a₂) = _+_ <$> size a₁ <*> size a₂
+    size Stop = return 0
+
     -- If there was some form of reduction happening here, we could
     -- use sized types to get termination, otherwise we need to use
     -- Delay.
-    {-# NON_TERMINATING #-}
+    {-# TERMINATING #-}
     sched : List (Action M) → M ⊤
     sched [] = return tt
     sched (a ∷ as) = case a of
