@@ -1,7 +1,7 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--exactdc"            @-}
-{-@ LIQUID "--prune-unsorted"     @-}
+-- {-@ LIQUID "--prune-unsorted"     @-}
 module GenericProofs.Classes where
 
 import GenericProofs.Combinators
@@ -23,17 +23,17 @@ class Generic1 f => Generic1Iso f where
 {-@ data MyInt = MyInt { getMyInt :: Int } @-}
 data MyInt = MyInt { getMyInt :: Int }
 
+{-@ data K1 i c p = K1 { unK1 :: c } @-}
+
 type RepMyInt = Rec0 Int
 
 {-@ axiomatize fromMyInt @-}
 fromMyInt :: MyInt -> RepMyInt x
 fromMyInt (MyInt x) = K1 x
-{-# INLINE fromMyInt #-}
 
 {-@ axiomatize toMyInt @-}
 toMyInt :: RepMyInt x -> MyInt
 toMyInt (K1 x) = MyInt x
-{-# INLINE toMyInt #-}
 
 {-@ tofMyInt :: a:MyInt
              -> { toMyInt (fromMyInt a) == a }
