@@ -34,7 +34,7 @@ module _ {E : Set → Set} {M : Set → Set} {{_ : Monad M}} where
   module _ {{_ : Functor E}} where
 
     mutual
-      runOpT : {A : Set} {i : Size} → OpT E M A → Delay (M A) i
+      runOpT : {A : Set} {i : Size} → OpT E M A → Delay i (M A)
       runOpT (lift ma) =
         now ma
       runOpT (bind (lift ma) k) =
@@ -46,5 +46,5 @@ module _ {E : Set → Set} {M : Set → Set} {{_ : Monad M}} where
       runOpT (bind (expr e) k) = {!!}
       runOpT (expr e) = now {!!}
 
-      ∞runOpT : {A : Set} {i : Size} → OpT E M A → ∞Delay (M A) i
+      ∞runOpT : {A : Set} {i : Size} → OpT E M A → ∞Delay i (M A)
       ∞Delay.coe (∞runOpT ma) = runOpT ma
