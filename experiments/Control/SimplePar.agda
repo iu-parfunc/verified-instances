@@ -68,44 +68,38 @@ insertWith f x a (y ↦ b , m) =
 infix 2 _∌_
 infix 3 _↦ε,_ _↦_,_
 
-data Heap : Set
-data _∌_ : Heap → Int → Set
+mutual
+  data Heap : Set where
+    ∅ : Heap
+    _↦ε,_ : (ix : Int) → (h : Heap) → ⦃ p : h ∌ ix ⦄ → Heap
+    _↦_,_ : (ix : Int) → (v : Val) → (h : Heap) → ⦃ _ : h ∌ ix ⦄ → Heap
 
-data Heap where
-  ∅ : Heap
-  _↦ε,_ : (ix : Int) → (h : Heap) → ⦃ p : h ∌ ix ⦄ → Heap
-  _↦_,_ : (ix : Int) → (v : Val) → (h : Heap) → ⦃ p : h ∌ ix ⦄ → Heap
+  data _∌_ : Heap → Int → Set where
+    ∅∌ : {ix : Int} → ∅ ∌ ix
+    ε∌ : {ix ix' : Int} {h : Heap}
+       → ⦃ _ : h ∌ ix ⦄ ⦃ _ : h ∌ ix' ⦄ → ¬ (ix' ≡ ix) → ix' ↦ε, h ∌ ix
+    v∌ : {ix ix' : Int} {h : Heap} {v : Val}
+       → ⦃ _ : h ∌ ix ⦄ ⦃ _ : h ∌ ix' ⦄ → ¬ (ix' ≡ ix) → ix' ↦ v , h ∌ ix
 
-data _∌_ where
-  ∅∌ : {ix : Int} → ∅ ∌ ix
-  ε∌ : {ix ix' : Int} {h : Heap}
-     → ⦃ p : h ∌ ix ⦄ → ¬ (ix' ≡ ix) → ix ↦ε, h ∌ ix'
-  v∌ : {ix ix' : Int} {h : Heap} {v : Val}
-     → ⦃ p : h ∌ ix ⦄ → ¬ (ix' ≡ ix) → ix ↦ v , h ∌ ix'
+data Lookup (ix : Int) (h : Heap) : Maybe Val → Dec (h ∌ ix) → Set where
+  isn : ⦃ p : h ∌ ix ⦄ → Lookup ix h nothing (yes p)
+  isε : ⦃ p : ¬ (h ∌ ix) ⦄ → Lookup ix h nothing (no p)
+  isval : (v : Val) → ⦃ p : ¬ (h ∌ ix) ⦄ → Lookup ix h (just v) (no p)
 
--- data Lookup (ix : Int) (h : Heap) : Maybe Val → Dec (h ∌ ix) → Set where
---   isn : ⦃ p : h ∌ ix ⦄ → Lookup ix h nothing (yes p)
---   isε : ⦃ p : ¬ (h ∌ ix) ⦄ → Lookup ix h nothing (no p)
---   isval : (v : Val) → ⦃ p : ¬ (h ∌ ix) ⦄ → Lookup ix h (just v) (no p)
-
--- lookupHeap : (ix : Int) → (h : Heap) → Σ (Maybe Val) (λ v → Σ (Dec (h ∌ ix)) (λ p → Lookup ix h v p))
--- lookupHeap ix ∅ = nothing , yes ∅∌ , isn
--- lookupHeap ix (ix' ↦ε, h) with ix == ix'
--- ... | yes refl = nothing , no (λ { (ε∌ p) → p refl }) , isε
--- ... | no p with lookupHeap ix h
--- ... | (.nothing , .(yes _) , isn) = nothing , yes (ε∌ p) , isn
--- ... | (.nothing , .(no _) , isε) = nothing , yes (ε∌ p) , isn
--- ... | (.(just v) , .(no _) , isval v) = just v , no (λ { (ε∌ q) → {!!} }) , {!isval!}
--- lookupHeap ix (ix' ↦ v , h) = {!!}
-
-lookupHeap : (ix : Int) → (h : Heap) → Maybe Val × Dec (h ∌ ix)
-lookupHeap ix ∅ = nothing , yes ∅∌
+lookupHeap : (ix : Int) → (h : Heap) → Σ (Maybe Val) (λ v → Σ (Dec (h ∌ ix)) (λ p → Lookup ix h v p))
+lookupHeap ix ∅ = nothing , yes ∅∌ , isn
 lookupHeap ix (ix' ↦ε, h) with ix == ix'
-... | yes refl = nothing , no λ { (ε∌ p) → p refl }
-... | no p = fst (lookupHeap ix h) , yes (ε∌ p)
+... | yes refl = nothing , no (λ { (ε∌ ix≢ix) → ix≢ix refl }) , isε
+... | no ix≢ix' with lookupHeap ix h
+... | (.nothing , .(yes _) , isn) = nothing , yes (ε∌ λ { ix'≡ix → ix≢ix' (sym ix'≡ix) }) , isn
+... | (.nothing , .(no ¬h∌ix) , isε ⦃ ¬h∌ix ⦄) = nothing , no (λ { (ε∌ ix'≢ix) → {!!} }) , isε
+... | (.(just v) , .(no ¬h∌ix) , isval v ⦃ ¬h∌ix ⦄) = just v , no (λ { (ε∌ ix'≢ix) → {!!} }) , isval v
 lookupHeap ix (ix' ↦ v , h) with ix == ix'
-... | yes refl = just v , no λ { (v∌ p) → p refl }
-... | no p = fst (lookupHeap ix h) , yes (v∌ p)
+... | yes refl = just v , no (λ { (v∌ ix≢ix) → ix≢ix refl }) , isval v
+... | no ix≢ix' with lookupHeap ix h
+... | (.nothing , .(yes _) , isn) = nothing , yes (v∌ (λ { ix'≡ix → ix≢ix' (sym ix'≡ix) })) , isn
+... | (.nothing , .(no ¬h∌ix) , isε ⦃ ¬h∌ix ⦄) = nothing , no (λ { (v∌ ix'≢ix) → {!!} }) , isε
+... | (.(just w) , .(no ¬h∌ix) , isval w ⦃ ¬h∌ix ⦄) = just w , no (λ { (v∌ ix'≢ix) → {!!} }) , isval w
 
 infix 2 _≤ₕ_
 
@@ -151,12 +145,18 @@ step (Get (ivar ix) k , others) blkd cntr heap =
       ; (just v  , p) → return (k v ∷ others , blkd , cntr , heap) }
 step (Put (ivar ix) v t₂ , others) blkd cntr heap =
   case lookupHeap ix heap of
-    λ { (nothing , yes p) → case find ix blkd of
-        λ { nothing → return (t₂ ∷ others , blkd , cntr , (ix ↦ v , heap) ⦃ p = p ⦄)
+    λ { (.nothing , .(yes _) , isn) → case find ix blkd of
+        λ { nothing → return (t₂ ∷ others , blkd , cntr , (ix ↦ v , heap))
           ; (just ls) → return (t₂ ∷ map (λ k → k v) ls ++ others , remove ix blkd , cntr , heap) }
-      ; (nothing , no p) → {!!}
-      ; (just v₀ , yes p) → {!!}
-      ; (just v₀ , no p) → {!!} }
+      ; (.nothing , .(no _) , isε) → {!!}
+      ; (.(just v) , .(no _) , isval v) → {!!} }
+
+    -- λ { (nothing , yes p) → case find ix blkd of
+    --     λ { nothing → return (t₂ ∷ others , blkd , cntr , (ix ↦ v , heap) ⦃ p = p ⦄)
+    --       ; (just ls) → return (t₂ ∷ map (λ k → k v) ls ++ others , remove ix blkd , cntr , heap) }
+    --   ; (nothing , no p) → {!!}
+    --   ; (just v₀ , yes p) → {!!}
+    --   ; (just v₀ , no p) → {!!} }
 
     -- λ { nothing → case find ix blkd of
     --     λ { nothing → return (t₂ ∷ others , blkd , cntr , ix ↦ v , {!!})
@@ -176,14 +176,14 @@ step (Fork t₁ t₂ , others) blkd cntr heap =
 step (Done , others) blkd cntr heap =
   return (others , blkd , cntr , heap)
 
-monotonicity : ∀ {threads} {blkd} {cntr} {heap}
-             → ∀ {threads'} {blkd'} {cntr'} {heap'}
-             → step threads blkd cntr heap ≡ right (threads' , blkd' , cntr' , heap')
-             → heap ≤ₕ heap'
-monotonicity {Get (ivar ix) k , others} {heap = heap} p with (lookupHeap ix heap)
-monotonicity {Get (ivar ix) k , others} p | q = {!!}
-monotonicity {Put (ivar ix) v t₂ , others} {heap = heap} p with (lookupHeap ix heap)
-monotonicity {Put (ivar ix) v t₂ , others} {blkd = blkd} p | q = {!!}
-monotonicity {New k , others} p = {!!}
-monotonicity {Fork t₁ t₂ , others} p = {!!}
-monotonicity {Done , others} p = {!!}
+-- monotonicity : ∀ {threads} {blkd} {cntr} {heap}
+--              → ∀ {threads'} {blkd'} {cntr'} {heap'}
+--              → step threads blkd cntr heap ≡ right (threads' , blkd' , cntr' , heap')
+--              → heap ≤ₕ heap'
+-- monotonicity {Get (ivar ix) k , others} {heap = heap} p with (lookupHeap ix heap)
+-- monotonicity {Get (ivar ix) k , others} p | q = {!!}
+-- monotonicity {Put (ivar ix) v t₂ , others} {heap = heap} p with (lookupHeap ix heap)
+-- monotonicity {Put (ivar ix) v t₂ , others} {blkd = blkd} p | q = {!!}
+-- monotonicity {New k , others} p = {!!}
+-- monotonicity {Fork t₁ t₂ , others} p = {!!}
+-- monotonicity {Done , others} p = {!!}
