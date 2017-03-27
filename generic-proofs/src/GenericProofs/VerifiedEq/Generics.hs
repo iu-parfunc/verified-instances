@@ -8,7 +8,8 @@ module GenericProofs.VerifiedEq.Generics where
 
 import GenericProofs.Combinators
 import GenericProofs.VerifiedEq
-import GHC.Generics
+
+import Generics.Deriving.Newtypeless
 
 {-@ data V1 @-}
 
@@ -58,7 +59,7 @@ eqU1Trans x y z = (eqU1 x y && eqU1 y z) ==. eqU1 x z *** QED
 veqU1 :: VerifiedEq (U1 p)
 veqU1 = VerifiedEq eqU1 eqU1Refl eqU1Sym eqU1Trans
 
-{-@ newtype Par1 p = Par1 { unPar1 :: p } @-}
+{-@ data Par1 p = Par1 { unPar1 :: p } @-}
 
 {-@ axiomatize eqPar1 @-}
 eqPar1 :: (p -> p -> Bool) -> Par1 p -> Par1 p -> Bool
@@ -102,7 +103,7 @@ veqPar1 (VerifiedEq eqP eqPRefl eqPSym eqPTrans)
              (eqPar1Sym eqP eqPSym)
              (eqPar1Trans eqP eqPTrans)
 
-{-@ newtype Rec1 f p = Rec1 { unRec1 :: f p } @-}
+{-@ data Rec1 f p = Rec1 { unRec1 :: f p } @-}
 
 {-@ axiomatize eqRec1 @-}
 eqRec1 :: (f p -> f p -> Bool) -> Rec1 f p -> Rec1 f p -> Bool
@@ -146,7 +147,7 @@ veqRec1 (VerifiedEq eqFp eqFpRefl eqFpSym eqFpTrans)
                (eqRec1Sym   eqFp eqFpSym)
                (eqRec1Trans eqFp eqFpTrans)
 
-{-@ newtype K1 i c p = K1 { unK1 :: c } @-}
+{-@ data K1 i c p = K1 { unK1 :: c } @-}
 
 {-@ axiomatize eqK1 @-}
 eqK1 :: (c -> c -> Bool) -> K1 i c p -> K1 i c p -> Bool
@@ -190,7 +191,7 @@ veqK1 (VerifiedEq eqC eqCRefl eqCSym eqCTrans)
                (eqK1Sym   eqC eqCSym)
                (eqK1Trans eqC eqCTrans)
 
-{-@ newtype M1 i c f p = M1 { unM1 :: f p } @-}
+{-@ data M1 i c f p = M1 { unM1 :: f p } @-}
 
 {-@ axiomatize eqM1 @-}
 eqM1 :: (f p -> f p -> Bool) -> M1 i c f p -> M1 i c f p -> Bool

@@ -1,15 +1,16 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--exactdc"            @-}
--- {-@ LIQUID "--prune-unsorted"     @-}
+{-@ LIQUID "--prune-unsorted"     @-}
 module GenericProofs.Classes where
 
 import GenericProofs.Combinators
 import GenericProofs.Iso
--- import GenericProofs.VerifiedEq
--- import GenericProofs.VerifiedEq.Generics
--- import GenericProofs.VerifiedEq.Instances
-import GHC.Generics
+import GenericProofs.VerifiedEq
+import GenericProofs.VerifiedEq.Generics
+import GenericProofs.VerifiedEq.Instances
+
+import Generics.Deriving.Newtypeless
 
 {-
 class Generic a => GenericIso a where
@@ -19,33 +20,34 @@ class Generic1 f => Generic1Iso f where
   rep1Iso :: Iso (f a) (Rep1 f a)
 -}
 
-newtype MyInt = MyInt Int
-{-@ MyInt :: x:Int -> {v:MyInt | v ~~ x } @-}
+{-@ data MyInt = MyInt { getMyInt :: Int } @-}
+data MyInt = MyInt { getMyInt :: Int }
 
 type RepMyInt = Rec0 Int
 
-{-@ measure fromMyInt ::   MyInt ->    RepMyInt x @-}
-{-@ assume  fromMyInt :: x:MyInt -> {v:RepMyInt x | v ~~ x && v ~~ fromMyInt x } @-}
+{-@ axiomatize fromMyInt @-}
 fromMyInt :: MyInt -> RepMyInt x
 fromMyInt (MyInt x) = K1 x
+{-# INLINE fromMyInt #-}
 
-{-@ measure toMyInt ::   RepMyInt x ->    MyInt @-}
-{-@ assume  toMyInt :: x:RepMyInt x -> {v:MyInt | v ~~ x && v ~~ toMyInt x } @-}
+{-@ axiomatize toMyInt @-}
 toMyInt :: RepMyInt x -> MyInt
 toMyInt (K1 x) = MyInt x
+{-# INLINE toMyInt #-}
 
-{-@ tofMyInt :: from':(x:MyInt -> {v:RepMyInt x | v ~~ x})
-             -> to':(x:RepMyInt x -> {v:MyInt | v ~~ x})
-             -> a:MyInt
-             -> { to' (from' a) == a }
+{-@ tofMyInt :: a:MyInt
+             -> { toMyInt (fromMyInt a) == a }
 @-}
-tofMyInt :: (MyInt -> RepMyInt x) -> (RepMyInt x -> MyInt) -> MyInt -> Proof
-tofMyInt from' to' (MyInt x)
-  =   to' (from' (MyInt x))
-  ==. to' (K1 x)
+tofMyInt :: MyInt -> Proof
+tofMyInt a@(MyInt x)
+  =   toMyInt (fromMyInt a)
+  ==. toMyInt (fromMyInt (MyInt x))
+  ==. toMyInt (K1 x)
   ==. MyInt x
+  ==. a
   *** QED
 
+{-
 {-@ fotMyInt :: from':(x:MyInt -> {v:RepMyInt x | v ~~ x})
              -> to':(x:RepMyInt x -> {v:MyInt | v ~~ x})
              -> a:RepMyInt x
@@ -62,7 +64,6 @@ isoMyInt :: Iso MyInt (RepMyInt x)
 isoMyInt = Iso fromMyInt toMyInt (fotMyInt fromMyInt toMyInt)
                                  (tofMyInt fromMyInt toMyInt)
 
-{-
 veqMyInt :: VerifiedEq MyInt
-veqMyInt = veqContra _ $ veqK1 veqInt
+veqMyInt = veqContra fromMyInt $ veqK1 veqInt
 -}

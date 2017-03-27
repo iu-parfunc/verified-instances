@@ -4,6 +4,7 @@ docker:
   image: "liquidhaskell"
 packages:
 - '.'
+- './generic-deriving-newtypeless'
 
 flags: {}
 extra-package-dbs: []

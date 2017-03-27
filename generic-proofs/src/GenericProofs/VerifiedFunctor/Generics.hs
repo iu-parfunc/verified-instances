@@ -8,7 +8,8 @@ module GenericProofs.VerifiedFunctor.Generics where
 
 import GenericProofs.Combinators
 import GenericProofs.VerifiedFunctor
-import GHC.Generics
+
+import Generics.Deriving.Newtypeless
 
 {-@ axiomatize identity @-}
 identity :: a -> a
@@ -91,7 +92,7 @@ vfunctorU1 :: VerifiedFunctor U1
 vfunctorU1 = VerifiedFunctor fmapU1 fmapU1Id fmapU1Compose
 
 {-
-{-@ newtype Par1 p = Par1 { unPar1 :: p } @-}
+{-@ data Par1 p = Par1 { unPar1 :: p } @-}
 
 {-@ axiomatize fmapPar1 @-}
 fmapPar1 :: (p -> q) -> Par1 p -> Par1 q
@@ -101,9 +102,30 @@ fmapPar1 f (Par1 p) = Par1 (f p)
                -> { fmapPar1 identity x == x }
 @-}
 fmapPar1Id :: Par1 p -> Proof
-fmapPar1Id (Par1 p)
-  =   fmapPar1 identity (Par1 p)
+fmapPar1Id par@(Par1 p)
+  =   fmapPar1 identity par
   ==. Par1 (identity p)
   ==. Par1 p
+  ==. par
   *** QED
+
+{-@ fmapPar1Compose :: f:(q -> r)
+                    -> g:(p -> q)
+                    -> x:Par1 p
+                    -> { fmapPar1 (compose f g) x == compose (fmapPar1 f) (fmapPar1 g) x } @-}
+fmapPar1Compose :: (q -> r) -> (p -> q)
+                -> Par1 p -> Proof
+fmapPar1Compose f g x@(Par1 p)
+  =   fmapPar1 (compose f g) x
+  ==. fmapPar1 (compose f g) (Par1 p)
+  ==. Par1 (compose f g p)
+  ==. Par1 (f (g p))
+  ==. fmapPar1 f (Par1 (g p))
+  ==. fmapPar1 f (fmapPar1 g (Par1 p))
+  ==. compose (fmapPar1 f) (fmapPar1 g) (Par1 p)
+  ==. compose (fmapPar1 f) (fmapPar1 g) x
+  *** QED
+
+vfunctorPar1 :: VerifiedFunctor Par1
+vfunctorPar1 = VerifiedFunctor fmapPar1 fmapPar1Id fmapPar1Compose
 -}
