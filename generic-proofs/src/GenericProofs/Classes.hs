@@ -23,7 +23,11 @@ class Generic1 f => Generic1Iso f where
 {-@ data MyInt = MyInt { getMyInt :: Int } @-}
 data MyInt = MyInt { getMyInt :: Int }
 
-{-@ data K1 i c p = K1 { unK1 :: c } @-}
+-- The below refinement is useless as K1 is defined in another file
+{- data K1 i c p = K1 { unK1 :: c } @-}
+
+{-@ assume k1   :: c:c -> {v:K1 i c p | v = K1 c &&  unK1 v == c && select_K1_1 v == c } @-}
+k1 = K1 
 
 type RepMyInt = Rec0 Int
 
@@ -42,7 +46,7 @@ tofMyInt :: MyInt -> Proof
 tofMyInt a@(MyInt x)
   =   toMyInt (fromMyInt a)
   ==. toMyInt (fromMyInt (MyInt x))
-  ==. toMyInt (K1 x)
+  ==. toMyInt (k1 x)
   ==. MyInt x
   ==. a
   *** QED
