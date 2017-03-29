@@ -12,26 +12,24 @@ import GenericProofs.VerifiedEq.Instances
 
 import Generics.Deriving.Newtypeless
 
-{-@ data Product = MkProduct { fld1 :: Int, fld2 :: Double } @-}
-data Product = MkProduct Int Double
+{-@ data MyProduct = MyProduct { fld1 :: Int, fld2 :: Double } @-}
+data MyProduct = MyProduct Int Double
 
-type Prod = (:*:)
-
-{-@ assume genProd :: a:(f p)
+{-@ assume product :: a:(f p)
                    -> b:(g p)
-                   -> {v:Prod f g p | v == a :*: b } @-}
-genProd :: f p -> g p -> (f :*: g) p
-genProd = (:*:)
+                   -> {v:Product f g p | v == Product a b } @-}
+product :: f p -> g p -> Product f g p
+product = Product
 
-type RepProduct = Rec0 Int :*: Rec0 Double
+type RepMyProduct = Product (Rec0 Int) (Rec0 Double)
 
-{-@ axiomatize fromProduct @-}
-fromProduct :: Product -> RepProduct x
-fromProduct (MkProduct i d) = K1 i :*: K1 d
+{-@ axiomatize fromMyProduct @-}
+fromMyProduct :: MyProduct -> RepMyProduct x
+fromMyProduct (MyProduct i d) = Product (K1 i) (K1 d)
 
-{-@ axiomatize toProduct @-}
-toProduct :: RepProduct x -> Product
-toProduct (K1 i :*: K1 d) = MkProduct i d
+{-@ axiomatize toMyProduct @-}
+toMyProduct :: RepMyProduct x -> MyProduct
+toMyProduct (Product (K1 i) (K1 d)) = MyProduct i d
 
 {-
 {-@ tofProduct :: a:Product
