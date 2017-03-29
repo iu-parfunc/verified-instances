@@ -529,7 +529,8 @@ module Generics.Deriving.Newtypeless.Base.Internal (
 
   -- * Generic representation types
     V1, U1(..), Par1(..), Rec1(..), K1(..), M1(..)
-  , (:+:)(..), (:*:)(..), (:.:)(..)
+  , Sum(..), Product(..), Comp1(..)
+  -- , (:+:)(..), (:*:)(..), (:.:)(..)
 
   -- ** Synonyms for convenience
   , Rec0, Par0, R, P
@@ -583,18 +584,24 @@ data M1 i c f p = M1 { unM1 :: f p }
   deriving (Eq, Ord, Read, Show)
 
 -- | Sums: encode choice between constructors
-infixr 5 :+:
-data (:+:) f g p = L1 (f p) | R1 (g p)
+infixr 5 `Sum`
+-- infixr 5 :+:
+data Sum f g p = L1 (f p) | R1 (g p)
+-- data (:+:) f g p = L1 (f p) | R1 (g p)
   deriving (Eq, Ord, Read, Show)
 
 -- | Products: encode multiple arguments to constructors
-infixr 6 :*:
-data (:*:) f g p = f p :*: g p
+infixr 6 `Product`
+-- infixr 6 :*:
+data Product f g p = Product (f p) (g p)
+-- data (:*:) f g p = f p :*: g p
   deriving (Eq, Ord, Read, Show)
 
 -- | Composition of functors
-infixr 7 :.:
-data (:.:) f g p = Comp1 { unComp1 :: f (g p) }
+infixr 7 `Comp1`
+-- infixr 7 :.:
+data Comp1 f g p = Comp1 { unComp1 :: f (g p) }
+-- data (:.:) f g p = Comp1 { unComp1 :: f (g p) }
   deriving (Eq, Ord, Read, Show)
 
 -- | Tag for K1: recursion (of kind *)

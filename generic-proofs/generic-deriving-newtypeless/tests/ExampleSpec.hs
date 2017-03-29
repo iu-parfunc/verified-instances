@@ -383,13 +383,13 @@ instance (GEq c) => GEq' (K1 i c) where
 instance (GEq' a) => GEq' (M1 i c a) where
   geq' (M1 a) (M1 b) = geq' a b
 
-instance (GEq' a, GEq' b) => GEq' (a :+: b) where
+instance (GEq' a, GEq' b) => GEq' (a `Sum` b) where
   geq' (L1 a) (L1 b) = geq' a b
   geq' (R1 a) (R1 b) = geq' a b
   geq' _      _      = False
 
-instance (GEq' a, GEq' b) => GEq' (a :*: b) where
-  geq' (a1 :*: b1) (a2 :*: b2) = geq' a1 a2 && geq' b1 b2
+instance (GEq' a, GEq' b) => GEq' (a `Product` b) where
+  geq' (a1 `Product` b1) (a2 `Product` b2) = geq' a1 a2 && geq' b1 b2
 
 geqdefault :: (Generic a, GEq' (Rep a)) => a -> a -> Bool
 geqdefault x y = geq' (from x) (from y)
@@ -508,18 +508,18 @@ instance (Selector s, GShow' a) => GShow' (M1 S s a) where
 instance (GShow' a) => GShow' (M1 D d a) where
   gshowsPrec' t n (M1 x) = gshowsPrec' t n x
 
-instance (GShow' a, GShow' b) => GShow' (a :+: b) where
+instance (GShow' a, GShow' b) => GShow' (a `Sum` b) where
   gshowsPrec' t n (L1 x) = gshowsPrec' t n x
   gshowsPrec' t n (R1 x) = gshowsPrec' t n x
 
-instance (GShow' a, GShow' b) => GShow' (a :*: b) where
-  gshowsPrec' t@Rec     n (a :*: b) =
+instance (GShow' a, GShow' b) => GShow' (a `Product` b) where
+  gshowsPrec' t@Rec     n (a `Product` b) =
     gshowsPrec' t n     a . showString ", " . gshowsPrec' t n     b
-  gshowsPrec' t@(Inf s) n (a :*: b) =
+  gshowsPrec' t@(Inf s) n (a `Product` b) =
     gshowsPrec' t n     a . showString s    . gshowsPrec' t n     b
-  gshowsPrec' t@Tup     n (a :*: b) =
+  gshowsPrec' t@Tup     n (a `Product` b) =
     gshowsPrec' t n     a . showChar ','    . gshowsPrec' t n     b
-  gshowsPrec' t@Pref    n (a :*: b) =
+  gshowsPrec' t@Pref    n (a `Product` b) =
     gshowsPrec' t (n+1) a . showChar ' '    . gshowsPrec' t (n+1) b
 
   -- If we have a product then it is not a nullary constructor
@@ -635,11 +635,11 @@ instance (GEnum c) => Enum' (K1 i c) where
 instance (Enum' f) => Enum' (M1 i c f) where
   enum' = map M1 enum'
 
-instance (Enum' f, Enum' g) => Enum' (f :+: g) where
+instance (Enum' f, Enum' g) => Enum' (f `Sum` g) where
   enum' = map L1 enum' ||| map R1 enum'
 
-instance (Enum' f, Enum' g) => Enum' (f :*: g) where
-  enum' = diag [ [ x :*: y | y <- enum' ] | x <- enum' ]
+instance (Enum' f, Enum' g) => Enum' (f `Product` g) where
+  enum' = diag [ [ x `Product` y | y <- enum' ] | x <- enum' ]
 
 genumDefault :: (Generic a, Enum' (Rep a)) => [a]
 genumDefault = map to enum'
@@ -665,14 +665,14 @@ instance (GFunctor f) => GFunctor' (Rec1 f) where
 instance (GFunctor' f) => GFunctor' (M1 i c f) where
   gmap' f (M1 a) = M1 (gmap' f a)
 
-instance (GFunctor' f, GFunctor' g) => GFunctor' (f :+: g) where
+instance (GFunctor' f, GFunctor' g) => GFunctor' (f `Sum` g) where
   gmap' f (L1 a) = L1 (gmap' f a)
   gmap' f (R1 a) = R1 (gmap' f a)
 
-instance (GFunctor' f, GFunctor' g) => GFunctor' (f :*: g) where
-  gmap' f (a :*: b) = gmap' f a :*: gmap' f b
+instance (GFunctor' f, GFunctor' g) => GFunctor' (f `Product` g) where
+  gmap' f (a `Product` b) = gmap' f a `Product` gmap' f b
 
-instance (GFunctor f, GFunctor' g) => GFunctor' (f :.: g) where
+instance (GFunctor f, GFunctor' g) => GFunctor' (f `Comp1` g) where
   gmap' f (Comp1 x) = Comp1 (gmap (gmap' f) x)
 
 gmapdefault :: (Generic1 f, GFunctor' (Rep1 f))
@@ -733,7 +733,7 @@ instance (Uniplate' f b) => Uniplate' (M1 i c f) b where
   transform' f (M1 a) = M1 (transform' f a)
   transformM' f (M1 a) = liftM M1 (transformM' f a)
 
-instance (Uniplate' f b, Uniplate' g b) => Uniplate' (f :+: g) b where
+instance (Uniplate' f b, Uniplate' g b) => Uniplate' (f `Sum` g) b where
   children' (L1 a) = children' a
   children' (R1 a) = children' a
   descend' f (L1 a) = L1 (descend' f a)
@@ -745,12 +745,12 @@ instance (Uniplate' f b, Uniplate' g b) => Uniplate' (f :+: g) b where
   transformM' f (L1 a) = liftM L1 (transformM' f a)
   transformM' f (R1 a) = liftM R1 (transformM' f a)
 
-instance (Uniplate' f b, Uniplate' g b) => Uniplate' (f :*: g) b where
-  children' (a :*: b) = children' a ++ children' b
-  descend' f (a :*: b) = descend' f a :*: descend' f b
-  descendM' f (a :*: b) = liftM2 (:*:) (descendM' f a) (descendM' f b)
-  transform' f (a :*: b) = transform' f a :*: transform' f b
-  transformM' f (a :*: b) = liftM2 (:*:) (transformM' f a) (transformM' f b)
+instance (Uniplate' f b, Uniplate' g b) => Uniplate' (f `Product` g) b where
+  children' (a `Product` b) = children' a ++ children' b
+  descend' f (a `Product` b) = descend' f a `Product` descend' f b
+  descendM' f (a `Product` b) = liftM2 Product (descendM' f a) (descendM' f b)
+  transform' f (a `Product` b) = transform' f a `Product` transform' f b
+  transformM' f (a `Product` b) = liftM2 Product (transformM' f a) (transformM' f b)
 
 childrendefault :: (Generic a, Uniplate' (Rep a) a) => a -> [a]
 childrendefault = children' . from
@@ -826,7 +826,7 @@ instance
 instance (Context' f b) => Context' (M1 i c f) b where
   context' (M1 a) cs = M1 (context' a cs)
 
-instance (Context' f b, Context' g b) => Context' (f :+: g) b where
+instance (Context' f b, Context' g b) => Context' (f `Sum` g) b where
   context' (L1 a) cs = L1 (context' a cs)
   context' (R1 a) cs = R1 (context' a cs)
 
@@ -834,16 +834,16 @@ instance
 #if __GLASGOW_HASKELL__ >= 709
     {-# OVERLAPPING #-}
 #endif
-    (Context' g a) => Context' (M1 i c (K1 j a) :*: g) a where
+    (Context' g a) => Context' (M1 i c (K1 j a) `Product` g) a where
   context' _                 []     = error "Generics.Deriving.Uniplate.context: empty list"
-  context' (M1 (K1 _) :*: b) (c:cs) = M1 (K1 c) :*: context' b cs
+  context' (M1 (K1 _) `Product` b) (c:cs) = M1 (K1 c) `Product` context' b cs
 
 instance
 #if __GLASGOW_HASKELL__ >= 709
     {-# OVERLAPPABLE #-}
 #endif
-    (Context' g b) => Context' (f :*: g) b where
-  context' (a :*: b) cs = a :*: context' b cs
+    (Context' g b) => Context' (f `Product` g) b where
+  context' (a `Product` b) cs = a `Product` context' b cs
 
 -------------------------------------------------------------------------------
 -- Template Haskell bits

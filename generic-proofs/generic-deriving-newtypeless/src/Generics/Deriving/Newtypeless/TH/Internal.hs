@@ -769,7 +769,7 @@ prefixDataName :: Name
 prefixDataName = mkGD4'4_d "Prefix"
 
 productDataName :: Name
-productDataName = mkGD4'4_d ":*:"
+productDataName = mkGD4'4_d "Product" -- ":*:"
 
 r1DataName :: Name
 r1DataName = mkGD4'4_d "R1"
@@ -805,7 +805,7 @@ c1TypeName :: Name
 c1TypeName = mkGD4'4_tc "C1"
 
 composeTypeName :: Name
-composeTypeName = mkGD4'4_tc ":.:"
+composeTypeName = mkGD4'4_tc "Comp1" -- ":.:"
 
 constructorTypeName :: Name
 constructorTypeName = mkGD4'4_tc "Constructor"
@@ -829,7 +829,7 @@ par1TypeName :: Name
 par1TypeName = mkGD4'4_tc "Par1"
 
 productTypeName :: Name
-productTypeName = mkGD4'4_tc ":*:"
+productTypeName = mkGD4'4_tc "Product" -- ":*:"
 
 rec0TypeName :: Name
 rec0TypeName = mkGD4'4_tc "Rec0"
@@ -850,7 +850,7 @@ selectorTypeName :: Name
 selectorTypeName = mkGD4'4_tc "Selector"
 
 sumTypeName :: Name
-sumTypeName = mkGD4'4_tc ":+:"
+sumTypeName = mkGD4'4_tc "Sum" -- ":+:"
 
 u1TypeName :: Name
 u1TypeName = mkGD4'4_tc "U1"
