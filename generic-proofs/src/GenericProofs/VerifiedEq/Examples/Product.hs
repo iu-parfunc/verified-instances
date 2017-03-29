@@ -17,7 +17,7 @@ data MyProduct = MyProduct Int Double
 
 {-@ assume product :: a:(f p)
                    -> b:(g p)
-                   -> {v:Product f g p | v == Product a b } @-}
+                   -> {v:Product f g p | v == Product a b && select_Product_1 v == a && select_Product_2 v == b } @-}
 product :: f p -> g p -> Product f g p
 product = Product
 
@@ -31,30 +31,25 @@ fromMyProduct (MyProduct i d) = Product (K1 i) (K1 d)
 toMyProduct :: RepMyProduct x -> MyProduct
 toMyProduct (Product (K1 i) (K1 d)) = MyProduct i d
 
-{-
-{-@ tofProduct :: a:Product
-               -> { toProduct (fromProduct a) == a }
+{-@ tofMyProduct :: a:MyProduct
+                 -> { toMyProduct (fromMyProduct a) == a }
 @-}
-tofProduct :: Product -> Proof
-tofProduct a@(MkProduct i d)
-  =   toProduct (fromProduct a)
-  ==. toProduct (K1 i :*: K1 d)
-  ==. MkProduct i d
+tofMyProduct :: MyProduct -> Proof
+tofMyProduct a@(MyProduct i d)
+  =   toMyProduct (fromMyProduct a)
+  ==. toMyProduct (Product (K1 i) (K1 d))
+  ==. MyProduct i d
   ==. a
   *** QED
--}
 
-{-
-{-@ fotProduct :: a:RepProduct x
-               -> { fromProduct (toProduct a) == a }
+{-@ fotMyProduct :: a:RepMyProduct x
+                 -> { fromMyProduct (toMyProduct a) == a }
 @-}
-fotProduct :: RepProduct x -> Proof
-fotProduct a@(K1 i :*: K1 d)
-  =   fromProduct (toProduct a)
-  ==. fromProduct (toProduct (K1 i :*: K1 d))
-  ==. fromProduct (MkProduct i d)
-  ==. K1 i :*: K1 d
+fotMyProduct :: RepMyProduct x -> Proof
+fotMyProduct a@(Product (K1 i) (K1 d))
+  =   fromMyProduct (toMyProduct a)
+  ==. fromMyProduct (toMyProduct (Product (K1 i) (K1 d)))
+  ==. fromMyProduct (MyProduct i d)
+  ==. Product (K1 i) (K1 d)
   ==. a
   *** QED
--}
-
