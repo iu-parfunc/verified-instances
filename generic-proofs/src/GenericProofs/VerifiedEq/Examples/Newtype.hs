@@ -3,7 +3,8 @@
 {-@ LIQUID "--exactdc"            @-}
 module GenericProofs.VerifiedEq.Examples.Newtype where
 
-import GenericProofs.Combinators
+import Language.Haskell.Liquid.ProofCombinators
+
 import GenericProofs.Iso
 import GenericProofs.VerifiedEq
 import GenericProofs.VerifiedEq.Generics
@@ -15,18 +16,23 @@ import Generics.Deriving.Newtypeless
 {-@ data MyInt = MyInt { getMyInt :: Int } @-}
 data MyInt = MyInt { getMyInt :: Int }
 
+
+-- | Begin manual reflection of imported data types: 
+
 -- The below refinement is useless as K1 is defined in another file
 {- data K1 i c p = K1 { unK1 :: c } @-}
 
-{-@ assume k1   :: c:c -> {v:K1 i c p | v == K1 c &&  unK1 v == c && select_K1_1 v == c } @-}
-k1 :: c -> K1 i c p
-k1 = K1
 
-{-
-{-@ assume unk1 :: k:K1 i c p -> {v:c | v == unK1 k && K1 v == k } @-}
-unk1 :: K1 i c p -> c
-unk1 = unK1
--}
+-- Instead we manually refine the data constructor and the methods as follows:
+
+{-@ assume K1   :: c:c -> {v:K1 i c p | v == K1 c &&  unK1 v == c && select_K1_1 v == c } @-}
+{-@ assume unK1 :: k:K1 i c p -> {v:c | v == unK1 k && v == select_K1_1 k && K1 v == k } @-}
+
+{-@ measure select_K1_1 :: K1 i c p -> c @-}
+{-@ measure unK1        :: K1 i c p -> c @-}
+
+-- | END manual reflection of imported data types 
+
 
 type RepMyInt = Rec0 Int
 
@@ -44,7 +50,7 @@ toMyInt (K1 x) = MyInt x
 tofMyInt :: MyInt -> Proof
 tofMyInt a@(MyInt x)
   =   toMyInt (fromMyInt a)
-  ==. toMyInt (k1 x)
+  ==. toMyInt (K1 x)
   ==. a
   *** QED
 
