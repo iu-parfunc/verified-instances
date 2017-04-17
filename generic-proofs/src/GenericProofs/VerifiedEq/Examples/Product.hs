@@ -22,7 +22,7 @@ data MyProduct = MyProduct Int Double
 -- | Begin manual reflection of imported data types:
 
 -- The below refinement is useless as K1 is defined in another file
-{- data K1 i c p = K1 { unK1 :: c } @-}
+{- data K1 i c p = K1 { unK1 :: c } -}
 
 
 -- Instead we manually refine the data constructor and the methods as follows:
@@ -35,7 +35,7 @@ data MyProduct = MyProduct Int Double
 
 
 -- Same for product
-{- data Product f g p = Product (f g) (g p) @-}
+{- data Product f g p = Product (f g) (g p) -}
 
 {-@ assume Product :: a:(f p)
                    -> b:(g p)
