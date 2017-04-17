@@ -6,7 +6,7 @@
 {-# LANGUAGE TypeOperators #-}
 module GenericProofs.VerifiedEq.Generics where
 
-import GenericProofs.Combinators
+import Language.Haskell.Liquid.ProofCombinators
 import GenericProofs.VerifiedEq
 
 import Generics.Deriving.Newtypeless
@@ -147,7 +147,20 @@ veqRec1 (VerifiedEq eqFp eqFpRefl eqFpSym eqFpTrans)
                (eqRec1Sym   eqFp eqFpSym)
                (eqRec1Trans eqFp eqFpTrans)
 
-{-@ data K1 i c p = K1 { unK1 :: c } @-}
+-- | Begin manual reflection of imported data types:
+
+-- The below refinement is useless as K1 is defined in another file
+{- data K1 i c p = K1 { unK1 :: c } @-}
+
+-- Instead we manually refine the data constructor and the methods as follows:
+
+{-@ assume K1   :: c:c -> {v:K1 i c p | v == K1 c &&  unK1 v == c && select_K1_1 v == c } @-}
+{-@ assume unK1 :: k:K1 i c p -> {v:c | v == unK1 k && v == select_K1_1 k && K1 v == k } @-}
+
+{-@ measure select_K1_1 :: K1 i c p -> c @-}
+{-@ measure unK1        :: K1 i c p -> c @-}
+
+-- | END manual reflection of imported data types
 
 {-@ axiomatize eqK1 @-}
 eqK1 :: (c -> c -> Bool) -> K1 i c p -> K1 i c p -> Bool
@@ -355,7 +368,16 @@ veqSum (VerifiedEq eqFp eqFpRefl eqFpSym eqFpTrans) (VerifiedEq eqGp eqGpRefl eq
              (eqSumSym eqFp eqFpSym eqGp eqGpSym)
              (eqSumTrans eqFp eqFpTrans eqGp eqGpTrans)
 
-{-@ data Product f g p = Product (f g) (g p) @-}
+-- | Begin manual reflection of imported data types:
+
+{-@ assume Product :: a:(f p)
+                   -> b:(g p)
+                   -> {v:Product f g p | v == Product a b && select_Product_1 v == a && select_Product_2 v == b } @-}
+
+{-@ measure select_Product_1 :: Product f g p -> f p @-}
+{-@ measure select_Product_2 :: Product f g p -> g p @-}
+
+-- | END manual reflection of imported data types
 
 {-@ axiomatize eqProd @-}
 eqProd :: (f p -> f p -> Bool) -> (g p -> g p -> Bool)

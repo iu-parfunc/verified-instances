@@ -16,24 +16,6 @@ import Generics.Deriving.Newtypeless
 {-@ data MyInt = MyInt { getMyInt :: Int } @-}
 data MyInt = MyInt { getMyInt :: Int }
 
-
--- | Begin manual reflection of imported data types: 
-
--- The below refinement is useless as K1 is defined in another file
-{- data K1 i c p = K1 { unK1 :: c } @-}
-
-
--- Instead we manually refine the data constructor and the methods as follows:
-
-{-@ assume K1   :: c:c -> {v:K1 i c p | v == K1 c &&  unK1 v == c && select_K1_1 v == c } @-}
-{-@ assume unK1 :: k:K1 i c p -> {v:c | v == unK1 k && v == select_K1_1 k && K1 v == k } @-}
-
-{-@ measure select_K1_1 :: K1 i c p -> c @-}
-{-@ measure unK1        :: K1 i c p -> c @-}
-
--- | END manual reflection of imported data types 
-
-
 type RepMyInt = Rec0 Int
 
 {-@ axiomatize fromMyInt @-}

@@ -4,8 +4,8 @@
 module GenericProofs.VerifiedEq.Instances (veqInt, veqInt64, veqUnit, veqDouble) where
 
 import Data.Int
-import GenericProofs.Combinators
 import GenericProofs.VerifiedEq
+import Language.Haskell.Liquid.ProofCombinators
 
 {-@ axiomatize eqUnit @-}
 eqUnit :: () -> () -> Bool

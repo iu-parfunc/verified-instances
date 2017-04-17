@@ -9,8 +9,8 @@ module GenericProofs.Iso (
   , isoTrans
   ) where
 
-import Control.Category (Category(..))
-import GenericProofs.Combinators
+import Control.Category                         (Category (..))
+import Language.Haskell.Liquid.ProofCombinators
 
 {-@ data Iso a b = Iso { to   :: a -> b
                        , from :: b -> a

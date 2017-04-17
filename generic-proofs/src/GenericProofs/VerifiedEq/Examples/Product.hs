@@ -9,7 +9,6 @@ import Language.Haskell.Liquid.ProofCombinators
 
 import GenericProofs.Iso
 import GenericProofs.VerifiedEq
-import GenericProofs.VerifiedEq.Generics
 import GenericProofs.VerifiedEq.Instances
 
 import Generics.Deriving.Newtypeless
@@ -20,7 +19,7 @@ data MyProduct = MyProduct Int Double
 
 
 
--- | Begin manual reflection of imported data types: 
+-- | Begin manual reflection of imported data types:
 
 -- The below refinement is useless as K1 is defined in another file
 {- data K1 i c p = K1 { unK1 :: c } @-}
@@ -35,7 +34,7 @@ data MyProduct = MyProduct Int Double
 {-@ measure unK1        :: K1 i c p -> c @-}
 
 
--- Same for product 
+-- Same for product
 {- data Product f g p = Product (f g) (g p) @-}
 
 {-@ assume Product :: a:(f p)
@@ -45,7 +44,7 @@ data MyProduct = MyProduct Int Double
 {-@ measure select_Product_1 :: Product f g p -> f p @-}
 {-@ measure select_Product_2 :: Product f g p -> g p @-}
 
--- | END manual reflection of imported data types 
+-- | END manual reflection of imported data types
 
 
 type RepMyProduct = Product (Rec0 Int) (Rec0 Double)

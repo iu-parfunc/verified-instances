@@ -5,8 +5,8 @@
 module GenericProofs.VerifiedEq where
 
 import Data.Functor.Contravariant
-import GenericProofs.Combinators
 import GenericProofs.Iso
+import Language.Haskell.Liquid.ProofCombinators
 
 {-@ data VerifiedEq a = VerifiedEq {
       eq :: a -> a -> Bool
@@ -17,9 +17,9 @@ import GenericProofs.Iso
 @-}
 
 data VerifiedEq a = VerifiedEq {
-    eq :: a -> a -> Bool
-  , refl :: a -> Proof
-  , sym :: a -> a -> Proof
+    eq    :: a -> a -> Bool
+  , refl  :: a -> Proof
+  , sym   :: a -> a -> Proof
   , trans :: a -> a -> a -> Proof
   }
 
