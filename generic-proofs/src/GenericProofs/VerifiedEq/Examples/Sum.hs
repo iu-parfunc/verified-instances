@@ -29,23 +29,15 @@ data MySum = MyLeft Int | MyRight Double
 
 {- data Sum f g p = L1 (f p) | R1 (g p) -}
 
-{-@ measure is_L1 @-}
-is_L1 :: Sum f g p -> Bool
-is_L1 (L1 _) = True
-is_L1 (R1 _) = False
-
-{-@ measure is_R1 @-}
-is_R1 :: Sum f g p -> Bool
-is_R1 (L1 _) = False
-is_R1 (R1 _) = True
-
 {-@ assume L1 :: a:(f p)
-              -> {v:Sum f g p | v == L1 a && select_L1_1 v == a } @-}
+              -> {v:Sum f g p | v == L1 a && select_L1_1 v == a && is_L1 v && not (is_R1 v)} @-}
 {-@ assume R1 :: b:(g p)
-              -> {v:Sum f g p | v == R1 b && select_R1_1 v == b } @-}
+              -> {v:Sum f g p | v == R1 b && select_R1_1 v == b && not (is_L1 v) && is_R1 v } @-}
 
 {-@ measure select_L1_1 :: Sum f g p -> f p @-}
 {-@ measure select_R1_1 :: Sum f g p -> g p @-}
+{-@ measure is_L1 :: Sum f g p -> Bool @-}
+{-@ measure is_R1 :: Sum f g p -> Bool @-}
 
 -- | END manual reflection of imported data types
 
@@ -61,7 +53,7 @@ toMySum :: RepMySum x -> MySum
 toMySum (L1 (K1 i)) = MyLeft i
 toMySum (R1 (K1 d)) = MyRight d
 
-{-@ assume tofMySum :: a:MySum
+{-@ tofMySum :: a:MySum
              -> { toMySum (fromMySum a) == a }
 @-}
 tofMySum :: MySum -> Proof
@@ -80,7 +72,7 @@ tofMySum a@(MyRight d)
   ==. a
   *** QED
 
-{-@ assume fotMySum :: a:RepMySum x
+{-@ fotMySum :: a:RepMySum x
              -> { fromMySum (toMySum a) == a }
 @-}
 fotMySum :: RepMySum x -> Proof
