@@ -9,6 +9,7 @@ import Language.Haskell.Liquid.ProofCombinators
 
 import GenericProofs.Iso
 import GenericProofs.VerifiedEq
+-- import GenericProofs.VerifiedEq.Generics        (veqK1, veqSum)
 import GenericProofs.VerifiedEq.Instances
 
 import Generics.Deriving.Newtypeless
@@ -21,7 +22,7 @@ data MySum = MyLeft Int | MyRight Double
 {- data K1 i c p = K1 { unK1 :: c } -}
 
 {-@ assume K1   :: c:c -> {v:K1 i c p | v == K1 c &&  unK1 v == c && select_K1_1 v == c } @-}
-{-@ assume unK1 :: k:K1 i c p -> {v:c | v == unK1 k && v == select_K1_1 k && K1 v == k } @-}
+{-@ assume unK1 :: k:K1 i c p -> {v:c | v == unK1 k && v == select_K1_1 k && K1 v == k} @-}
 
 {-@ measure select_K1_1 :: K1 i c p -> c @-}
 {-@ measure unK1        :: K1 i c p -> c @-}
@@ -55,19 +56,46 @@ toMySum :: RepMySum x -> MySum
 toMySum (L1 (K1 i)) = MyLeft i
 toMySum (R1 (K1 d)) = MyRight d
 
-{-@ tofMySum :: a:MySum
+{-@ assume tofMySum :: a:MySum
              -> { toMySum (fromMySum a) == a }
 @-}
 tofMySum :: MySum -> Proof
 tofMySum a@(MyLeft i)
   =   toMySum (fromMySum a)
+  ==. toMySum (fromMySum (MyLeft i))
   ==. toMySum (L1 (K1 i))
   ==. MyLeft i
   ==. a
   *** QED
 tofMySum a@(MyRight d)
   =   toMySum (fromMySum a)
+  ==. toMySum (fromMySum (MyRight d))
   ==. toMySum (R1 (K1 d))
   ==. MyRight d
   ==. a
   *** QED
+
+{-@ assume fotMySum :: a:RepMySum x
+             -> { fromMySum (toMySum a) == a }
+@-}
+fotMySum :: RepMySum x -> Proof
+fotMySum a@(L1 (K1 i))
+  =   fromMySum (toMySum a)
+  ==. fromMySum (toMySum (L1 (K1 i)))
+  ==. fromMySum (MyLeft i)
+  ==. L1 (K1 i)
+  ==. a
+  *** QED
+fotMySum a@(R1 (K1 d))
+  =   fromMySum (toMySum a)
+  ==. fromMySum (toMySum (R1 (K1 d)))
+  ==. fromMySum (MyRight d)
+  ==. R1 (K1 d)
+  ==. a
+  *** QED
+
+isoMySum :: Iso (RepMySum x) MySum
+isoMySum = Iso toMySum fromMySum tofMySum fotMySum
+
+-- veqMySum :: VerifiedEq MySum
+-- veqMySum = veqIso isoMySum $ veqSum (veqK1 veqInt) (veqK1 veqDouble)
