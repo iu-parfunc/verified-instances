@@ -25,11 +25,12 @@ library
                        GenericProofs.VerifiedFunctor
                        GenericProofs.VerifiedFunctor.Generics
 
-  other-modules:       GenericProofs.Combinators
+  -- other-modules:       GenericProofs.Combinators
   build-depends:       base >= 4.8 && < 5
                      , contravariant
                      , generic-deriving-newtypeless
                      , invariant
+                     , liquidhaskell >= 0.7
   hs-source-dirs:      src
   default-language:    Haskell2010
   ghc-options:         -Wall

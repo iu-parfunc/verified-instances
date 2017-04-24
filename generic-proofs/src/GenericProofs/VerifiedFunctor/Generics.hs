@@ -6,10 +6,9 @@
 {-# LANGUAGE TypeOperators #-}
 module GenericProofs.VerifiedFunctor.Generics where
 
-import GenericProofs.Combinators
 import GenericProofs.VerifiedFunctor
-
 import Generics.Deriving.Newtypeless
+import Language.Haskell.Liquid.ProofCombinators
 
 {-@ axiomatize identity @-}
 identity :: a -> a

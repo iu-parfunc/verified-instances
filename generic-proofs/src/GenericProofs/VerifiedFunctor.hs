@@ -5,7 +5,7 @@
 {-# LANGUAGE RankNTypes #-}
 module GenericProofs.VerifiedFunctor (VerifiedFunctor(..)) where
 
-import GenericProofs.Combinators
+import Language.Haskell.Liquid.ProofCombinators
 
 {-@ axiomatize identity @-}
 identity :: a -> a
