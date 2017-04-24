@@ -39,6 +39,11 @@ is_R1 :: Sum f g p -> Bool
 is_R1 (L1 _) = False
 is_R1 (R1 _) = True
 
+{-@ assume L1 :: a:(f p)
+              -> {v:Sum f g p | v == L1 a && select_L1_1 v == a } @-}
+{-@ assume R1 :: b:(g p)
+              -> {v:Sum f g p | v == R1 b && select_R1_1 v == b } @-}
+
 {-@ measure select_L1_1 :: Sum f g p -> f p @-}
 {-@ measure select_R1_1 :: Sum f g p -> g p @-}
 
