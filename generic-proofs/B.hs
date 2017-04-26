@@ -2,10 +2,11 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--exactdc"            @-}
+{-@ LIQUID "--i=./include"        @-}
 module B where
 
 import A
-import K1
+import Generics.Deriving.Newtypeless
 
 import Language.Haskell.Liquid.ProofCombinators
 

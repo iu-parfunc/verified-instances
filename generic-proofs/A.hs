@@ -2,10 +2,13 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--exactdc"            @-}
+{-@ LIQUID "--i=./include"        @-}
 module A where
 
-import K1
 import Language.Haskell.Liquid.ProofCombinators
+
+import Generics.Deriving.Newtypeless
+
 
 {-@ axiomatize eqK1 @-}
 eqK1 :: (c -> c -> Bool) -> K1 i c p -> K1 i c p -> Bool
