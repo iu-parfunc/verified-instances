@@ -11,8 +11,6 @@ import GenericProofs.VerifiedEq
 
 import Generics.Deriving.Newtypeless
 
-{-@ data V1 @-}
-
 {-@ axiomatize eqV1 @-}
 eqV1 :: V1 p -> V1 p -> Bool
 -- Sadly, LH barfs on this definition. We'd need to put it in a measure,
