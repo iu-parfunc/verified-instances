@@ -10,3 +10,12 @@ assume Product :: a:f p -> b:g p -> {v:Product f g p | v == Product a b && selec
 
 measure select_Product_1 :: Product f g p -> (f p)
 measure select_Product_2 :: Product f g p -> (g p)
+
+assume L1 :: a:(f p) -> {v:Sum f g p | v == L1 a && select_L1_1 v == a && is_L1 v && not (is_R1 v)}
+assume R1 :: b:(g p) -> {v:Sum f g p | v == R1 b && select_R1_1 v == b && not (is_L1 v) && is_R1 v }
+
+measure select_L1_1 :: Sum f g p -> (f p)
+measure select_R1_1 :: Sum f g p -> (g p)
+
+measure is_L1 :: Sum f g p -> Bool
+measure is_R1 :: Sum f g p -> Bool
