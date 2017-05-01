@@ -20,6 +20,12 @@ assume unPar1 :: p:Par1 p -> {v:p | v == unPar1 p && v == select_Par1_1 p && Par
 measure select_Par1_1 :: Par1 p -> p
 measure unPar1        :: Par1 p -> p
 
+assume Rec1   :: a:(f p) -> {v:Rec1 f p | v == Rec1 a && unRec1 v == a && select_Rec1_1 v == a }
+assume unRec1 :: m:Rec1 f p -> {v:(f p) | v == unRec1 m && v == select_Rec1_1 m && Rec1 v == m }
+
+measure select_Rec1_1 :: Rec1 f p -> (f p)
+measure unRec1        :: Rec1 f p -> (f p)
+
 assume Product :: a:f p -> b:g p -> {v:Product f g p | v == Product a b && select_Product_1 v == a && select_Product_2 v == b }
 
 measure select_Product_1 :: Product f g p -> (f p)
