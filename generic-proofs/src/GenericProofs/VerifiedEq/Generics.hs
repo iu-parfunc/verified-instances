@@ -38,8 +38,6 @@ eqV1Trans x _ _ = absurd x
 veqV1 :: VerifiedEq (V1 p)
 veqV1 = VerifiedEq eqV1 eqV1Refl eqV1Sym eqV1Trans
 
-{-@ data U1 p = U1 @-}
-
 {-@ axiomatize eqU1 @-}
 eqU1 :: U1 p -> U1 p -> Bool
 eqU1 _ _ = True
