@@ -23,11 +23,6 @@ eqK1Refl eqC eqCRefl x
   ==. True ? eqCRefl (unK1 x)
   *** QED
 
-{-@ assume Product :: a:f p -> b:g p -> {v:Product f g p | v == Product a b && select_Product_1 v == a && select_Product_2 v == b } @-}
-
-{-@ measure select_Product_1 :: Product f g p -> f p @-}
-{-@ measure select_Product_2 :: Product f g p -> g p @-}
-
 {-@ axiomatize eqProd @-}
 eqProd :: (f p -> f p -> Bool) -> (g p -> g p -> Bool)
        -> Product f g p -> Product f g p -> Bool
