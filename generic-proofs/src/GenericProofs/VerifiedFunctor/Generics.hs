@@ -21,8 +21,6 @@ compose f g x = f (g x)
 {-# INLINE compose #-}
 
 {-
-{-@ data V1 @-}
-
 {-@ measure fmapV1 :: (p -> q) -> V1 p -> V1 q @-}
 fmapV1 :: (p -> q) -> V1 p -> V1 q
 fmapV1 _ x = absurd x
@@ -58,8 +56,6 @@ vfunctorV1 :: VerifiedFunctor V1
 vfunctorV1 = VerifiedFunctor fmapV1 fmapV1Id fmapV1Compose
 -}
 
-{-@ data U1 p = U1 @-}
-
 {-@ axiomatize fmapU1 @-}
 fmapU1 :: (p -> q) -> U1 p -> U1 q
 fmapU1 _ _ = U1
@@ -89,9 +85,6 @@ fmapU1Compose f g x
 
 vfunctorU1 :: VerifiedFunctor U1
 vfunctorU1 = VerifiedFunctor fmapU1 fmapU1Id fmapU1Compose
-
-{-
-{-@ data Par1 p = Par1 { unPar1 :: p } @-}
 
 {-@ axiomatize fmapPar1 @-}
 fmapPar1 :: (p -> q) -> Par1 p -> Par1 q
@@ -127,4 +120,3 @@ fmapPar1Compose f g x@(Par1 p)
 
 vfunctorPar1 :: VerifiedFunctor Par1
 vfunctorPar1 = VerifiedFunctor fmapPar1 fmapPar1Id fmapPar1Compose
--}

@@ -55,8 +55,6 @@ eqU1Trans x y z = (eqU1 x y && eqU1 y z) ==. eqU1 x z *** QED
 veqU1 :: VerifiedEq (U1 p)
 veqU1 = VerifiedEq eqU1 eqU1Refl eqU1Sym eqU1Trans
 
-{-@ data Par1 p = Par1 { unPar1 :: p } @-}
-
 {-@ axiomatize eqPar1 @-}
 eqPar1 :: (p -> p -> Bool) -> Par1 p -> Par1 p -> Bool
 eqPar1 eqP x y = eqP (unPar1 x) (unPar1 y)

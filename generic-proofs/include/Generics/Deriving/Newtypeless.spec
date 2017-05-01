@@ -14,6 +14,12 @@ assume unK1 :: k:K1 i c p -> {v:c | v == unK1 k && v == select_K1_1 k && K1 v ==
 measure select_K1_1 :: K1 i c p -> c
 measure unK1        :: K1 i c p -> c
 
+assume Par1   :: a:p -> {v:Par1 p | v == Par1 a && unPar1 v == a && select_Par1_1 v == a }
+assume unPar1 :: p:Par1 p -> {v:p | v == unPar1 p && v == select_Par1_1 p && Par1 v == p }
+
+measure select_Par1_1 :: Par1 p -> p
+measure unPar1        :: Par1 p -> p
+
 assume Product :: a:f p -> b:g p -> {v:Product f g p | v == Product a b && select_Product_1 v == a && select_Product_2 v == b }
 
 measure select_Product_1 :: Product f g p -> (f p)
