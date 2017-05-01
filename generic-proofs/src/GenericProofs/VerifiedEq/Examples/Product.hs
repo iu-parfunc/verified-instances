@@ -35,8 +35,6 @@ tofMyProduct :: MyProduct -> Proof
 tofMyProduct a@(MyProduct i d)
   =   toMyProduct (fromMyProduct a)
   ==. toMyProduct (Product (K1 i) (K1 d))
-  ==. MyProduct i d
-  ==. a
   *** QED
 
 {-@ fotMyProduct :: a:RepMyProduct x
@@ -45,10 +43,7 @@ tofMyProduct a@(MyProduct i d)
 fotMyProduct :: RepMyProduct x -> Proof
 fotMyProduct a@(Product (K1 i) (K1 d))
   =   fromMyProduct (toMyProduct a)
-  ==. fromMyProduct (toMyProduct (Product (K1 i) (K1 d)))
   ==. fromMyProduct (MyProduct i d)
-  ==. Product (K1 i) (K1 d)
-  ==. a
   *** QED
 
 isoMyProduct :: Iso (RepMyProduct x) MyProduct
