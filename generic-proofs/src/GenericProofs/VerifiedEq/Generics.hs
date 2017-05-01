@@ -189,8 +189,6 @@ veqK1 (VerifiedEq eqC eqCRefl eqCSym eqCTrans)
                (eqK1Sym   eqC eqCSym)
                (eqK1Trans eqC eqCTrans)
 
-{-@ data M1 i c f p = M1 { unM1 :: f p } @-}
-
 {-@ axiomatize eqM1 @-}
 eqM1 :: (f p -> f p -> Bool) -> M1 i c f p -> M1 i c f p -> Bool
 eqM1 eqFp x y = eqFp (unM1 x) (unM1 y)

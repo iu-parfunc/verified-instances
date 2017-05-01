@@ -1,5 +1,11 @@
 module spec Generics.Deriving.Newtypeless where
 
+assume M1   :: a:(f p) -> {v:M1 i c f p | v == M1 a && unM1 v == c && select_M1_1 v == c}
+assume unM1 :: m:M1 i c f p -> {v:(f p) | v == unM1 m && v == select_M1_1 m && M1 v == m }
+
+measure select_M1_1 :: M1 i c f p -> (f p)
+measure unM1        :: M1 i c f p -> (f p)
+
 assume K1   :: c:c -> {v:K1 i c p | v == K1 c &&  unK1 v == c && select_K1_1 v == c }
 assume unK1 :: k:K1 i c p -> {v:c | v == unK1 k && v == select_K1_1 k && K1 v == k }
 
