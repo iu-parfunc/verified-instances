@@ -19,7 +19,7 @@ library
                        -- GenericProofs.VerifiedEq.Examples.FullStressTest
                        GenericProofs.VerifiedEq.Examples.Newtype
                        GenericProofs.VerifiedEq.Examples.Product
-                       -- GenericProofs.VerifiedEq.Examples.Sum
+                       GenericProofs.VerifiedEq.Examples.Sum
                        GenericProofs.VerifiedEq.Generics
                        GenericProofs.VerifiedEq.Instances
                        GenericProofs.VerifiedFunctor
