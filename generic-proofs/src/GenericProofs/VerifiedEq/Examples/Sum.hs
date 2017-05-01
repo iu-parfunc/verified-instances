@@ -9,7 +9,7 @@ import Language.Haskell.Liquid.ProofCombinators
 
 import GenericProofs.Iso
 import GenericProofs.VerifiedEq
--- import GenericProofs.VerifiedEq.Generics        (veqK1, veqSum)
+import GenericProofs.VerifiedEq.Generics
 import GenericProofs.VerifiedEq.Instances
 
 import Generics.Deriving.Newtypeless
@@ -56,19 +56,19 @@ fotMySum a@(L1 (K1 i))
   =   fromMySum (toMySum a)
   -- ==. fromMySum (toMySum (L1 (K1 i)))
   ==. fromMySum (MyLeft i)
-  ==. L1 (K1 i)
+  -- ==. L1 (K1 i)
   -- ==. a
   *** QED
 fotMySum a@(R1 (K1 d))
   =   fromMySum (toMySum a)
   -- ==. fromMySum (toMySum (R1 (K1 d)))
   ==. fromMySum (MyRight d)
-  ==. R1 (K1 d)
+  -- ==. R1 (K1 d)
   -- ==. a
   *** QED
 
 isoMySum :: Iso (RepMySum x) MySum
 isoMySum = Iso toMySum fromMySum tofMySum fotMySum
 
--- veqMySum :: VerifiedEq MySum
--- veqMySum = veqIso isoMySum $ veqSum (veqK1 veqInt) (veqK1 veqDouble)
+veqMySum :: VerifiedEq MySum
+veqMySum = veqIso isoMySum $ veqSum (veqK1 veqInt) (veqK1 veqDouble)

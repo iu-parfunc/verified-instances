@@ -9,7 +9,7 @@ import Language.Haskell.Liquid.ProofCombinators
 
 import GenericProofs.Iso
 import GenericProofs.VerifiedEq
--- import GenericProofs.VerifiedEq.Generics        (veqK1, veqProd)
+import GenericProofs.VerifiedEq.Generics (veqK1, veqProd)
 import GenericProofs.VerifiedEq.Instances
 
 import Generics.Deriving.Newtypeless
@@ -54,5 +54,5 @@ fotMyProduct a@(Product (K1 i) (K1 d))
 isoMyProduct :: Iso (RepMyProduct x) MyProduct
 isoMyProduct = Iso toMyProduct fromMyProduct tofMyProduct fotMyProduct
 
--- veqMyProduct :: VerifiedEq MyProduct
--- veqMyProduct = veqIso isoMyProduct $ veqProd (veqK1 veqInt) (veqK1 veqDouble)
+veqMyProduct :: VerifiedEq MyProduct
+veqMyProduct = veqIso isoMyProduct $ veqProd (veqK1 veqInt) (veqK1 veqDouble)
