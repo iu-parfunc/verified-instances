@@ -52,3 +52,12 @@ sappendInvAssoc sappendA sappendAAssoc f g gof x y z
   ==. f (sappendA (g (sappendInv sappendA f g x y)) (g z))
   ==. sappendInv sappendA f g (sappendInv sappendA f g x y) z
   *** QED
+
+vsemigroupInv :: (a -> b) -> (b -> a) -> (a -> Proof)
+              -> VerifiedSemigroup a -> VerifiedSemigroup b
+vsemigroupInv f g gof (VerifiedSemigroup sappendA sappendAAssoc)
+  = VerifiedSemigroup (sappendInv      sappendA f g)
+                      (sappendInvAssoc sappendA sappendAAssoc f g gof)
+
+vsemigroupIso :: Iso a b -> VerifiedSemigroup a -> VerifiedSemigroup b
+vsemigroupIso (Iso f g _ gof) = vsemigroupInv f g gof

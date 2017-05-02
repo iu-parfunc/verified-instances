@@ -23,6 +23,7 @@ library
                        GenericProofs.VerifiedEq.Examples.Unit
                        GenericProofs.VerifiedEq.Generics
                        GenericProofs.VerifiedEq.Instances
+                       GenericProofs.VerifiedMonoid
                        GenericProofs.VerifiedSemigroup
 
                        -- Not really working
