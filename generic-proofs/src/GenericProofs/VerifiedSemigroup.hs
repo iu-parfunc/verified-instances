@@ -53,6 +53,12 @@ sappendInvAssoc sappendA sappendAAssoc f g gof x y z
   ==. sappendInv sappendA f g (sappendInv sappendA f g x y) z
   *** QED
 
+{-@ vsemigroupInv :: f:(a -> b)
+                  -> g:(b -> a)
+                  -> gof:(x:a -> { g (f x) == x })
+                  -> VerifiedSemigroup a
+                  -> VerifiedSemigroup b
+@-}
 vsemigroupInv :: (a -> b) -> (b -> a) -> (a -> Proof)
               -> VerifiedSemigroup a -> VerifiedSemigroup b
 vsemigroupInv f g gof (VerifiedSemigroup sappendA sappendAAssoc)

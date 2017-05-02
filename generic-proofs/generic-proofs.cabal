@@ -25,6 +25,7 @@ library
                        GenericProofs.VerifiedEq.Instances
                        GenericProofs.VerifiedMonoid
                        GenericProofs.VerifiedSemigroup
+                       GenericProofs.VerifiedSemigroup.Generics
 
                        -- Not really working
                        GenericProofs.VerifiedFunctor
