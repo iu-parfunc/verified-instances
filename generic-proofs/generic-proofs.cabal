@@ -23,7 +23,8 @@ library
                        GenericProofs.VerifiedEq.Examples.Unit
                        GenericProofs.VerifiedEq.Generics
                        GenericProofs.VerifiedEq.Instances
-                       GenericProofs.VerifiedMonoid
+                       GenericProofs.VerifiedOrd
+                       GenericProofs.VerifiedOrd.Instances
                        GenericProofs.VerifiedSemigroup
                        GenericProofs.VerifiedSemigroup.Generics
                        GenericProofs.VerifiedSemigroup.Examples.Newtype
@@ -33,6 +34,7 @@ library
                        GenericProofs.VerifiedFunctor
                        GenericProofs.VerifiedFunctor.Examples.Identity
                        GenericProofs.VerifiedFunctor.Generics
+                       GenericProofs.VerifiedMonoid
 
   -- other-modules:       GenericProofs.Combinators
   build-depends:       base >= 4.8 && < 5
