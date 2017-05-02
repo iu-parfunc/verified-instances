@@ -23,18 +23,21 @@ library
                        GenericProofs.VerifiedEq.Examples.Unit
                        GenericProofs.VerifiedEq.Generics
                        GenericProofs.VerifiedEq.Instances
-                       GenericProofs.VerifiedOrd
-                       GenericProofs.VerifiedOrd.Instances
                        GenericProofs.VerifiedSemigroup
                        GenericProofs.VerifiedSemigroup.Generics
                        GenericProofs.VerifiedSemigroup.Examples.Newtype
                        GenericProofs.VerifiedSemigroup.Instances
 
                        -- Not really working
+                       --- Higher-rank stuff
                        GenericProofs.VerifiedFunctor
                        GenericProofs.VerifiedFunctor.Examples.Identity
                        GenericProofs.VerifiedFunctor.Generics
+                       --- Superclass issues
                        GenericProofs.VerifiedMonoid
+                       GenericProofs.VerifiedOrd
+                       GenericProofs.VerifiedOrd.Generics
+                       GenericProofs.VerifiedOrd.Instances
 
   -- other-modules:       GenericProofs.Combinators
   build-depends:       base >= 4.8 && < 5
