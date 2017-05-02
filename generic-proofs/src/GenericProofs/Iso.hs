@@ -1,12 +1,15 @@
 {-@ LIQUID "--higherorder" @-}
 {-@ LIQUID "--totality"    @-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE RankNTypes #-}
 module GenericProofs.Iso (
     Iso(..)
   , isoRefl
   , isoCompose
   , isoSym
   , isoTrans
+
+  , Iso1(..)
   ) where
 
 import Control.Category                         (Category (..))
@@ -24,6 +27,18 @@ data Iso a b = Iso { to   :: a -> b
                    , tof  :: b -> Proof
                    , fot  :: a -> Proof
                    }
+
+{-@ data Iso1 f g = Iso1 { to1   :: forall a. f a -> g a
+                         , from1 :: forall a. g a -> f a
+                         , tof1  :: forall a. g a -> Proof
+                         , fot1  :: forall a. f a -> Proof
+                         }
+@-}
+data Iso1 f g = Iso1 { to1   :: forall a. f a -> g a
+                     , from1 :: forall a. g a -> f a
+                     , tof1  :: forall a. g a -> Proof
+                     , fot1  :: forall a. f a -> Proof
+                     }
 
 instance Category Iso where
   id  = isoRefl

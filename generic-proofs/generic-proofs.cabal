@@ -24,6 +24,7 @@ library
                        GenericProofs.VerifiedEq.Generics
                        GenericProofs.VerifiedEq.Instances
                        GenericProofs.VerifiedFunctor
+                       GenericProofs.VerifiedFunctor.Examples.Identity
                        GenericProofs.VerifiedFunctor.Generics
 
   -- other-modules:       GenericProofs.Combinators
