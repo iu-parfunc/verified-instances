@@ -23,6 +23,9 @@ library
                        GenericProofs.VerifiedEq.Examples.Unit
                        GenericProofs.VerifiedEq.Generics
                        GenericProofs.VerifiedEq.Instances
+                       GenericProofs.VerifiedSemigroup
+
+                       -- Not really working
                        GenericProofs.VerifiedFunctor
                        GenericProofs.VerifiedFunctor.Examples.Identity
                        GenericProofs.VerifiedFunctor.Generics
