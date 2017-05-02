@@ -1,7 +1,6 @@
 {-@ LIQUID "--higherorder"    @-}
 {-@ LIQUID "--totality"       @-}
 {-@ LIQUID "--exactdc"        @-}
-{-@ LIQUID "--prune-unsorted" @-}
 {-# LANGUAGE EmptyCase     #-}
 {-# LANGUAGE RankNTypes    #-}
 {-# LANGUAGE TypeOperators #-}

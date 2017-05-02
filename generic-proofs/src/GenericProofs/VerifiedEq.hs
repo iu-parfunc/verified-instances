@@ -1,6 +1,5 @@
 {-@ LIQUID "--higherorder"    @-}
 {-@ LIQUID "--totality"       @-}
-{-@ LIQUID "--prune-unsorted" @-}
 {-@ LIQUID "--exactdc"        @-}
 module GenericProofs.VerifiedEq where
 

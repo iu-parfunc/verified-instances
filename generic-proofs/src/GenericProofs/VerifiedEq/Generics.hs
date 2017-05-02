@@ -1,7 +1,6 @@
 {-@ LIQUID "--higherorder"    @-}
 {-@ LIQUID "--totality"       @-}
 {-@ LIQUID "--exactdc"        @-}
-{-@ LIQUID "--prune-unsorted" @-}
 {-# LANGUAGE EmptyCase     #-}
 {-# LANGUAGE TypeOperators #-}
 module GenericProofs.VerifiedEq.Generics where
@@ -96,8 +95,6 @@ veqPar1 (VerifiedEq eqP eqPRefl eqPSym eqPTrans)
              (eqPar1Refl eqP eqPRefl)
              (eqPar1Sym eqP eqPSym)
              (eqPar1Trans eqP eqPTrans)
-
-{-@ data Rec1 f p = Rec1 { unRec1 :: f p } @-}
 
 {-@ axiomatize eqRec1 @-}
 eqRec1 :: (f p -> f p -> Bool) -> Rec1 f p -> Rec1 f p -> Bool
