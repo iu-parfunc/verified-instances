@@ -6,7 +6,7 @@ module GenericProofs.VerifiedFunctor (VerifiedFunctor(..)) where
 
 import Language.Haskell.Liquid.ProofCombinators
 
-import GenericProofs.Iso
+-- import GenericProofs.Iso
 
 {-@ axiomatize _identity @-}
 _identity :: a -> a
