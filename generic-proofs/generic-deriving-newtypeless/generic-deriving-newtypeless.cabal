@@ -35,10 +35,10 @@ library
                         Generics.Deriving.Newtypeless.Base
                         Generics.Deriving.Newtypeless.Instances
                         Generics.Deriving.Newtypeless.TH
-
-  other-modules:        Generics.Deriving.Newtypeless.Base.Internal
+                        Generics.Deriving.Newtypeless.Base.Internal
                         Generics.Deriving.Newtypeless.TH.Internal
-                        Paths_generic_deriving_newtypeless
+
+  other-modules:        Paths_generic_deriving_newtypeless
 
   build-depends:        base >= 4.8 && < 5
   other-modules:        Generics.Deriving.Newtypeless.TH.NonDataKinded

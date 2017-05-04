@@ -12,7 +12,7 @@ import GenericProofs.VerifiedEq
 import GenericProofs.VerifiedEq.Generics
 import GenericProofs.VerifiedEq.Instances
 
-import Generics.Deriving.Newtypeless
+import Generics.Deriving.Newtypeless.Base.Internal
 
 {-@ data MySum = MyLeft Int | MyRight Double @-}
 data MySum = MyLeft Int | MyRight Double

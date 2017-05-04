@@ -9,7 +9,7 @@ import GenericProofs.Iso
 -- import GenericProofs.VerifiedFunctor
 -- import GenericProofs.VerifiedFunctor.Generics
 
-import Generics.Deriving.Newtypeless
+import Generics.Deriving.Newtypeless.Base.Internal
 
 {-@ data Id a = Id { runId :: a } @-}
 data Id a = Id { runId :: a }

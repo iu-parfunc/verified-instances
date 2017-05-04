@@ -1,4 +1,4 @@
-module spec Generics.Deriving.Newtypeless where
+module spec Generics.Deriving.Newtypeless.Base.Internal where
 
 assume U1 :: {v:U1 p | v == U1 }
 

@@ -5,7 +5,7 @@ module GenericProofs.VerifiedSemigroup.Generics where
 
 import Language.Haskell.Liquid.ProofCombinators
 import GenericProofs.VerifiedSemigroup
-import Generics.Deriving.Newtypeless
+import Generics.Deriving.Newtypeless.Base.Internal
 
 {-@ axiomatize sappendU1 @-}
 sappendU1 :: U1 p -> U1 p -> U1 p

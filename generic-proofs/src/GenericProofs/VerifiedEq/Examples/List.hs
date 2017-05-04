@@ -10,7 +10,7 @@ import GenericProofs.Iso
 import GenericProofs.VerifiedEq
 import GenericProofs.VerifiedEq.Generics
 
-import Generics.Deriving.Newtypeless
+import Generics.Deriving.Newtypeless.Base.Internal
 
 {-@ data List [listLength] a = Nil | Cons { x :: a , xs :: List a } @-}
 data List a = Nil | Cons a (List a)

@@ -12,7 +12,7 @@ import GenericProofs.VerifiedEq
 import GenericProofs.VerifiedEq.Generics (veqK1, veqProd)
 import GenericProofs.VerifiedEq.Instances
 
-import Generics.Deriving.Newtypeless
+import Generics.Deriving.Newtypeless.Base.Internal
 
 
 {-@ data MyProduct = MyProduct { fld1 :: Int, fld2 :: Double } @-}

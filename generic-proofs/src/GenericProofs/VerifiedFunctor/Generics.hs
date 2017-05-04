@@ -7,7 +7,7 @@
 module GenericProofs.VerifiedFunctor.Generics where
 
 import GenericProofs.VerifiedFunctor
-import Generics.Deriving.Newtypeless
+import Generics.Deriving.Newtypeless.Base.Internal
 import Language.Haskell.Liquid.ProofCombinators
 
 {-@ axiomatize _identity @-}

@@ -8,7 +8,7 @@ module GenericProofs.VerifiedEq.Generics where
 import Language.Haskell.Liquid.ProofCombinators
 import GenericProofs.VerifiedEq
 
-import Generics.Deriving.Newtypeless
+import Generics.Deriving.Newtypeless.Base.Internal
 
 {-@ axiomatize eqV1 @-}
 eqV1 :: V1 p -> V1 p -> Bool

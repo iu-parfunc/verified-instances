@@ -4,7 +4,7 @@ module GenericProofs.TH where
 import Control.Lens ((^..))
 import Data.Foldable (foldl')
 import GenericProofs.Iso (Iso(Iso))
-import Generics.Deriving.Newtypeless
+import Generics.Deriving.Newtypeless.Base.Internal
 import Generics.Deriving.Newtypeless.TH
 import Language.Haskell.Liquid.ProofCombinators
 import Language.Haskell.TH
