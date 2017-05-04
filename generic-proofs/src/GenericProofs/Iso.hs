@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder" @-}
 {-@ LIQUID "--totality"    @-}
+{-@ LIQUID "--exactdc"     @-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 module GenericProofs.Iso (

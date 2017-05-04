@@ -1,15 +1,17 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--exactdc"            @-}
-{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeFamilies #-}
 module GenericProofs.VerifiedEq.Examples.Product where
 
 
 import Language.Haskell.Liquid.ProofCombinators
 
 import GenericProofs.Iso
+import GenericProofs.TH
 import GenericProofs.VerifiedEq
-import GenericProofs.VerifiedEq.Generics (veqK1, veqProd)
+import GenericProofs.VerifiedEq.Generics
 import GenericProofs.VerifiedEq.Instances
 
 import Generics.Deriving.Newtypeless.Base.Internal
@@ -18,36 +20,22 @@ import Generics.Deriving.Newtypeless.Base.Internal
 {-@ data MyProduct = MyProduct { fld1 :: Int, fld2 :: Double } @-}
 data MyProduct = MyProduct Int Double
 
-type RepMyProduct = Product (Rec0 Int) (Rec0 Double)
-
 {-@ axiomatize fromMyProduct @-}
-fromMyProduct :: MyProduct -> RepMyProduct x
-fromMyProduct (MyProduct i d) = Product (K1 i) (K1 d)
-
 {-@ axiomatize toMyProduct @-}
-toMyProduct :: RepMyProduct x -> MyProduct
-toMyProduct (Product (K1 i) (K1 d)) = MyProduct i d
-
 {-@ tofMyProduct :: a:MyProduct
                  -> { toMyProduct (fromMyProduct a) == a }
 @-}
-tofMyProduct :: MyProduct -> Proof
-tofMyProduct a@(MyProduct i d)
-  =   toMyProduct (fromMyProduct a)
-  ==. toMyProduct (Product (K1 i) (K1 d))
-  *** QED
-
 {-@ fotMyProduct :: a:RepMyProduct x
                  -> { fromMyProduct (toMyProduct a) == a }
 @-}
-fotMyProduct :: RepMyProduct x -> Proof
-fotMyProduct a@(Product (K1 i) (K1 d))
-  =   fromMyProduct (toMyProduct a)
-  ==. fromMyProduct (MyProduct i d)
-  *** QED
-
-isoMyProduct :: Iso (RepMyProduct x) MyProduct
-isoMyProduct = Iso toMyProduct fromMyProduct tofMyProduct fotMyProduct
+$(deriveIso "RepMyProduct"
+            "toMyProduct" "fromMyProduct"
+            "tofMyProduct" "fotMyProduct"
+            "isoMyProduct"
+            ''MyProduct)
 
 veqMyProduct :: VerifiedEq MyProduct
-veqMyProduct = veqIso isoMyProduct $ veqProd (veqK1 veqInt) (veqK1 veqDouble)
+veqMyProduct = veqIso (isoSym isoMyProduct) $ veqM1
+                                            $ veqM1
+                                            $ veqProd (veqM1 $ veqK1 veqInt)
+                                                      (veqM1 $ veqK1 veqDouble)
