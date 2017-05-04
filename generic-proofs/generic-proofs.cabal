@@ -50,3 +50,5 @@ library
   hs-source-dirs:      src
   default-language:    Haskell2010
   ghc-options:         -Wall
+                       -- Sadly needed due to https://github.com/ucsd-progsys/liquidhaskell/issues/1019
+                       -fno-warn-unused-imports
