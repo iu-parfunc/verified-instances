@@ -1,7 +1,7 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--exactdc"            @-}
-module GenericProofs.VerifiedOrd (VerifiedOrd(..)) where
+module GenericProofs.VerifiedOrd (VerifiedOrd(..), {-vordEq,-} eqCompare) where
 
 import Language.Haskell.Liquid.ProofCombinators
 
@@ -20,3 +20,17 @@ data VerifiedOrd a = VerifiedOrd {
   , trans :: a -> a -> a -> Proof
   , total :: a -> a -> Proof
   }
+
+{-
+-- | Test for equality using 'VerifiedOrd'.
+{-@ axiomatize vordEq @-}
+vordEq :: VerifiedOrd a -> a -> a -> Bool
+vordEq (VerifiedOrd { leq = leq' }) = eqCompare leq'
+{-# INLINE vordEq #-}
+-}
+
+-- | Test for equality using a 'leq' function.
+{-@ axiomatize eqCompare @-}
+eqCompare :: (a -> a -> Bool) -> a -> a -> Bool
+eqCompare cmp x y = cmp x y && cmp y x
+{-# INLINE eqCompare #-}
