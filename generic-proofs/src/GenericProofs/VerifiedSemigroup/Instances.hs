@@ -1,7 +1,7 @@
 {-@ LIQUID "--higherorder" @-}
 {-@ LIQUID "--totality"    @-}
 {-@ LIQUID "--exactdc"     @-}
-module GenericProofs.VerifiedSemigroup.Instances (Unit(..), vsemigroupUnit) where
+module GenericProofs.VerifiedSemigroup.Instances where -- (Unit(..), vsemigroupUnit) where
 
 import GenericProofs.VerifiedSemigroup
 import Language.Haskell.Liquid.ProofCombinators

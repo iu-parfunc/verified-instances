@@ -63,7 +63,7 @@ deriveIso rep toFun fromFun tof fot iso dataN = do
 
       dataType, repType :: Q Type
       dataType = case genericInstance of
-                   [InstanceD _ (AppT _ t) _] -> return t
+                   [InstanceD _ _ (AppT _ t) _] -> return t
                    _ -> fail "deriveIso: dataType"
       repType = return $ applyTyToTys (ConT repN) $ repTypeTyVars ++ [VarT x]
 

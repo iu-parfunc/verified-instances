@@ -1,4 +1,4 @@
-resolver: lts-6.27
+resolver: lts-8.9
 docker:
   enable: false
   image: "liquidhaskell"
@@ -7,24 +7,21 @@ packages:
 - './generic-deriving-newtypeless'
 - location:
     git: https://github.com/ucsd-progsys/liquidhaskell
-    commit: 904e6927a97480856fe2c7d2e083f7bc7a0710c5
-  extra-dep: true
-- location:
-    git: https://github.com/christetreault/liquiddesugar
-    commit: 792501fdbf75edbdeb496f9e16ee7ddf6fd2decf
+    commit: fb0348020873edf34e242b894cd018cbf57c9166
   extra-dep: true
 - location:
     git: https://github.com/ucsd-progsys/liquid-fixpoint
-    commit: 59f25fced058fdf8f0484dc9c176353160b4ad1f
+    commit: 7e9823e3f4bf1c2cb4008219134b34e2116c22e5
   extra-dep: true
 
 extra-deps:
+- aeson-0.11.3.0
+- csv-table-0.1.0.1
 - dotgen-0.4.2
 - fgl-visualize-0.1.0.1
 - intern-0.9.1.4
 - liquid-fixpoint-0.6.0.1
-- liquiddesugar-7.10.0.0
-- liquidhaskell-0.7.0.0
+- liquidhaskell-0.8.0.0
 - located-base-0.1.1.0
 
 flags:
