@@ -96,17 +96,22 @@ compInverse to1 from1 fot1 to2 from2 fot2 x
   *** QED
 
 {-
-{-@ comp1Inverse :: to1:(g a -> h a)
-                 -> from1:(h a -> g a)
-                 -> fot1:(y:(g a) -> { from1 (to1 y) == y })
-                 -> to2:(f a -> g a)
-                 -> from2:(g a -> f a)
-                 -> fot2:(x:(f a) -> { from2 (to2 x) == x })
-                 -> x:(f a) -> { compose from2 from1 (compose to1 to2 x) == x }
+{-@ comp1Inverse :: to1:(forall a. g a -> h a)
+                 -> from1:(forall a. h a -> g a)
+                 -> fot1:(forall a. y:(g a) -> { from1 (to1 y) == y })
+                 -> to2:(forall a. f a -> g a)
+                 -> from2:(forall a. g a -> f a)
+                 -> fot2:(forall a. x:(f a) -> { from2 (to2 x) == x })
+                 -> x:(f p)
+                 -> { compose from2 from1 (compose to1 to2 x) == x }
 @-}
-comp1Inverse :: (g a -> h a) -> (h a -> g a) -> (g a -> Proof)
-             -> (f a -> g a) -> (g a -> f a) -> (f a -> Proof)
-             -> f a -> Proof
+comp1Inverse :: (forall a. g a -> h a)
+             -> (forall a. h a -> g a)
+             -> (forall a. g a -> Proof)
+             -> (forall a. f a -> g a)
+             -> (forall a. g a -> f a)
+             -> (forall a. f a -> Proof)
+             -> f p -> Proof
 comp1Inverse to1 from1 fot1 to2 from2 fot2 x
   =   compose from2 from1 (compose to1 to2 x)
   ==. from2 (from1 (to1 (to2 x)))
