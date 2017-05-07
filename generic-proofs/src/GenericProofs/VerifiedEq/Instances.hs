@@ -1,7 +1,12 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--exactdc"            @-}
-module GenericProofs.VerifiedEq.Instances where -- (veqInt, veqInt64, veqUnit, veqDouble) where
+module GenericProofs.VerifiedEq.Instances
+  ( eqInt, veqInt
+  , eqInt64, veqInt64
+  , eqUnit, veqUnit
+  , eqDouble, veqDouble
+  ) where
 
 import Data.Int
 import GenericProofs.VerifiedEq

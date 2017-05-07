@@ -3,21 +3,9 @@
 {-@ LIQUID "--exactdc"     @-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
-module GenericProofs.Iso
-{-( Iso(..)
-  , isoRefl
-  , isoCompose
-  , isoSym
-  , isoTrans
+module GenericProofs.Iso where
 
-  , Iso1(..)
-  , iso1Refl
-  -- , iso1Compose
-  , iso1Sym
-  -- , iso1Trans
-  )-} where
-
-import Control.Category                         (Category (..))
+import Control.Category (Category (..))
 import Language.Haskell.Liquid.ProofCombinators
 
 {-@ data Iso a b = Iso { to   :: a -> b

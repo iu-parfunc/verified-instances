@@ -4,7 +4,7 @@
 module GenericProofs.VerifiedEq where
 
 import Data.Functor.Contravariant
-import GenericProofs.Iso
+import GenericProofs.Iso (Iso(..))
 import Language.Haskell.Liquid.ProofCombinators
 
 {-@ data VerifiedEq a = VerifiedEq {
