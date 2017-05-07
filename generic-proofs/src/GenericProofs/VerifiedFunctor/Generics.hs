@@ -7,18 +7,9 @@
 module GenericProofs.VerifiedFunctor.Generics where
 
 import GenericProofs.VerifiedFunctor
+import GenericProofs.Utils
 import Generics.Deriving.Newtypeless.Base.Internal
 import Language.Haskell.Liquid.ProofCombinators
-
-{-@ axiomatize _identity @-}
-_identity :: a -> a
-_identity x = x
-{-# INLINE _identity #-}
-
-{-@ axiomatize _compose @-}
-_compose :: (b -> c) -> (a -> b) -> a -> c
-_compose f g x = f (g x)
-{-# INLINE _compose #-}
 
 {-
 {-@ measure fmapV1 :: (p -> q) -> V1 p -> V1 q @-}
@@ -29,11 +20,11 @@ absurd :: V1 p -> a
 absurd x = case x of {}
 
 {-@ fmapV1Id :: x:V1 p
-             -> { fmapV1 _identity x == x }
+             -> { fmapV1 identity x == x }
 @-}
 fmapV1Id :: V1 p -> Proof
 fmapV1Id x
- =   fmapV1 _identity x
+ =   fmapV1 identity x
  ==. absurd x
  ==. x
  *** QED
@@ -41,15 +32,15 @@ fmapV1Id x
 {-@ fmapV1Compose :: f:(q -> r)
                   -> g:(p -> q)
                   -> x:V1 p
-                  -> { fmapV1 (_compose f g) x == _compose (fmapV1 f) (fmapV1 g) x }
+                  -> { fmapV1 (compose f g) x == compose (fmapV1 f) (fmapV1 g) x }
 @-}
 fmapV1Compose :: (q -> r) -> (p -> q)
               -> V1 p -> Proof
 fmapV1Compose f g x
-  =   fmapV1 (_compose f g) x
+  =   fmapV1 (compose f g) x
   ==. absurd x
   ==. fmapV1 f (fmapV1 g x)
-  ==. _compose (fmapV1 f) (fmapV1 g) x
+  ==. compose (fmapV1 f) (fmapV1 g) x
   *** QED
 
 vfunctorV1 :: VerifiedFunctor V1
@@ -61,26 +52,26 @@ fmapU1 :: (p -> q) -> U1 p -> U1 q
 fmapU1 _ _ = U1
 
 {-@ fmapU1Id :: x:U1 p
-             -> { fmapU1 _identity x == x }
+             -> { fmapU1 identity x == x }
 @-}
 fmapU1Id :: U1 p -> Proof
 fmapU1Id U1
-  =   fmapU1 _identity U1
+  =   fmapU1 identity U1
   ==. U1
   *** QED
 
 {-@ fmapU1Compose :: f:(q -> r)
                   -> g:(p -> q)
                   -> x:U1 p
-                  -> { fmapU1 (_compose f g) x == _compose (fmapU1 f) (fmapU1 g) x }
+                  -> { fmapU1 (compose f g) x == compose (fmapU1 f) (fmapU1 g) x }
 @-}
 fmapU1Compose :: (q -> r) -> (p -> q)
               -> U1 p -> Proof
 fmapU1Compose f g x
-  =   fmapU1 (_compose f g) x
+  =   fmapU1 (compose f g) x
   ==. U1
   ==. fmapU1 f (fmapU1 g x)
-  ==. _compose (fmapU1 f) (fmapU1 g) x
+  ==. compose (fmapU1 f) (fmapU1 g) x
   *** QED
 
 vfunctorU1 :: VerifiedFunctor U1
@@ -91,12 +82,12 @@ fmapPar1 :: (p -> q) -> Par1 p -> Par1 q
 fmapPar1 f (Par1 p) = Par1 (f p)
 
 {-@ fmapPar1Id :: x:Par1 p
-               -> { fmapPar1 _identity x == x }
+               -> { fmapPar1 identity x == x }
 @-}
 fmapPar1Id :: Par1 p -> Proof
 fmapPar1Id par@(Par1 p)
-  =   fmapPar1 _identity par
-  ==. Par1 (_identity p)
+  =   fmapPar1 identity par
+  ==. Par1 (identity p)
   ==. Par1 p
   ==. par
   *** QED
@@ -104,18 +95,18 @@ fmapPar1Id par@(Par1 p)
 {-@ fmapPar1Compose :: f:(q -> r)
                     -> g:(p -> q)
                     -> x:Par1 p
-                    -> { fmapPar1 (_compose f g) x == _compose (fmapPar1 f) (fmapPar1 g) x } @-}
+                    -> { fmapPar1 (compose f g) x == compose (fmapPar1 f) (fmapPar1 g) x } @-}
 fmapPar1Compose :: (q -> r) -> (p -> q)
                 -> Par1 p -> Proof
 fmapPar1Compose f g x@(Par1 p)
-  =   fmapPar1 (_compose f g) x
-  ==. fmapPar1 (_compose f g) (Par1 p)
-  ==. Par1 (_compose f g p)
+  =   fmapPar1 (compose f g) x
+  ==. fmapPar1 (compose f g) (Par1 p)
+  ==. Par1 (compose f g p)
   ==. Par1 (f (g p))
   ==. fmapPar1 f (Par1 (g p))
   ==. fmapPar1 f (fmapPar1 g (Par1 p))
-  ==. _compose (fmapPar1 f) (fmapPar1 g) (Par1 p)
-  ==. _compose (fmapPar1 f) (fmapPar1 g) x
+  ==. compose (fmapPar1 f) (fmapPar1 g) (Par1 p)
+  ==. compose (fmapPar1 f) (fmapPar1 g) x
   *** QED
 
 vfunctorPar1 :: VerifiedFunctor Par1
@@ -129,44 +120,44 @@ fmapRec1 fmapF f (Rec1 fp) = Rec1 (fmapF f fp)
 
 {-
 {-@ fmapRec1Id :: fmapF:(forall a b. (a -> b) -> f a -> f b)
-               -> fmapFId:(forall a. y:(f a) -> { fmapF _identity y == y })
+               -> fmapFId:(forall a. y:(f a) -> { fmapF identity y == y })
                -> r:Rec1 f p
-               -> { fmapRec1 fmapF _identity r == r }
+               -> { fmapRec1 fmapF identity r == r }
 @-}
 -}
 fmapRec1Id :: (forall a b. (a -> b) -> f a -> f b)
            -> (forall a. f a -> Proof)
            -> Rec1 f p -> Proof
 fmapRec1Id fmapF fmapFId r@(Rec1 fp)
-  =   fmapRec1 fmapF _identity r
-  ==. Rec1 (fmapF _identity fp)
-  ==. Rec1 (_identity fp) ? fmapFId fp
+  =   fmapRec1 fmapF identity r
+  ==. Rec1 (fmapF identity fp)
+  ==. Rec1 (identity fp) ? fmapFId fp
   ==. Rec1 fp
   ==. r
   *** QED
 
 {-
 {-@ fmapRec1Compose :: fmapF:(forall a b. (a -> b) -> f a -> f b)
-                    -> fmapFId:(forall a b c. f':(b -> c) -> g':(a -> b) -> y:(f a) -> { fmapF (_compose f' g') y == _compose (fmapF f') (fmapF g') y })
+                    -> fmapFId:(forall a b c. f':(b -> c) -> g':(a -> b) -> y:(f a) -> { fmapF (compose f' g') y == compose (fmapF f') (fmapF g') y })
                     -> f:(q -> r)
                     -> g:(p -> q)
                     -> x:Rec1 f p
-                    -> { fmapRec1 fmapF (_compose f g) x == _compose (fmapRec1 fmapF f) (fmapRec1 fmapF g) x }
+                    -> { fmapRec1 fmapF (compose f g) x == compose (fmapRec1 fmapF f) (fmapRec1 fmapF g) x }
 @-}
 -}
 fmapRec1Compose :: (forall a b. (a -> b) -> f a -> f b)
                 -> (forall a b c. (b -> c) -> (a -> b) -> f a -> Proof)
                 -> (q -> r) -> (p -> q) -> Rec1 f p -> Proof
 fmapRec1Compose fmapF fmapFCompose f g r@(Rec1 fp)
-  =   fmapRec1 fmapF (_compose f g) r
-  ==. fmapRec1 fmapF (_compose f g) (Rec1 fp)
-  ==. Rec1 (fmapF (_compose f g) fp)
-  ==. Rec1 (_compose (fmapF f) (fmapF g) fp) ? fmapFCompose f g fp
+  =   fmapRec1 fmapF (compose f g) r
+  ==. fmapRec1 fmapF (compose f g) (Rec1 fp)
+  ==. Rec1 (fmapF (compose f g) fp)
+  ==. Rec1 (compose (fmapF f) (fmapF g) fp) ? fmapFCompose f g fp
   ==. Rec1 (fmapF f (fmapF g fp))
   ==. fmapRec1 fmapF f (Rec1 (fmapF g fp))
   ==. fmapRec1 fmapF f (fmapRec1 fmapF g (Rec1 fp))
-  ==. _compose (fmapRec1 fmapF f) (fmapRec1 fmapF g) (Rec1 fp)
-  ==. _compose (fmapRec1 fmapF f) (fmapRec1 fmapF g) r
+  ==. compose (fmapRec1 fmapF f) (fmapRec1 fmapF g) (Rec1 fp)
+  ==. compose (fmapRec1 fmapF f) (fmapRec1 fmapF g) r
   *** QED
 -}
 
