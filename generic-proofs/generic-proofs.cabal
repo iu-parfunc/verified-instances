@@ -27,7 +27,6 @@ library
                        GenericProofs.VerifiedSemigroup.Examples.Newtype
                        GenericProofs.VerifiedSemigroup.Instances
                        GenericProofs.TH
-                       GenericProofs.Utils
 
                        -- Not really working
                        --- Higher-rank stuff
@@ -40,6 +39,7 @@ library
                        GenericProofs.VerifiedOrd.Generics
                        GenericProofs.VerifiedOrd.Instances
 
+  -- other-modules:       GenericProofs.Combinators
   build-depends:       base >= 4.8 && < 5
                      , contravariant
                      , generic-deriving-newtypeless
