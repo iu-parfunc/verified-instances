@@ -7,11 +7,11 @@ packages:
 - './generic-deriving-newtypeless'
 - location:
     git: https://github.com/ucsd-progsys/liquidhaskell
-    commit: 05b716191353d7db6d0b33100a9a67ac48bdd5c0
+    commit: 27bc088c4f8b29fd9866e5589233e97e22e314c4
   extra-dep: true
 - location:
     git: https://github.com/ucsd-progsys/liquid-fixpoint
-    commit: 882137a6aac58badcc483770f24227c579afd06d
+    commit: 42f8902f2ba6fec4d6c189a431afa9387351ca45
   extra-dep: true
 
 extra-deps:
