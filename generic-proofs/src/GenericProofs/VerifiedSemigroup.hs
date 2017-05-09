@@ -61,7 +61,7 @@ sappendInvAssoc sappendA sappendAAssoc f g gof x y z
 @-}
 vsemigroupInv :: (a -> b) -> (b -> a) -> (a -> Proof)
               -> VerifiedSemigroup a -> VerifiedSemigroup b
-vsemigroupInv f g gof ~(VerifiedSemigroup sappendA sappendAAssoc)
+vsemigroupInv f g gof (VerifiedSemigroup sappendA sappendAAssoc)
   = VerifiedSemigroup (sappendInv      sappendA f g)
                       (sappendInvAssoc sappendA sappendAAssoc f g gof)
 

@@ -65,7 +65,7 @@ eqContraTrans eqa eqaTrans g x y z =
   *** QED
 
 veqContra :: (b -> a) -> VerifiedEq a -> VerifiedEq b
-veqContra g ~(VerifiedEq eqa eqaRefl eqaSym eqaTrans) =
+veqContra g (VerifiedEq eqa eqaRefl eqaSym eqaTrans) =
   VerifiedEq (eqContra eqa g) (eqContraRefl eqa eqaRefl g) (eqContraSym eqa eqaSym g) (eqContraTrans eqa eqaTrans g)
 
 instance Contravariant VerifiedEq where
