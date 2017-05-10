@@ -74,17 +74,10 @@ fotList r@(M1 (R1 (M1 (Product (M1 (K1 x)) (M1 (K1 xs))))))
 isoList :: Iso (List a) (RepList a x)
 isoList = Iso fromList toList fotList tofList
 
+{-@ lazy veqList @-}
 veqList :: VerifiedEq a -> VerifiedEq (List a)
 veqList veqA
   = veqContra fromList $ veqM1
                        $ veqSum (veqM1 veqU1)
                                 (veqM1 $ veqProd (veqM1 $ veqK1 veqA)
                                                  (veqM1 $ veqK1 $ veqList veqA))
-
-{-
-isoMyInt :: Iso MyInt (RepMyInt x)
-isoMyInt = Iso fromMyInt toMyInt fotMyInt tofMyInt
-
-veqMyInt :: VerifiedEq MyInt
-veqMyInt = veqContra fromMyInt $ veqK1 veqInt
--}
