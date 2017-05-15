@@ -85,7 +85,7 @@ getRefl (VerifiedEq _ r _ _) = r
 getSym :: VerifiedEq a -> a -> a -> Proof
 getSym (VerifiedEq _ _ s _) = s
 
-{-@ assume getTrans :: p:VerifiedEq a -> x:a -> y:a -> z:a -> { eq p x y && eq p y z => eq p x z } @-}
+{-@ getTrans :: p:VerifiedEq a -> x:a -> y:a -> z:a -> { eq p x y && eq p y z => eq p x z } @-}
 getTrans :: VerifiedEq a -> a -> a -> a -> Proof
 getTrans (VerifiedEq _ _ _ t) = t
 
