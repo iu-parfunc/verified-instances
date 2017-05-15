@@ -65,8 +65,29 @@ eqContraTrans eqa eqaTrans g x y z =
   *** QED
 
 veqContra :: (b -> a) -> VerifiedEq a -> VerifiedEq b
-veqContra g (VerifiedEq eqa eqaRefl eqaSym eqaTrans) =
-  VerifiedEq (eqContra eqa g) (eqContraRefl eqa eqaRefl g) (eqContraSym eqa eqaSym g) (eqContraTrans eqa eqaTrans g)
+veqContra g p = VerifiedEq (eqContra eqa g) (eqContraRefl eqa eqaRefl g) (eqContraSym eqa eqaSym g) (eqContraTrans eqa eqaTrans g)
+  where
+    eqa      = getEq    p
+    eqaRefl  = getRefl  p
+    eqaSym   = getSym   p
+    eqaTrans = getTrans p
+
+{-@ measure eq @-}
+{-@ getEq :: p:VerifiedEq a -> {f:(a -> a -> Bool) | f = eq p} @-}
+getEq :: VerifiedEq a -> (a -> a -> Bool)
+getEq (VerifiedEq a _ _ _) = a
+
+{-@ getRefl :: p:VerifiedEq a -> x:a -> { eq p x x } @-}
+getRefl :: VerifiedEq a -> a -> Proof
+getRefl (VerifiedEq _ r _ _) = r
+
+{-@ getSym :: p:VerifiedEq a -> x:a -> y:a -> { eq p x y => eq p y x } @-}
+getSym :: VerifiedEq a -> a -> a -> Proof
+getSym (VerifiedEq _ _ s _) = s
+
+{-@ assume getTrans :: p:VerifiedEq a -> x:a -> y:a -> z:a -> { eq p x y && eq p y z => eq p x z } @-}
+getTrans :: VerifiedEq a -> a -> a -> a -> Proof
+getTrans (VerifiedEq _ _ _ t) = t
 
 instance Contravariant VerifiedEq where
   contramap = veqContra
