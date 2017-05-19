@@ -10,16 +10,6 @@ import GenericProofs.VerifiedFunctor
 import Generics.Deriving.Newtypeless.Base.Internal
 import Language.Haskell.Liquid.ProofCombinators
 
-{-@ axiomatize _identity @-}
-_identity :: a -> a
-_identity x = x
-{-# INLINE _identity #-}
-
-{-@ axiomatize _compose @-}
-_compose :: (b -> c) -> (a -> b) -> a -> c
-_compose f g x = f (g x)
-{-# INLINE _compose #-}
-
 {-
 {-@ measure fmapV1 :: (p -> q) -> V1 p -> V1 q @-}
 fmapV1 :: (p -> q) -> V1 p -> V1 q
