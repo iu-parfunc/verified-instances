@@ -20,6 +20,7 @@ library
                        GenericProofs.VerifiedEq.Examples.Product
                        GenericProofs.VerifiedEq.Examples.Sum
                        GenericProofs.VerifiedEq.Examples.Unit
+                       GenericProofs.VerifiedEq.Examples.Nat
                        GenericProofs.VerifiedEq.Generics
                        GenericProofs.VerifiedEq.Instances
                        GenericProofs.VerifiedSemigroup
