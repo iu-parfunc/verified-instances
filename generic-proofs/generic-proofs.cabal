@@ -30,6 +30,8 @@ library
                        GenericProofs.VerifiedSemigroup
                        GenericProofs.VerifiedSemigroup.Generics
                        GenericProofs.VerifiedSemigroup.Examples.Newtype
+                       GenericProofs.VerifiedSemigroup.Examples.Identity
+                       GenericProofs.VerifiedSemigroup.Examples.Triple
                        GenericProofs.VerifiedSemigroup.Instances
                        GenericProofs.TH
 
