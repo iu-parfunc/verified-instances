@@ -5,7 +5,7 @@ stack install
 
 run="stack exec liquid -- -iinclude -isrc "
 
-for file in List Newtype Product Sum Unit;
+for file in List Newtype Product Product3 Sum Unit ;
 do
     $run src/GenericProofs/VerifiedEq/Examples/${file}.hs
 done
