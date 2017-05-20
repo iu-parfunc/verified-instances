@@ -11,3 +11,5 @@ data Rec1 f p = Rec1 { unRec1 :: (f p) }
 data Sum f g p = L1 { l1 :: (f p) } | R1 { r1 :: (g p) }
 
 data Product f g p = Product { prd1 :: (f p), prd2 :: (g p) }
+
+data Comp1 f g p = Comp1 { unComp1 :: (f (g p)) }
