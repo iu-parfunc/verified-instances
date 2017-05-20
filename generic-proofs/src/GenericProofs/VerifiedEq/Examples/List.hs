@@ -1,12 +1,15 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--exactdc"            @-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE TemplateHaskell #-}
 module GenericProofs.VerifiedEq.Examples.List where
 
 import Language.Haskell.Liquid.ProofCombinators
 
 import GenericProofs.Iso
+import GenericProofs.TH
 import GenericProofs.VerifiedEq
 import GenericProofs.VerifiedEq.Generics
 
@@ -21,6 +24,7 @@ listLength :: List a -> Int
 listLength Nil         = 0
 listLength (Cons _ xs) = 1 + listLength xs
 
+{-
 type RepList a = D1 D1List (C1 C1_0List U1 `Sum` C1 C1_1List
                               (S1 NoSelector (Rec0 a) `Product`
                                S1 NoSelector (Rec0 (List a))))
@@ -73,6 +77,21 @@ fotList r@(M1 (R1 (M1 (Product (M1 (K1 x)) (M1 (K1 xs))))))
 
 isoList :: Iso (List a) (RepList a x)
 isoList = Iso fromList toList fotList tofList
+-}
+
+{-@ axiomatize fromList @-}
+{-@ axiomatize toList @-}
+{-@ tofList :: l:List a
+            -> { toList (fromList l) == l }
+@-}
+{-@ fotList :: r:RepList a x
+            -> { fromList (toList r) == r }
+@-}
+$(deriveIso "RepList"
+            "toList" "fromList"
+            "tofList" "fotList"
+            "isoList"
+            ''List)
 
 {-@ lazy veqList @-}
 veqList :: VerifiedEq a -> VerifiedEq (List a)
