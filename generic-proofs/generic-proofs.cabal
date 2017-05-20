@@ -32,6 +32,7 @@ library
                        --- Higher-rank stuff
                        GenericProofs.VerifiedFunctor
                        GenericProofs.VerifiedFunctor.Examples.Identity
+                       GenericProofs.VerifiedFunctor.Examples.List
                        GenericProofs.VerifiedFunctor.Generics
                        --- Superclass issues
                        GenericProofs.VerifiedMonoid
