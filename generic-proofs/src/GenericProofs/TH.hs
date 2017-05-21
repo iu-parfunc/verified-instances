@@ -198,7 +198,7 @@ deriveIso1 rep toFun fromFun tof fot iso dataN = do
 
       fromToDecsQ :: Name -> Q Type -> Q Type -> [(Pat,Exp)] -> Q [Dec]
       fromToDecsQ fromToN ty1 ty2 patsAndExps = do
-        rt <- repType
+        rt <- repTypeApplied
         sequence
           [ sigD fromToN $ mkForallT rt [t| $(ty1) -> $(ty2) |]
           , funD fromToN $ map (\(pat,expr) -> clause [return pat] (normalB (return expr)) [])
