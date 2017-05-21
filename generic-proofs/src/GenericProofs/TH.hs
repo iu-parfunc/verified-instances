@@ -3,7 +3,7 @@ module GenericProofs.TH where
 
 import Control.Lens ((^..))
 import Data.Foldable (foldl')
-import GenericProofs.Iso (Iso(Iso))
+import GenericProofs.Iso (Iso(Iso), Iso1(Iso1))
 import Generics.Deriving.Newtypeless.Base.Internal
 import Generics.Deriving.Newtypeless.TH
 import Language.Haskell.Liquid.ProofCombinators
@@ -109,6 +109,123 @@ deriveIso rep toFun fromFun tof fot iso dataN = do
       fotDecsQ, tofDecsQ :: Q [Dec]
       fotDecsQ = proofDecsQ fotN fromN toN repType  toPatsAndExps
       tofDecsQ = proofDecsQ tofN toN fromN dataType fromPatsAndExps
+
+  fromDecs <- fromDecsQ
+  toDecs   <- toDecsQ
+  fotDecs  <- fotDecsQ
+  tofDecs  <- tofDecsQ
+  isoDecs  <- isoDecsQ
+  return $ concat [ metaDecs
+                  , repTypeSyn'
+                  , fromDecs
+                  , toDecs
+                  , fotDecs
+                  , tofDecs
+                  , isoDecs
+                  ]
+
+deriveIso1 :: String -- ^ Name of the representation type synonym
+           -> String -- ^ Name of the @to1@ function
+           -> String -- ^ Name of the @from1@ function
+           -> String -- ^ Name of the proof that @to1 . from1 = id@
+           -> String -- ^ Name of the proof that @from1 . to1 = id@
+           -> String -- ^ Name of the 'Iso1'
+           -> Name   -- ^ Name of the datatype
+           -> Q [Dec]
+deriveIso1 rep toFun fromFun tof fot iso dataN = do
+  metaDecs        <- deriveMeta dataN
+  repTypeSyn      <- deriveRep1 dataN
+  genericInstance <- deriveRepresentable1 dataN
+  fromExp         <- makeFrom1 dataN
+  toExp           <- makeTo1 dataN
+  x               <- newName "x"
+  z               <- newName "z"
+
+  let repN, fromN, toN, tofN, fotN, isoN :: Name
+      repN  = mkName rep
+      fromN = mkName fromFun
+      toN   = mkName toFun
+      tofN  = mkName tof
+      fotN  = mkName fot
+      isoN  = mkName iso
+
+      -- Technically, we could also retrieve this information from
+      -- deriveRepresentable0, but this is a smidge more convenient.
+      toPatsAndExps, fromPatsAndExps :: [(Pat,Exp)]
+      toPatsAndExps = case toExp of
+                         LamE [VarP _] (CaseE (VarE _) [Match (ConP _ [VarP _]) (NormalB (CaseE (VarE _) matches)) []]) ->
+                           map (\(Match pat (NormalB expr) []) -> (ConP 'M1 [pat], expr)) matches
+                         _ -> error $ "deriveIso1: fotPatsAndExps\n" ++ pprint toExp
+      fromPatsAndExps = case fromExp of
+                         LamE [VarP _] (CaseE (VarE _) [Match (VarP _) (NormalB (AppE (ConE _) (CaseE (VarE _) matches))) []]) ->
+                           map (\(Match pat (NormalB expr) []) -> (pat, ConE 'M1 `AppE` expr)) matches
+                         _ -> error $ "deriveIso1: tofPatsAndExps\n" ++ pprint fromExp
+
+      tvbToTyVar :: TyVarBndr -> Type
+      tvbToTyVar (PlainTV n)    = VarT n
+      tvbToTyVar (KindedTV n k) = SigT (VarT n) k
+
+      -- Construct a type via curried application.
+      applyTyToTys :: Type -> [Type] -> Type
+      applyTyToTys = foldl' AppT
+
+      repTypeTyVars :: [Type]
+      repTypeSyn'   :: [Dec]
+      (repTypeTyVars, repTypeSyn') = case repTypeSyn of
+                                       [TySynD _ tvbs ty] -> (map tvbToTyVar tvbs, [TySynD repN tvbs ty])
+                                       _ -> error "deriveIso1: repTypeSyn'"
+
+      dataType, repType, dataTypeApplied, repTypeApplied :: Q Type
+      dataType = case genericInstance of
+                   [InstanceD _ _ (AppT _ t) _] -> return t
+                   _ -> fail "deriveIso1: dataType"
+      repType = return $ applyTyToTys (ConT repN) $ repTypeTyVars
+
+      dataTypeApplied = appT dataType (varT x)
+      repTypeApplied = appT repType (varT x)
+
+      mkForallT :: Type -> Q Type -> Q Type
+      mkForallT ty qBodyTy = forallT (map PlainTV (ty^..typeVars)) (return []) qBodyTy
+
+      isoDecsQ :: Q [Dec]
+      isoDecsQ = do
+        ty <- repType
+        sequence [ sigD isoN $ mkForallT ty [t| Iso1 $(dataType) $(repType) |]
+                 , funD isoN [clause [] (normalB [| Iso1 $(varE fromN) $(varE toN)
+                                                         $(varE fotN) $(varE tofN) |])
+                                                 []]
+                 ]
+
+      fromToDecsQ :: Name -> Q Type -> Q Type -> [(Pat,Exp)] -> Q [Dec]
+      fromToDecsQ fromToN ty1 ty2 patsAndExps = do
+        rt <- repTypeApplied
+        sequence
+          [ sigD fromToN $ mkForallT rt [t| $(ty1) -> $(ty2) |]
+          , funD fromToN $ map (\(pat,expr) -> clause [return pat] (normalB (return expr)) [])
+                               patsAndExps
+          ]
+
+      fromDecsQ, toDecsQ :: Q [Dec]
+      fromDecsQ = fromToDecsQ fromN dataTypeApplied repTypeApplied  fromPatsAndExps
+      toDecsQ   = fromToDecsQ toN   repTypeApplied  dataTypeApplied toPatsAndExps
+
+      proofDecsQ :: Name -> Name -> Name -> Q Type -> [(Pat,Exp)] -> Q [Dec]
+      proofDecsQ fun1oFun2N fun1N fun2N qTy patsAndExps = do
+        ty <- qTy
+        sequence
+          [ sigD fun1oFun2N $ mkForallT ty [t| $(qTy) -> Proof |]
+          , funD fun1oFun2N $ map (\(pat,expr) -> clause [asP z $ return pat]
+                                                         (normalB [|     $(varE fun1N) ($(varE fun2N) $(varE z))
+                                                                     ==. $(varE fun1N) $(return expr)
+                                                                     ==. $(varE z)
+                                                                     *** QED
+                                                                   |]) [])
+                                  patsAndExps
+          ]
+
+      fotDecsQ, tofDecsQ :: Q [Dec]
+      fotDecsQ = proofDecsQ fotN fromN toN repTypeApplied  toPatsAndExps
+      tofDecsQ = proofDecsQ tofN toN fromN dataTypeApplied fromPatsAndExps
 
   fromDecs <- fromDecsQ
   toDecs   <- toDecsQ

@@ -8,17 +8,22 @@
 module GenericProofs.Iso (
     identity
   , compose
+
   , Iso(..)
   , isoRefl
   , isoCompose
   , isoSym
   , isoTrans
+  , toInj
+  , fromInj
 
   , Iso1(..)
   , iso1Refl
   , iso1Compose
   , iso1Sym
   , iso1Trans
+  , to1Inj
+  , from1Inj
   ) where
 
 import Control.Category                         (Category (..))
@@ -37,6 +42,30 @@ data Iso a b = Iso { to   :: a -> b
                    , fot  :: a -> Proof
                    }
 
+{-@ toInj :: to:(a -> b) -> from:(b -> a) -> fot:(x:a -> {from (to x) == x })
+          -> x:a -> y:a -> { to x == to y ==> x == y } @-}
+toInj :: (Eq a, Eq b)
+      => (a -> b) -> (b -> a) -> (a -> Proof)
+      -> a -> a -> Proof
+toInj to from fot x y
+  =   to x == to y
+  ==. from (to x) == from (to y)
+  ==. x == from (to y) ? fot x
+  ==. x == y ? fot y
+  *** QED
+
+{-@ fromInj :: to:(a -> b) -> from:(b -> a) -> tof:(y:b -> {to (from y) == y })
+            -> x:b -> y:b -> { from x == from y ==> x == y } @-}
+fromInj :: (Eq a, Eq b)
+        => (a -> b) -> (b -> a) -> (b -> Proof)
+        -> b -> b -> Proof
+fromInj to from tof x y
+  =   from x == from y
+  ==. to (from x) == to (from y)
+  ==. x == to (from y) ? tof x
+  ==. x == y ? tof y
+  *** QED
+
 {-@ data Iso1 f g = Iso1 { to1   :: forall a. f a -> g a
                          , from1 :: forall a. g a -> f a
                          , tof1  :: forall a. y:(g a) -> { to1 (from1 y) == y }
@@ -48,6 +77,30 @@ data Iso1 f g = Iso1 { to1   :: forall a. f a -> g a
                      , tof1  :: forall a. g a -> Proof
                      , fot1  :: forall a. f a -> Proof
                      }
+
+{-@ to1Inj :: to1:(f a -> g a) -> from1:(g a -> f a) -> fot1:(x:f a -> {from1 (to1 x) == x })
+           -> x:f a -> y:f a -> { to1 x == to1 y ==> x == y } @-}
+to1Inj :: (Eq (f a), Eq (g a))
+       => (f a -> g a) -> (g a -> f a) -> (f a -> Proof)
+       -> f a -> f a -> Proof
+to1Inj to1 from1 fot1 x y
+  =   to1 x == to1 y
+  ==. from1 (to1 x) == from1 (to1 y)
+  ==. x == from1 (to1 y) ? fot1 x
+  ==. x == y ? fot1 y
+  *** QED
+
+{-@ from1Inj :: to1:(f a -> g a) -> from1:(g a -> f a) -> tof1:(y:g a -> {to1 (from1 y) == y })
+            -> x:g a -> y:g a -> { from1 x == from1 y ==> x == y } @-}
+from1Inj :: (Eq (f a), Eq (g a))
+         => (f a -> g a) -> (g a -> f a) -> (g a -> Proof)
+         -> g a -> g a -> Proof
+from1Inj to1 from1 tof1 x y
+  =   from1 x == from1 y
+  ==. to1 (from1 x) == to1 (from1 y)
+  ==. x == to1 (from1 y) ? tof1 x
+  ==. x == y ? tof1 y
+  *** QED
 
 instance Category Iso where
   id  = isoRefl

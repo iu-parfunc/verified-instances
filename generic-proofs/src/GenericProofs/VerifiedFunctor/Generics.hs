@@ -78,6 +78,35 @@ fmapU1Compose f g U1
 vfunctorU1 :: VerifiedFunctor U1
 vfunctorU1 = VerifiedFunctor fmapU1 fmapU1Id fmapU1Compose
 
+{-@ axiomatize fmapK1 @-}
+fmapK1 :: (p -> q) -> K1 i c p -> K1 i c q
+fmapK1 _ (K1 p) = K1 p
+
+{-@ fmapK1Id :: x:K1 i c p
+               -> { fmapK1 identity x == x }
+@-}
+fmapK1Id :: K1 i c p -> Proof
+fmapK1Id par@(K1 p)
+  =   fmapK1 identity par
+  ==. K1 p
+  *** QED
+
+{-@ fmapK1Compose :: f:(q -> r)
+                    -> g:(p -> q)
+                    -> x:K1 i c p
+                    -> { fmapK1 (compose f g) x == compose (fmapK1 f) (fmapK1 g) x } @-}
+fmapK1Compose :: (q -> r) -> (p -> q)
+                -> K1 i c p -> Proof
+fmapK1Compose f g x@(K1 p)
+  =   fmapK1 (compose f g) x
+  ==. K1 p
+  ==. fmapK1 f (fmapK1 g x)
+  ==. compose (fmapK1 f) (fmapK1 g) x
+  *** QED
+
+vfunctorK1 :: VerifiedFunctor (K1 i c)
+vfunctorK1 = VerifiedFunctor fmapK1 fmapK1Id fmapK1Compose
+
 {-@ axiomatize fmapPar1 @-}
 fmapPar1 :: (p -> q) -> Par1 p -> Par1 q
 fmapPar1 f (Par1 p) = Par1 (f p)
@@ -112,6 +141,56 @@ fmapPar1Compose f g x@(Par1 p)
 
 vfunctorPar1 :: VerifiedFunctor Par1
 vfunctorPar1 = VerifiedFunctor fmapPar1 fmapPar1Id fmapPar1Compose
+
+{-@ axiomatize fmapM1 @-}
+fmapM1 :: (forall a b. (a -> b) -> f a -> f b)
+       -> (p -> q) -> M1 i c f p -> M1 i c f q
+fmapM1 fmapF f (M1 fp) = M1 (fmapF f fp)
+
+{-@ fmapM1Id :: fmapF:(forall a b. (a -> b) -> f a -> f b)
+             -> fmapFId:(forall a. y:(f a) -> { fmapF identity y == y })
+             -> r:M1 i c f p
+             -> { fmapM1 fmapF identity r == r }
+@-}
+fmapM1Id :: (forall a b. (a -> b) -> f a -> f b)
+           -> (forall a. f a -> Proof)
+           -> M1 i c f p -> Proof
+fmapM1Id fmapF fmapFId r@(M1 fp)
+  =   fmapM1 fmapF identity r
+  ==. M1 (fmapF identity fp)
+  ==. M1 (identity fp) ? fmapFId fp
+  ==. M1 fp
+  ==. r
+  *** QED
+
+{-@ fmapM1Compose :: fmapF:(forall a b. (a -> b) -> f a -> f b)
+                  -> fmapFCompose:(forall a b c. f':(b -> c) -> g':(a -> b) -> y:(f a)
+                                         -> { fmapF (compose f' g') y == compose (fmapF f') (fmapF g') y })
+                  -> f:(q -> r)
+                  -> g:(p -> q)
+                  -> x:M1 i c f p
+                  -> { fmapM1 fmapF (compose f g) x == compose (fmapM1 fmapF f) (fmapM1 fmapF g) x }
+@-}
+fmapM1Compose :: (forall a b. (a -> b) -> f a -> f b)
+              -> (forall a b c. (b -> c) -> (a -> b) -> f a -> Proof)
+              -> (q -> r) -> (p -> q) -> M1 i c f p -> Proof
+fmapM1Compose fmapF fmapFCompose f g r@(M1 fp)
+  =   fmapM1 fmapF (compose f g) r
+  ==. fmapM1 fmapF (compose f g) (M1 fp)
+  ==. M1 (fmapF (compose f g) fp)
+  ==. M1 (compose (fmapF f) (fmapF g) fp) ? fmapFCompose f g fp
+  ==. M1 (fmapF f (fmapF g fp))
+  ==. fmapM1 fmapF f (M1 (fmapF g fp))
+  ==. fmapM1 fmapF f (fmapM1 fmapF g (M1 fp))
+  ==. compose (fmapM1 fmapF f) (fmapM1 fmapF g) (M1 fp)
+  ==. compose (fmapM1 fmapF f) (fmapM1 fmapF g) r
+  *** QED
+
+vfunctorM1 :: VerifiedFunctor f -> VerifiedFunctor (M1 i c f)
+vfunctorM1 (VerifiedFunctor fmapF fmapFId fmapFCompose)
+  = VerifiedFunctor (fmapM1        fmapF)
+                    (fmapM1Id      fmapF fmapFId)
+                    (fmapM1Compose fmapF fmapFCompose)
 
 {-@ axiomatize fmapRec1 @-}
 fmapRec1 :: (forall a b. (a -> b) -> f a -> f b)

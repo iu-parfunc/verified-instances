@@ -1,22 +1,22 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--exactdc"            @-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE TemplateHaskell #-}
-module GenericProofs.VerifiedEq.Examples.List where
+{-# LANGUAGE TypeFamilies    #-}
+{-# LANGUAGE TypeOperators   #-}
+module GenericProofs.VerifiedOrd.Examples.List where
 
 import Language.Haskell.Liquid.ProofCombinators
 
 import GenericProofs.Iso
 import GenericProofs.TH
-import GenericProofs.VerifiedEq
-import GenericProofs.VerifiedEq.Generics
+import GenericProofs.VerifiedOrd
+import GenericProofs.VerifiedOrd.Generics
 
 import Generics.Deriving.Newtypeless.Base.Internal
 
 {-@ data List [listLength] a = Nil | Cons { x :: a , xs :: List a } @-}
-data List a = Nil | Cons a (List a)
+data List a = Nil | Cons a (List a) deriving (Eq)
 
 {-@ measure listLength @-}
 {-@ listLength :: List a -> Nat @-}
@@ -93,10 +93,11 @@ $(deriveIso "RepList"
             "isoList"
             ''List)
 
-{-@ lazy veqList @-}
-veqList :: VerifiedEq a -> VerifiedEq (List a)
-veqList veqA
-  = veqContra fromList $ veqM1
-                       $ veqSum (veqM1 veqU1)
-                                (veqM1 $ veqProd (veqM1 $ veqK1 veqA)
-                                                 (veqM1 $ veqK1 $ veqList veqA))
+{-@ lazy vordList @-}
+vordList :: Eq a => VerifiedOrd a -> VerifiedOrd (List a)
+vordList vordA
+  = vordIso (isoSym isoList)
+  $ vordM1
+  $ vordSum (vordM1 vordU1)
+            (vordM1 $ vordProd (vordM1 $ vordK1 vordA)
+              (vordM1 $ vordK1 $ vordList vordA))

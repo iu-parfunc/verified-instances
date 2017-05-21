@@ -2,12 +2,14 @@
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--exactdc"            @-}
 {-# LANGUAGE Rank2Types #-}
-
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeFamilies #-}
 module GenericProofs.VerifiedFunctor.Examples.List where
 
 import Language.Haskell.Liquid.ProofCombinators
 
 import GenericProofs.Iso
+import GenericProofs.TH
 import GenericProofs.VerifiedFunctor
 import GenericProofs.VerifiedFunctor.Generics
 
@@ -16,6 +18,7 @@ import Generics.Deriving.Newtypeless.Base.Internal
 {-@ data List a = Nil | Cons { hd :: a, tl :: List a } @-}
 data List a = Nil | Cons { hd :: a, tl :: List a }
 
+{-
 type RepList = Sum U1 (Product Par1 (Rec1 List))
 
 {-@ axiomatize fromList @-}
@@ -53,15 +56,27 @@ fotList (R1 (Product (Par1 x) (Rec1 xs)))
   ==. fromList (Cons x xs)
   ==. R1 (Product (Par1 x) (Rec1 xs))
   *** QED
+-}
 
+{-@ axiomatize fromList @-}
+{-@ axiomatize toList @-}
+{-@ tofList :: forall a. l:List a -> { toList (fromList l) == l } @-}
+{-@ fotList :: forall a. l:RepList a -> { fromList (toList l) == l } @-}
+$(deriveIso1 "RepList"
+             "toList" "fromList"
+             "tofList" "fotList"
+             "isoList"
+             ''List)
+
+{-
 isoList :: Iso1 RepList List
 isoList = Iso1 toList fromList tofList fotList
+-}
 
 {-@ lazy vfunctorList @-}
 vfunctorList :: VerifiedFunctor List
-vfunctorList =
-    vfunctorIso
-        isoList
-        (vfunctorSum
-             vfunctorU1
-             (vfunctorProduct vfunctorPar1 (vfunctorRec1 vfunctorList)))
+vfunctorList = vfunctorIso (iso1Sym isoList)
+             $ vfunctorM1
+             $ vfunctorSum (vfunctorM1 vfunctorU1)
+                           (vfunctorM1 $ vfunctorProduct (vfunctorM1 vfunctorPar1)
+                                                         (vfunctorM1 $ vfunctorRec1 vfunctorList))
