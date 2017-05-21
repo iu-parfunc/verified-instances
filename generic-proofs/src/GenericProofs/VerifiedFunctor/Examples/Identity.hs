@@ -1,19 +1,24 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--exactdc"            @-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeFamilies #-}
 module GenericProofs.VerifiedFunctor.Examples.Identity where
 
 import Language.Haskell.Liquid.ProofCombinators
 
 import GenericProofs.Iso
--- import GenericProofs.VerifiedFunctor
--- import GenericProofs.VerifiedFunctor.Generics
+import GenericProofs.TH
+import GenericProofs.VerifiedFunctor
+import GenericProofs.VerifiedFunctor.Generics
 
 import Generics.Deriving.Newtypeless.Base.Internal
 
-{-@ data Id a = Id { runId :: a } @-}
-data Id a = Id { runId :: a }
+-- Morally a newtype, but in practice, not.
+{-@ data Identity a = Identity { getIdentity :: a } @-}
+data Identity a = Identity { runIdentity :: a }
 
+{-
 type RepId = Par1
 
 {-@ axiomatize fromId @-}
@@ -43,6 +48,22 @@ fotId x@(Par1 a)
   ==. fromId (Id a)
   ==. x
   *** QED
+-}
 
-isoId :: Iso1 Id RepId
-isoId = Iso1 fromId toId fotId tofId
+{-@ axiomatize fromIdentity @-}
+{-@ axiomatize toIdentity @-}
+{-@ tofIdentity1 :: x:Identity a
+                 -> { toIdentity (fromIdentity x) == x }
+@-}
+{-@ fotIdentity1 :: x:RepIdentity1 a
+                 -> { fromIdentity (toIdentity x) == x }
+@-}
+$(deriveIso1 "RepIdentity1"
+             "toIdentity" "fromIdentity"
+             "tofIdentity1" "fotIdentity1"
+             "isoIdentity1"
+             ''Identity)
+
+vfunctorIdentity :: VerifiedFunctor Identity
+vfunctorIdentity = vfunctorIso (iso1Sym isoIdentity1)
+                 $ vfunctorM1 $ vfunctorM1 $ vfunctorM1 vfunctorPar1
