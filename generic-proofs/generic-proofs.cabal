@@ -14,6 +14,7 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:     GenericProofs.Iso
+                       GenericProofs.TH
                        GenericProofs.VerifiedEq
                        GenericProofs.VerifiedEq.Examples.Either
                        GenericProofs.VerifiedEq.Examples.List
@@ -27,22 +28,18 @@ library
                        GenericProofs.VerifiedEq.Examples.Triple
                        GenericProofs.VerifiedEq.Generics
                        GenericProofs.VerifiedEq.Instances
+                       GenericProofs.VerifiedFunctor
+                       GenericProofs.VerifiedFunctor.Examples.Identity
+                       GenericProofs.VerifiedFunctor.Examples.List
+                       GenericProofs.VerifiedFunctor.Generics
+                       GenericProofs.VerifiedMonoid
+                       GenericProofs.VerifiedMonoid.Generics
                        GenericProofs.VerifiedSemigroup
                        GenericProofs.VerifiedSemigroup.Generics
                        GenericProofs.VerifiedSemigroup.Examples.Newtype
                        GenericProofs.VerifiedSemigroup.Examples.Identity
                        GenericProofs.VerifiedSemigroup.Examples.Triple
                        GenericProofs.VerifiedSemigroup.Instances
-                       GenericProofs.TH
-
-                       -- Not really working
-                       --- Higher-rank stuff
-                       GenericProofs.VerifiedFunctor
-                       GenericProofs.VerifiedFunctor.Examples.Identity
-                       GenericProofs.VerifiedFunctor.Examples.List
-                       GenericProofs.VerifiedFunctor.Generics
-                       --- Superclass issues
-                       GenericProofs.VerifiedMonoid
                        GenericProofs.VerifiedOrd
                        GenericProofs.VerifiedOrd.Generics
                        GenericProofs.VerifiedOrd.Instances
