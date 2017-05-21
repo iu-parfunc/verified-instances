@@ -32,8 +32,8 @@ library
                        GenericProofs.VerifiedFunctor.Examples.Either
                        GenericProofs.VerifiedFunctor.Examples.Identity
                        GenericProofs.VerifiedFunctor.Examples.List
-                       -- GenericProofs.VerifiedFunctor.Examples.Maybe
-                       -- GenericProofs.VerifiedFunctor.Examples.Triple
+                       GenericProofs.VerifiedFunctor.Examples.Maybe
+                       GenericProofs.VerifiedFunctor.Examples.Triple
                        GenericProofs.VerifiedFunctor.Generics
                        GenericProofs.VerifiedMonoid
                        GenericProofs.VerifiedMonoid.Examples.Identity
