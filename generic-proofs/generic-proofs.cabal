@@ -44,6 +44,16 @@ library
                        GenericProofs.VerifiedSemigroup.Examples.Triple
                        GenericProofs.VerifiedSemigroup.Instances
                        GenericProofs.VerifiedOrd
+                       GenericProofs.VerifiedOrd.Examples.Either
+                       GenericProofs.VerifiedOrd.Examples.List
+                       GenericProofs.VerifiedOrd.Examples.Identity
+                       GenericProofs.VerifiedOrd.Examples.Maybe
+                       GenericProofs.VerifiedOrd.Examples.Newtype
+                       GenericProofs.VerifiedOrd.Examples.Product
+                       GenericProofs.VerifiedOrd.Examples.Sum
+                       GenericProofs.VerifiedOrd.Examples.Unit
+                       GenericProofs.VerifiedOrd.Examples.Nat
+                       GenericProofs.VerifiedOrd.Examples.Triple
                        GenericProofs.VerifiedOrd.Generics
                        GenericProofs.VerifiedOrd.Instances
 

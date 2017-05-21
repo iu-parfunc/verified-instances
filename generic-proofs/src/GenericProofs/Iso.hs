@@ -8,17 +8,22 @@
 module GenericProofs.Iso (
     identity
   , compose
+
   , Iso(..)
   , isoRefl
   , isoCompose
   , isoSym
   , isoTrans
+  , toInj
+  , fromInj
 
   , Iso1(..)
   , iso1Refl
   , iso1Compose
   , iso1Sym
   , iso1Trans
+  , to1Inj
+  , from1Inj
   ) where
 
 import Control.Category                         (Category (..))
