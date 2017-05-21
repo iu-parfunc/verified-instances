@@ -33,7 +33,10 @@ library
                        GenericProofs.VerifiedFunctor.Examples.List
                        GenericProofs.VerifiedFunctor.Generics
                        GenericProofs.VerifiedMonoid
+                       GenericProofs.VerifiedMonoid.Examples.Identity
+                       GenericProofs.VerifiedMonoid.Examples.Triple
                        GenericProofs.VerifiedMonoid.Generics
+                       GenericProofs.VerifiedMonoid.Instances
                        GenericProofs.VerifiedSemigroup
                        GenericProofs.VerifiedSemigroup.Generics
                        GenericProofs.VerifiedSemigroup.Examples.Newtype
