@@ -59,6 +59,7 @@ library
                        GenericProofs.VerifiedOrd.Examples.Unit
                        GenericProofs.VerifiedOrd.Examples.Nat
                        GenericProofs.VerifiedOrd.Examples.Triple
+                       GenericProofs.VerifiedOrd.Examples.These
                        GenericProofs.VerifiedOrd.Generics
                        GenericProofs.VerifiedOrd.Instances
 
