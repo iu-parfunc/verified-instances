@@ -24,8 +24,6 @@ import GenericProofs.VerifiedOrd.Instances
 
 import Generics.Deriving.Newtypeless.Base.Internal
 
-import Prelude                                     hiding (These (..))
-
 {-@ data These = This a | That b | These { a :: a, b :: b } @-}
 data These a b = This a | That b | These a b deriving (Eq)
 
