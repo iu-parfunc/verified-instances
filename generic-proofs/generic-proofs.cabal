@@ -54,6 +54,7 @@ library
                        GenericProofs.VerifiedOrd.Examples.Maybe
                        GenericProofs.VerifiedOrd.Examples.Newtype
                        GenericProofs.VerifiedOrd.Examples.Product
+                       GenericProofs.VerifiedOrd.Examples.ProductNoIso
                        GenericProofs.VerifiedOrd.Examples.Sum
                        GenericProofs.VerifiedOrd.Examples.Unit
                        GenericProofs.VerifiedOrd.Examples.Nat
