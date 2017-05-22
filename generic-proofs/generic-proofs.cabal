@@ -48,6 +48,7 @@ library
                        GenericProofs.VerifiedSemigroup.Instances
                        GenericProofs.VerifiedOrd
                        GenericProofs.VerifiedOrd.Examples.Either
+                       GenericProofs.VerifiedOrd.Examples.EitherNoIso
                        GenericProofs.VerifiedOrd.Examples.List
                        GenericProofs.VerifiedOrd.Examples.Identity
                        GenericProofs.VerifiedOrd.Examples.Maybe
