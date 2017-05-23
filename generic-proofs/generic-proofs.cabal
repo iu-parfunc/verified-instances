@@ -1,0 +1,79 @@
+name:                generic-proofs
+version:             0.1
+-- synopsis:
+-- description:
+license:             BSD3
+license-file:        LICENSE
+author:              Ryan Scott
+maintainer:          ryan.gl.scott@gmail.com
+-- copyright:
+-- category:
+build-type:          Simple
+extra-source-files:  ChangeLog.md
+cabal-version:       >=1.10
+
+library
+  exposed-modules:     GenericProofs.Iso
+                       GenericProofs.TH
+                       GenericProofs.VerifiedEq
+                       GenericProofs.VerifiedEq.Examples.Either
+                       GenericProofs.VerifiedEq.Examples.List
+                       GenericProofs.VerifiedEq.Examples.Identity
+                       GenericProofs.VerifiedEq.Examples.Maybe
+                       GenericProofs.VerifiedEq.Examples.Newtype
+                       GenericProofs.VerifiedEq.Examples.Product
+                       GenericProofs.VerifiedEq.Examples.Sum
+                       GenericProofs.VerifiedEq.Examples.Unit
+                       GenericProofs.VerifiedEq.Examples.Nat
+                       GenericProofs.VerifiedEq.Examples.Triple
+                       GenericProofs.VerifiedEq.Generics
+                       GenericProofs.VerifiedEq.Instances
+                       GenericProofs.VerifiedFunctor
+                       GenericProofs.VerifiedFunctor.Examples.Either
+                       GenericProofs.VerifiedFunctor.Examples.Identity
+                       GenericProofs.VerifiedFunctor.Examples.List
+                       GenericProofs.VerifiedFunctor.Examples.Maybe
+                       GenericProofs.VerifiedFunctor.Examples.Triple
+                       GenericProofs.VerifiedFunctor.Generics
+                       GenericProofs.VerifiedMonoid
+                       GenericProofs.VerifiedMonoid.Examples.Identity
+                       GenericProofs.VerifiedMonoid.Examples.Triple
+                       GenericProofs.VerifiedMonoid.Generics
+                       GenericProofs.VerifiedMonoid.Instances
+                       GenericProofs.VerifiedSemigroup
+                       GenericProofs.VerifiedSemigroup.Generics
+                       GenericProofs.VerifiedSemigroup.Examples.Newtype
+                       GenericProofs.VerifiedSemigroup.Examples.Identity
+                       GenericProofs.VerifiedSemigroup.Examples.Triple
+                       GenericProofs.VerifiedSemigroup.Instances
+                       GenericProofs.VerifiedOrd
+                       GenericProofs.VerifiedOrd.Examples.Either
+                       GenericProofs.VerifiedOrd.Examples.EitherNoIso
+                       GenericProofs.VerifiedOrd.Examples.List
+                       GenericProofs.VerifiedOrd.Examples.Identity
+                       GenericProofs.VerifiedOrd.Examples.Maybe
+                       GenericProofs.VerifiedOrd.Examples.Newtype
+                       GenericProofs.VerifiedOrd.Examples.Product
+                       GenericProofs.VerifiedOrd.Examples.ProductNoIso
+                       GenericProofs.VerifiedOrd.Examples.Sum
+                       GenericProofs.VerifiedOrd.Examples.Unit
+                       GenericProofs.VerifiedOrd.Examples.Nat
+                       GenericProofs.VerifiedOrd.Examples.Triple
+                       GenericProofs.VerifiedOrd.Examples.These
+                       GenericProofs.VerifiedOrd.Examples.TheseNoIso
+                       GenericProofs.VerifiedOrd.Generics
+                       GenericProofs.VerifiedOrd.Instances
+
+  -- other-modules:       GenericProofs.Combinators
+  build-depends:       base >= 4.8 && < 5
+                     , contravariant
+                     , generic-deriving-newtypeless
+                     , invariant
+                     , lens
+                     , liquidhaskell >= 0.8
+                     , template-haskell == 2.11.*
+  hs-source-dirs:      src
+  default-language:    Haskell2010
+  ghc-options:         -Wall
+                       -- Sadly needed due to https://github.com/ucsd-progsys/liquidhaskell/issues/1019
+                       -Wno-unused-imports
