@@ -4,13 +4,18 @@ packages:
 - '.'
 - location:
     git: https://github.com/iu-parfunc/lvars.git
-    commit: 51df52ec577d825deb1c8f642553350890a4041a
+    commit: 59591ab538fa3d9261581d82b9be4538cfed8922
   subdirs:
   - src/par-classes
   - src/par-collections
   - src/lvish
   - deps/concurrent-skiplist
   - deps/ctrie
+  extra-dep: true
+- location:
+    git: https://github.com/iu-parfunc/tslogger.git
+    commit: bfa8d2b52f0d41439863b15863baa0ca2ef613d9
+  extra-dep: true
 docker:
   image: liquidhaskell
   enable: false
@@ -20,6 +25,5 @@ extra-deps:
 - ctrie-0.1.0.3
 - pcg-random-0.1.3.4
 - thread-local-storage-0.1.0.4
-- tslogger-0.2.1.0
 compiler-check: newer-minor
-resolver: lts-8.9
+resolver: lts-8.21
