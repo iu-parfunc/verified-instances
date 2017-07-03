@@ -3,6 +3,7 @@
 {-@ LIQUID "--prune-unsorted"     @-}
 {-@ LIQUID "--exactdc"            @-}
 {-@ LIQUID "--trust-internals" @-}
+{-@ LIQUID "--automatic-instances=liquidinstances" @-}
 
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 {-# LANGUAGE BangPatterns #-}
@@ -106,22 +107,13 @@ fromAccel (Accel x y z) = Pair x (Pair y z)
 assume tofAccel :: a:Accel -> { toAccel (fromAccel a) == a }
 @-}
 tofAccel :: Accel -> Proof
-tofAccel (Accel x y z)
-  =   toAccel (fromAccel (Accel x y z))
-  ==. toAccel (Pair x (Pair y z))
-  ==. Accel x y z
-  *** QED
+tofAccel (Accel x y z) = simpleProof
 
 {-@
 fotAccel :: ar:AccelRep -> { fromAccel (toAccel ar) == ar }
 @-}
 fotAccel :: AccelRep -> Proof
-fotAccel ar@(Pair x (Pair y z))
-  =   fromAccel (toAccel ar)
-  ==. fromAccel (Accel x y z)
-  ==. Pair x (Pair y z)
-  ==. ar
-  *** QED
+fotAccel ar@(Pair x (Pair y z)) = simpleProof
 
 isoAccel :: Iso AccelRep Accel
 isoAccel = Iso {

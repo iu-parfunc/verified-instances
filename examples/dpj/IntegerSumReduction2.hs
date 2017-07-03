@@ -3,6 +3,7 @@
 {-@ LIQUID "--totality"       @-}
 {-@ LIQUID "--exactdc"        @-}
 {-@ LIQUID "--prune-unsorted" @-}
+{-@ LIQUID "--automatic-instances=liquidinstances" @-}
 
 module Main where
 
@@ -53,66 +54,38 @@ instance NFData Sum where
 getSumSumId :: x:Int -> { getSum (Sum x) == x }
 @-}
 getSumSumId :: Int -> Proof
-getSumSumId x = getSum (Sum x) ==. x *** QED
+getSumSumId x = simpleProof
 
 {-@
 appendSumAssoc :: x:Sum -> y:Sum -> z:Sum
                -> { appendSum x (appendSum y z) == appendSum (appendSum x y) z }
 @-}
 appendSumAssoc :: Sum -> Sum -> Sum -> Proof
-appendSumAssoc x y z
-  =   appendSum x (appendSum y z)
-  ==. appendSum x (Sum (getSum y + getSum z))
-  ==. Sum (getSum x + getSum (Sum (getSum y + getSum z)))
-  ==. Sum (getSum x + (getSum y + getSum z))
-  ==. Sum ((getSum x + getSum y) + getSum z)
-  ==. Sum (getSum (Sum (getSum x + getSum y)) + getSum z)
-  ==. appendSum (Sum (getSum x + getSum y)) z
-  ==. appendSum (appendSum x y) z
-  *** QED
+appendSumAssoc x y z = simpleProof
 
 {-@
 appendSumCommute :: x:Sum -> y:Sum -> { appendSum x y == appendSum y x }
 @-}
 appendSumCommute :: Sum -> Sum -> Proof
-appendSumCommute x y
-  =   appendSum x y
-  ==. Sum (getSum x + getSum y)
-  ==. Sum (getSum y + getSum x)
-  ==. appendSum y x
-  *** QED
+appendSumCommute x y = simpleProof
 
 {-@
 appendIntLident :: x:Int -> { 0 + x == x }
 @-}
 appendIntLident :: Int -> Proof
-appendIntLident x = 0 + x ==. x *** QED
+appendIntLident x = simpleProof
 
 {-@
 assume appendSumLident :: x:Sum -> { appendSum emptySum x == x }
 @-}
 appendSumLident :: Sum -> Proof
-appendSumLident x
-  =   appendSum emptySum x
-  ==. appendSum (Sum 0) x
-  ==. Sum (getSum (Sum 0) + getSum x)
-  ==. Sum (0 + getSum x) ? getSumSumId 0
-  ==. Sum (getSum x) ? appendIntLident (getSum x)
-  ==. x
-  *** QED
+appendSumLident x = simpleProof
 
 {-@
 assume appendSumRident :: x:Sum -> { appendSum x emptySum == x }
 @-}
 appendSumRident :: Sum -> Proof
-appendSumRident x@(Sum s)
-  =   appendSum x emptySum
-  ==. appendSum x (Sum 0)
-  ==. Sum (s + getSum (Sum 0))
-  ==. Sum (s + 0)
-  ==. Sum s
-  ==. x
-  *** QED
+appendSumRident (Sum s) = simpleProof
 
 {-@
 vamSum :: VerifiedAbelianMonoid Sum
