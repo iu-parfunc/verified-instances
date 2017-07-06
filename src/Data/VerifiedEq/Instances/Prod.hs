@@ -2,7 +2,7 @@
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--exactdc"            @-}
 
-module Data.VerifiedEq.Instances.Prod (veqProd) where
+module Data.VerifiedEq.Instances.Prod (veqProd, eqProd) where
 
 import Data.VerifiedEq
 import Language.Haskell.Liquid.ProofCombinators

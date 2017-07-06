@@ -9,12 +9,12 @@ import Data.VerifiedEq
 import Data.VerifiedEq.Instances.Contra
 import Language.Haskell.Liquid.ProofCombinators
 
-{-@ data Inj a b = Inj { to  :: a -> b
-                       , inj :: x:a -> y:a -> { to x == to y ==> x == y }
+{-@ data Inj a b = Inj { f  :: a -> b
+                       , inj :: x:a -> y:a -> { f x == f y ==> x == y }
                        }
 @-}
 
-data Inj a b = Inj { to  :: a -> b
+data Inj a b = Inj { f   :: a -> b
                    , inj :: a -> a -> Proof
                    }
 

@@ -2,7 +2,7 @@
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--exactdc"            @-}
 
-module Data.VerifiedOrd.Instances.Sum (vordSum) where
+module Data.VerifiedOrd.Instances.Sum (vordSum, leqSum) where
 
 import Data.VerifiableConstraint
 import Data.VerifiedEq

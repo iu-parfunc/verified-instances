@@ -1,14 +1,24 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 
-module Data.VerifiedOrd.Instances (vordUnit, vordInt, vordInt64, vordDouble, module X) where
+module Data.VerifiedOrd.Instances
+  ( vordUnit
+  , vordInt
+  , vordInt64
+  , vordDouble
+  , module X
+  , leqUnit
+  , leqInt
+  , leqInt64
+  , leqDouble )
+  where
 
 import Data.Int
 
-import Data.VerifiedOrd.Instances.Inj  as X
-import Data.VerifiedOrd.Instances.Iso  as X
-import Data.VerifiedOrd.Instances.Prod as X
-import Data.VerifiedOrd.Instances.Sum  as X
+import Data.VerifiedOrd.Instances.Inj           as X
+import Data.VerifiedOrd.Instances.Iso           as X
+import Data.VerifiedOrd.Instances.Prod          as X
+import Data.VerifiedOrd.Instances.Sum           as X
 
 import Data.VerifiedEq.Instances
 import Data.VerifiedOrd

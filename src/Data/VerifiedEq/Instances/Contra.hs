@@ -1,7 +1,7 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 
-module Data.VerifiedEq.Instances.Contra (veqContra) where
+module Data.VerifiedEq.Instances.Contra (veqContra, eqContra) where
 
 import Data.Functor.Contravariant
 import Data.VerifiedEq

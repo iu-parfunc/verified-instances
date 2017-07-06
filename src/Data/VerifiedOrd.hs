@@ -1,35 +1,35 @@
-{-# LANGUAGE Trustworthy          #-}
-{-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE FlexibleContexts     #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
+{-# LANGUAGE Trustworthy          #-}
 {-# LANGUAGE TypeFamilies         #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 
 module Data.VerifiedOrd where
 
-import Data.Constraint
+import Data.Constraint                          ((:-) (..), Dict (..))
 import Data.Reflection
-import Data.VerifiedEq
 import Data.VerifiableConstraint.Internal
+import Data.VerifiedEq                          (VerifiedEq, eq)
 import Language.Haskell.Liquid.ProofCombinators
 
 {-@ data VerifiedOrd a = VerifiedOrd {
       leq :: (a -> a -> Bool)
-    , refl :: (x:a -> { leq x x })
+    , reflo :: (x:a -> { leq x x })
     , antisym :: (x:a -> y:a -> { leq x y && leq y x ==> x == y })
-    , trans :: (x:a -> y:a -> z:a -> { leq x y && leq y z ==> leq x z })
+    , transo :: (x:a -> y:a -> z:a -> { leq x y && leq y z ==> leq x z })
     , total :: (x:a -> y:a -> { leq x y || leq y x })
     , verifiedEq :: VerifiedEq a
     }
 @-}
 
 data VerifiedOrd a = VerifiedOrd {
-    leq :: a -> a -> Bool
-  , refl :: a -> Proof
-  , antisym :: a -> a -> Proof
-  , trans :: a -> a -> a -> Proof
-  , total :: a -> a -> Proof
+    leq        :: a -> a -> Bool
+  , reflo      :: a -> Proof
+  , antisym    :: a -> a -> Proof
+  , transo     :: a -> a -> a -> Proof
+  , total      :: a -> a -> Proof
   , verifiedEq :: VerifiedEq a
   }
 

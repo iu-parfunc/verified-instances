@@ -1,8 +1,8 @@
-{-# LANGUAGE Trustworthy          #-}
-{-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE FlexibleContexts     #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
+{-# LANGUAGE Trustworthy          #-}
 {-# LANGUAGE TypeFamilies         #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--prune-unsorted"     @-}
@@ -10,8 +10,8 @@
 
 module Data.VerifiedEq where
 
+import Data.Constraint                          ((:-) (..), Dict (..))
 import Data.Reflection
-import Data.Constraint
 import Data.VerifiableConstraint.Internal
 import Language.Haskell.Liquid.ProofCombinators
 
@@ -24,9 +24,9 @@ import Language.Haskell.Liquid.ProofCombinators
 @-}
 
 data VerifiedEq a = VerifiedEq {
-    eq :: a -> a -> Bool
-  , refl :: a -> Proof
-  , sym :: a -> a -> Proof
+    eq    :: a -> a -> Bool
+  , refl  :: a -> Proof
+  , sym   :: a -> a -> Proof
   , trans :: a -> a -> a -> Proof
   }
 

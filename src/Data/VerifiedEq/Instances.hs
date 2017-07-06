@@ -1,14 +1,24 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 
-module Data.VerifiedEq.Instances (veqInt, veqInt64, veqUnit, veqDouble, module X) where
+module Data.VerifiedEq.Instances
+  ( veqInt
+  , veqInt64
+  , veqUnit
+  , veqDouble
+  , module X
+  , eqUnit
+  , eqInt
+  , eqInt64
+  , eqDouble )
+  where
 
 import Data.Int
-import Data.VerifiedEq.Instances.Contra   as X
-import Data.VerifiedEq.Instances.Generics as X
-import Data.VerifiedEq.Instances.Iso      as X
-import Data.VerifiedEq.Instances.Prod     as X
-import Data.VerifiedEq.Instances.Sum      as X
+import Data.VerifiedEq.Instances.Contra         as X
+-- import Data.VerifiedEq.Instances.Generics       as X
+import Data.VerifiedEq.Instances.Iso            as X
+import Data.VerifiedEq.Instances.Prod           as X
+import Data.VerifiedEq.Instances.Sum            as X
 
 import Data.VerifiedEq
 import Language.Haskell.Liquid.ProofCombinators

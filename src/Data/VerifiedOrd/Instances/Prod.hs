@@ -2,7 +2,7 @@
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--exactdc"            @-}
 
-module Data.VerifiedOrd.Instances.Prod (vordProd) where
+module Data.VerifiedOrd.Instances.Prod (vordProd, leqProd) where
 
 import Data.VerifiableConstraint
 import Data.VerifiedEq

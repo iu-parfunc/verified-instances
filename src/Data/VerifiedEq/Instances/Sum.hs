@@ -2,7 +2,7 @@
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--exactdc"            @-}
 
-module Data.VerifiedEq.Instances.Sum (veqSum) where
+module Data.VerifiedEq.Instances.Sum (veqSum, eqSum) where
 
 import Data.VerifiedEq
 import Language.Haskell.Liquid.ProofCombinators

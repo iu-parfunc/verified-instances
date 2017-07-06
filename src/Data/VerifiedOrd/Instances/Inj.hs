@@ -1,7 +1,7 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 
-module Data.VerifiedOrd.Instances.Inj (vordInj) where
+module Data.VerifiedOrd.Instances.Inj (vordInj, leqFrom) where
 
 import Data.Inj
 import Data.VerifiableConstraint
