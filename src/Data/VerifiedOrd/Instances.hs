@@ -34,15 +34,15 @@ leqUnit () () = True
 leqUnitRefl :: () -> Proof
 leqUnitRefl () = simpleProof
 
-{-@ leqUnitAntisym :: x:() -> y:() -> { leqUnit x y && leqUnit y x ==> x == y } @-}
+{-@ leqUnitAntisym :: x:() -> y:{() | leqUnit x y && leqUnit y x} -> {x == y} @-}
 leqUnitAntisym :: () -> () -> Proof
 leqUnitAntisym () () = simpleProof
 
-{-@ leqUnitTrans :: x:() -> y:() -> z:() -> { leqUnit x y && leqUnit y z ==> leqUnit x z } @-}
+{-@ leqUnitTrans :: x:() -> y:{() | leqUnit x y} -> z:{() | leqUnit y z} -> {leqUnit x z} @-}
 leqUnitTrans :: () -> () -> () -> Proof
 leqUnitTrans () () () = simpleProof
 
-{-@ leqUnitTotal :: x:() -> y:() -> { leqUnit x y || leqUnit y x } @-}
+{-@ leqUnitTotal :: x:() -> y:() -> {leqUnit x y || leqUnit y x} @-}
 leqUnitTotal :: () -> () -> Proof
 leqUnitTotal () () = (leqUnit () () || leqUnit () ()) *** QED
 
@@ -58,17 +58,17 @@ leqInt x y = x <= y
 leqIntRefl :: Int -> Proof
 leqIntRefl x = simpleProof
 
-{-@ leqIntAntisym :: x:Int -> y:Int -> { leqInt x y && leqInt y x ==> x == y } @-}
+{-@ leqIntAntisym :: x:Int -> y:{Int | leqInt x y && leqInt y x} -> {x == y} @-}
 leqIntAntisym :: Int -> Int -> Proof
-leqIntAntisym x y = (leqInt x y && leqInt y x) *** QED
+leqIntAntisym x y = simpleProof
 
-{-@ leqIntTrans :: x:Int -> y:Int -> z:Int -> { leqInt x y && leqInt y z ==> leqInt x z } @-}
+{-@ leqIntTrans :: x:Int -> y:{Int | leqInt x y} -> z:{Int | leqInt y z} -> {leqInt x z} @-}
 leqIntTrans :: Int -> Int -> Int -> Proof
-leqIntTrans x y z = (leqInt x y && leqInt y z) ==. leqInt x z *** QED
+leqIntTrans x y z = simpleProof
 
 {-@ leqIntTotal :: x:Int -> y:Int -> { leqInt x y || leqInt y x } @-}
 leqIntTotal :: Int -> Int -> Proof
-leqIntTotal x y = (leqInt x y || leqInt y x) ==. (x <= y || y <= x) *** QED
+leqIntTotal x y = (leqInt x y || leqInt y x) *** QED
 
 vordInt :: VerifiedOrd Int
 vordInt = VerifiedOrd leqInt leqIntRefl leqIntAntisym leqIntTrans leqIntTotal veqInt
@@ -82,17 +82,17 @@ leqInt64 x y = x <= y
 leqInt64Refl :: Int64 -> Proof
 leqInt64Refl x = simpleProof
 
-{-@ leqInt64Antisym :: x:Int64 -> y:Int64 -> { leqInt64 x y && leqInt64 y x ==> x == y } @-}
+{-@ leqInt64Antisym :: x:Int64 -> y:{Int64 | leqInt64 x y && leqInt64 y x} -> {x == y} @-}
 leqInt64Antisym :: Int64 -> Int64 -> Proof
-leqInt64Antisym x y = (leqInt64 x y && leqInt64 y x) *** QED
+leqInt64Antisym x y = simpleProof
 
-{-@ leqInt64Trans :: x:Int64 -> y:Int64 -> z:Int64 -> { leqInt64 x y && leqInt64 y z ==> leqInt64 x z } @-}
+{-@ leqInt64Trans :: x:Int64 -> y:{Int64 | leqInt64 x y} -> z:{Int64 | leqInt64 y z} -> {leqInt64 x z} @-}
 leqInt64Trans :: Int64 -> Int64 -> Int64 -> Proof
-leqInt64Trans x y z = (leqInt64 x y && leqInt64 y z) ==. leqInt64 x z *** QED
+leqInt64Trans x y z = simpleProof
 
 {-@ leqInt64Total :: x:Int64 -> y:Int64 -> { leqInt64 x y || leqInt64 y x } @-}
 leqInt64Total :: Int64 -> Int64 -> Proof
-leqInt64Total x y = (leqInt64 x y || leqInt64 y x) ==. (x <= y || y <= x) *** QED
+leqInt64Total x y = (leqInt64 x y || leqInt64 y x) *** QED
 
 vordInt64 :: VerifiedOrd Int64
 vordInt64 = VerifiedOrd leqInt64 leqInt64Refl leqInt64Antisym leqInt64Trans leqInt64Total veqInt64
@@ -111,21 +111,15 @@ leqDoubleRefl x = simpleProof
 leqDoubleTotal :: Double -> Double -> Proof
 leqDoubleTotal x y = (leqDouble x y || leqDouble y x) *** QED
 
-{-@ leqDoubleAntisym :: x:Double -> y:Double
-                     -> { leqDouble x y && leqDouble y x ==> x == y } @-}
+{-@ leqDoubleAntisym :: x:Double -> y:{Double | leqDouble x y && leqDouble y x}
+                     -> {x == y} @-}
 leqDoubleAntisym :: Double -> Double -> Proof
-leqDoubleAntisym x y
-  =   (leqDouble x y && leqDouble y x)
-  ==. x == y
-  *** QED
+leqDoubleAntisym x y = simpleProof
 
-{-@ leqDoubleTrans :: x:Double -> y:Double -> z:Double
-                   -> { leqDouble x y && leqDouble y z ==> leqDouble x z } @-}
+{-@ leqDoubleTrans :: x:Double -> y:{Double | leqDouble x y} -> z:{Double | leqDouble y z}
+                   -> {leqDouble x z} @-}
 leqDoubleTrans :: Double -> Double -> Double -> Proof
-leqDoubleTrans x y z
-  =   (leqDouble x y && leqDouble y z)
-  ==. leqDouble x z
-  *** QED
+leqDoubleTrans x y z = simpleProof
 
 vordDouble :: VerifiedOrd Double
 vordDouble = VerifiedOrd leqDouble leqDoubleRefl leqDoubleAntisym
