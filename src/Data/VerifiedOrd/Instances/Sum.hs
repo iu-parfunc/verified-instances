@@ -33,79 +33,35 @@ leqSumRefl :: (a -> a -> Bool) -> (a -> Proof)
 leqSumRefl leqa leqaRefl leqb leqbRefl p@(Left x)  = leqaRefl x
 leqSumRefl leqa leqaRefl leqb leqbRefl p@(Right y) = leqbRefl y
 
-{-@ leqSumAntisym :: leqa:(a -> a -> Bool) -> leqaAntisym:(x:a -> y:a -> { leqa x y && leqa y x ==> x == y })
-                  -> leqb:(b -> b -> Bool) -> leqbAntisym:(x:b -> y:b -> { leqb x y && leqb y x ==> x == y })
-                  -> VerifiedEq a -> VerifiedEq b
-                  -> p:Either a b -> q:Either a b
-                  -> { leqSum leqa leqb p q && leqSum leqa leqb q p ==> p == q }
+{-@ leqSumAntisym :: leqa:(a -> a -> Bool) -> leqaAntisym:(x:a -> y:{a | leqa x y && leqa y x} -> { x == y })
+                  -> leqb:(b -> b -> Bool) -> leqbAntisym:(x:b -> y:{b | leqb x y && leqb y x} -> { x == y })
+                  -> p:Either a b -> q:{Either a b | leqSum leqa leqb p q && leqSum leqa leqb q p}
+                  -> { p == q }
 @-}
 leqSumAntisym :: (a -> a -> Bool) -> (a -> a -> Proof)
               -> (b -> b -> Bool) -> (b -> b -> Proof)
-              -> VerifiedEq a -> VerifiedEq b
               -> Either a b -> Either a b -> Proof
-leqSumAntisym leqa leqaAntisym leqb leqbAntisym veqa veqb p@(Left x) q@(Left y) =
-      using (VEq veqa)
-    $ (leqSum leqa leqb p q && leqSum leqa leqb q p)
-  ==. x == y ? leqaAntisym x y
-  *** QED
-leqSumAntisym leqa leqaAntisym leqb leqbAntisym veqa veqb p@(Left x) q@(Right y) =
-      using (VEq veqa)
-    $ using (VEq veqb)
-    $ (leqSum leqa leqb p q && leqSum leqa leqb q p)
-  *** QED
-leqSumAntisym leqa leqaAntisym leqb leqbAntisym veqa veqb p@(Right x) q@(Left y) =
-      using (VEq veqa)
-    $ using (VEq veqb)
-    $ (leqSum leqa leqb p q && leqSum leqa leqb q p)
-  *** QED
-leqSumAntisym leqa leqaAntisym leqb leqbAntisym veqa veqb p@(Right x) q@(Right y) =
-      using (VEq veqb)
-    $ (leqSum leqa leqb p q && leqSum leqa leqb q p)
-  ==. x == y ? leqbAntisym x y
-  *** QED
+leqSumAntisym leqa leqaAntisym leqb leqbAntisym (Left x) (Left y) = leqaAntisym x y
+leqSumAntisym leqa leqaAntisym leqb leqbAntisym (Left x) (Right y) = simpleProof
+leqSumAntisym leqa leqaAntisym leqb leqbAntisym (Right x) (Left y) = simpleProof
+leqSumAntisym leqa leqaAntisym leqb leqbAntisym (Right x) (Right y) = leqbAntisym x y
 
-{-@ leqSumTrans :: leqa:(a -> a -> Bool) -> leqaTrans:(x:a -> y:a -> z:a -> { leqa x y && leqa y z ==> leqa x z })
-                -> leqb:(b -> b -> Bool) -> leqbTrans:(x:b -> y:b -> z:b -> { leqb x y && leqb y z ==> leqb x z })
-                -> p:Either a b -> q:Either a b -> r:Either a b
-                -> { leqSum leqa leqb p q && leqSum leqa leqb q r ==> leqSum leqa leqb p r }
+{-@ leqSumTrans :: leqa:(a -> a -> Bool) -> leqaTrans:(x:a -> y:{a | leqa x y} -> z:{a | leqa y z} -> { leqa x z })
+                -> leqb:(b -> b -> Bool) -> leqbTrans:(x:b -> y:{b | leqb x y} -> z:{b | leqb y z} -> { leqb x z })
+                -> p:Either a b -> q:{Either a b | leqSum leqa leqb p q} -> r:{Either a b | leqSum leqa leqb q r}
+                -> { leqSum leqa leqb p r }
 @-}
 leqSumTrans :: (a -> a -> Bool) -> (a -> a -> a -> Proof)
             -> (b -> b -> Bool) -> (b -> b -> b -> Proof)
             -> Either a b -> Either a b -> Either a b -> Proof
-leqSumTrans leqa leqaTrans leqb leqbTrans p@(Left x) q@(Left y) r@(Left z) =
-      (leqSum leqa leqb p q && leqSum leqa leqb q r)
-  ==. leqa x z ? leqaTrans x y z
-  ==. leqSum leqa leqb p r
-  *** QED
-leqSumTrans leqa leqaTrans leqb leqbTrans p@(Left x) q@(Left y) r@(Right z) =
-      (leqSum leqa leqb p q && leqSum leqa leqb q r)
-  ==. leqSum leqa leqb p r
-  *** QED
-leqSumTrans leqa leqaTrans leqb leqbTrans p@(Left x) q@(Right y) r@(Left z) =
-      (leqSum leqa leqb p q && leqSum leqa leqb q r)
-  ==. leqSum leqa leqb p r
-  *** QED
-leqSumTrans leqa leqaTrans leqb leqbTrans p@(Left x) q@(Right y) r@(Right z) =
-      (leqSum leqa leqb p q && leqSum leqa leqb q r)
-  ==. leqSum leqa leqb p r
-  *** QED
-leqSumTrans leqa leqaTrans leqb leqbTrans p@(Right x) q@(Left y) r@(Left z) =
-      (leqSum leqa leqb p q && leqSum leqa leqb q r)
-  ==. leqSum leqa leqb p r
-  *** QED
-leqSumTrans leqa leqaTrans leqb leqbTrans p@(Right x) q@(Left y) r@(Right z) =
-      (leqSum leqa leqb p q && leqSum leqa leqb q r)
-  ==. leqSum leqa leqb p r
-  *** QED
-leqSumTrans leqa leqaTrans leqb leqbTrans p@(Right x) q@(Right y) r@(Left z) =
-      (leqSum leqa leqb p q && leqSum leqa leqb q r)
-  ==. leqSum leqa leqb p r
-  *** QED
-leqSumTrans leqa leqaTrans leqb leqbTrans p@(Right x) q@(Right y) r@(Right z) =
-      (leqSum leqa leqb p q && leqSum leqa leqb q r)
-  ==. leqb x z ? leqbTrans x y z
-  ==. leqSum leqa leqb p r
-  *** QED
+leqSumTrans leqa leqaTrans leqb leqbTrans (Left x) (Left y) (Left z) = leqaTrans x y z
+leqSumTrans leqa leqaTrans leqb leqbTrans (Left x) (Left y) (Right z) = simpleProof
+leqSumTrans leqa leqaTrans leqb leqbTrans (Left x) (Right y) (Left z) = simpleProof
+leqSumTrans leqa leqaTrans leqb leqbTrans (Left x) (Right y) (Right z) = simpleProof
+leqSumTrans leqa leqaTrans leqb leqbTrans (Right x) (Left y) (Left z) = simpleProof
+leqSumTrans leqa leqaTrans leqb leqbTrans (Right x) (Left y) (Right z) = simpleProof
+leqSumTrans leqa leqaTrans leqb leqbTrans (Right x) (Right y) (Left z) = simpleProof
+leqSumTrans leqa leqaTrans leqb leqbTrans (Right x) (Right y) (Right z) = leqbTrans x y z
 
 {-@ leqSumTotal :: leqa:(a -> a -> Bool) -> leqaTotal:(x:a -> y:a -> { leqa x y || leqa y x })
                 -> leqb:(b -> b -> Bool) -> leqbTotal:(x:b -> y:b -> { leqb x y || leqb y x })
@@ -119,12 +75,8 @@ leqSumTotal leqa leqaTotal leqb leqbTotal p@(Left x) q@(Left y) =
       (leqSum leqa leqb p q || leqSum leqa leqb q p)
   ==. True ? leqaTotal x y
   *** QED
-leqSumTotal leqa leqaTotal leqb leqbTotal p@(Left x) q@(Right y) =
-      (leqSum leqa leqb p q || leqSum leqa leqb q p)
-  *** QED
-leqSumTotal leqa leqaTotal leqb leqbTotal p@(Right x) q@(Left y) =
-      (leqSum leqa leqb p q || leqSum leqa leqb q p)
-  *** QED
+leqSumTotal leqa leqaTotal leqb leqbTotal p@(Left x) q@(Right y) = simpleProof
+leqSumTotal leqa leqaTotal leqb leqbTotal p@(Right x) q@(Left y) = simpleProof
 leqSumTotal leqa leqaTotal leqb leqbTotal p@(Right x) q@(Right y) =
       (leqSum leqa leqb p q || leqSum leqa leqb q p)
   ==. True ? leqbTotal x y
@@ -135,7 +87,7 @@ vordSum (VerifiedOrd leqa leqaRefl leqaAntisym leqaTrans leqaTotal veqa) (Verifi
   VerifiedOrd
     (leqSum leqa leqb)
     (leqSumRefl leqa leqaRefl leqb leqbRefl)
-    (leqSumAntisym leqa leqaAntisym leqb leqbAntisym veqa veqb)
+    (leqSumAntisym leqa leqaAntisym leqb leqbAntisym)
     (leqSumTrans leqa leqaTrans leqb leqbTrans)
     (leqSumTotal leqa leqaTotal leqb leqbTotal)
     (veqSum veqa veqb)
