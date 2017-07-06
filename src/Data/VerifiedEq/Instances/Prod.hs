@@ -36,10 +36,8 @@ eqProdSym :: (a -> a -> Bool) -> (a -> a -> Proof)
           -> (a, b) -> (a, b) -> Proof
 eqProdSym eqa eqaSym eqb eqbSym p@(x1, y1) q@(x2, y2) =
       eqProd eqa eqb p q
-  ==. (eqa x1 x2 && eqb y1 y2)
   ==. (eqa x2 x1 && eqb y1 y2) ? eqaSym x1 x2
   ==. (eqa x2 x1 && eqb y2 y1) ? eqbSym y1 y2
-  ==. (eqProd eqa eqb (x2, y2) (x1, y1))
   ==. eqProd eqa eqb q p
   *** QED
 
@@ -53,8 +51,6 @@ eqProdTrans :: (a -> a -> Bool) -> (a -> a -> a -> Proof)
             -> (a, b) -> (a, b) -> (a, b) -> Proof
 eqProdTrans eqa eqaTrans eqb eqbTrans p@(x1, y1) q@(x2, y2) r@(x3, y3) =
       (eqProd eqa eqb p q && eqProd eqa eqb q r)
-  ==. ((eqa x1 x2 && eqb y1 y2) && (eqa x2 x3 && eqb y2 y3))
-  ==. ((eqa x1 x2 && eqa x2 x3) && (eqb y1 y2 && eqb y2 y3))
   ==. (eqa x1 x3 && (eqb y1 y2 && eqb y2 y3)) ? eqaTrans x1 x2 x3
   ==. (eqa x1 x3 && eqb y1 y3)                ? eqbTrans y1 y2 y3
   ==. eqProd eqa eqb p r

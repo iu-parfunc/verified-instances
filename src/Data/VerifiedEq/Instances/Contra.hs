@@ -29,7 +29,6 @@ eqContraSym :: (a -> a -> Bool) -> (a -> a -> Proof)
             -> (b -> a) -> b -> b -> Proof
 eqContraSym eqa eqaSym g x y =
       eqContra eqa g x y
-  ==. eqa (g x) (g y)
   ==. eqa (g y) (g x) ? eqaSym (g x) (g y)
   ==. eqContra eqa g y x
   *** QED
@@ -41,7 +40,6 @@ eqContraTrans :: (a -> a -> Bool) -> (a -> a -> a -> Proof)
               -> (b -> a) -> b -> b -> b -> Proof
 eqContraTrans eqa eqaTrans g x y z =
       (eqContra eqa g x y && eqContra eqa g y z)
-  ==. (eqa (g x) (g y) && eqa (g y) (g z))
   ==. eqa (g x) (g z) ? eqaTrans (g x) (g y) (g z)
   ==. eqContra eqa g x z
   *** QED

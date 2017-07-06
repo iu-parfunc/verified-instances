@@ -30,7 +30,7 @@ leqSum leqa leqb (Right x) (Right y) = leqb x y
 leqSumRefl :: (a -> a -> Bool) -> (a -> Proof)
            -> (b -> b -> Bool) -> (b -> Proof)
            -> Either a b -> Proof
-leqSumRefl leqa leqaRefl leqb leqbRefl p@(Left x) = leqaRefl x
+leqSumRefl leqa leqaRefl leqb leqbRefl p@(Left x)  = leqaRefl x
 leqSumRefl leqa leqaRefl leqb leqbRefl p@(Right y) = leqbRefl y
 
 {-@ leqSumAntisym :: leqa:(a -> a -> Bool) -> leqaAntisym:(x:a -> y:a -> { leqa x y && leqa y x ==> x == y })
@@ -46,29 +46,21 @@ leqSumAntisym :: (a -> a -> Bool) -> (a -> a -> Proof)
 leqSumAntisym leqa leqaAntisym leqb leqbAntisym veqa veqb p@(Left x) q@(Left y) =
       using (VEq veqa)
     $ (leqSum leqa leqb p q && leqSum leqa leqb q p)
-  ==. (leqa x y && leqa y x)
   ==. x == y ? leqaAntisym x y
   *** QED
 leqSumAntisym leqa leqaAntisym leqb leqbAntisym veqa veqb p@(Left x) q@(Right y) =
       using (VEq veqa)
     $ using (VEq veqb)
     $ (leqSum leqa leqb p q && leqSum leqa leqb q p)
-  ==. (True && False)
-  ==. False
-  ==. p == q
   *** QED
 leqSumAntisym leqa leqaAntisym leqb leqbAntisym veqa veqb p@(Right x) q@(Left y) =
       using (VEq veqa)
     $ using (VEq veqb)
     $ (leqSum leqa leqb p q && leqSum leqa leqb q p)
-  ==. (False && True)
-  ==. False
-  ==. p == q
   *** QED
 leqSumAntisym leqa leqaAntisym leqb leqbAntisym veqa veqb p@(Right x) q@(Right y) =
       using (VEq veqb)
     $ (leqSum leqa leqb p q && leqSum leqa leqb q p)
-  ==. (leqb x y && leqb y x)
   ==. x == y ? leqbAntisym x y
   *** QED
 
@@ -82,43 +74,35 @@ leqSumTrans :: (a -> a -> Bool) -> (a -> a -> a -> Proof)
             -> Either a b -> Either a b -> Either a b -> Proof
 leqSumTrans leqa leqaTrans leqb leqbTrans p@(Left x) q@(Left y) r@(Left z) =
       (leqSum leqa leqb p q && leqSum leqa leqb q r)
-  ==. (leqa x y && leqa y z)
   ==. leqa x z ? leqaTrans x y z
   ==. leqSum leqa leqb p r
   *** QED
 leqSumTrans leqa leqaTrans leqb leqbTrans p@(Left x) q@(Left y) r@(Right z) =
       (leqSum leqa leqb p q && leqSum leqa leqb q r)
-  ==. (leqa x y && True)
   ==. leqSum leqa leqb p r
   *** QED
 leqSumTrans leqa leqaTrans leqb leqbTrans p@(Left x) q@(Right y) r@(Left z) =
       (leqSum leqa leqb p q && leqSum leqa leqb q r)
-  ==. (True && False)
   ==. leqSum leqa leqb p r
   *** QED
 leqSumTrans leqa leqaTrans leqb leqbTrans p@(Left x) q@(Right y) r@(Right z) =
       (leqSum leqa leqb p q && leqSum leqa leqb q r)
-  ==. (True && leqb y z)
   ==. leqSum leqa leqb p r
   *** QED
 leqSumTrans leqa leqaTrans leqb leqbTrans p@(Right x) q@(Left y) r@(Left z) =
       (leqSum leqa leqb p q && leqSum leqa leqb q r)
-  ==. (False && leqa y z)
   ==. leqSum leqa leqb p r
   *** QED
 leqSumTrans leqa leqaTrans leqb leqbTrans p@(Right x) q@(Left y) r@(Right z) =
       (leqSum leqa leqb p q && leqSum leqa leqb q r)
-  ==. (False && True)
   ==. leqSum leqa leqb p r
   *** QED
 leqSumTrans leqa leqaTrans leqb leqbTrans p@(Right x) q@(Right y) r@(Left z) =
       (leqSum leqa leqb p q && leqSum leqa leqb q r)
-  ==. (leqb x y && False)
   ==. leqSum leqa leqb p r
   *** QED
 leqSumTrans leqa leqaTrans leqb leqbTrans p@(Right x) q@(Right y) r@(Right z) =
       (leqSum leqa leqb p q && leqSum leqa leqb q r)
-  ==. (leqb x y && leqb y z)
   ==. leqb x z ? leqbTrans x y z
   ==. leqSum leqa leqb p r
   *** QED
@@ -133,20 +117,16 @@ leqSumTotal :: (a -> a -> Bool) -> (a -> a -> Proof)
             -> Either a b -> Either a b -> Proof
 leqSumTotal leqa leqaTotal leqb leqbTotal p@(Left x) q@(Left y) =
       (leqSum leqa leqb p q || leqSum leqa leqb q p)
-  ==. (leqa x y || leqa y x)
   ==. True ? leqaTotal x y
   *** QED
 leqSumTotal leqa leqaTotal leqb leqbTotal p@(Left x) q@(Right y) =
       (leqSum leqa leqb p q || leqSum leqa leqb q p)
-  ==. (True || True)
   *** QED
 leqSumTotal leqa leqaTotal leqb leqbTotal p@(Right x) q@(Left y) =
       (leqSum leqa leqb p q || leqSum leqa leqb q p)
-  ==. (False || False)
   *** QED
 leqSumTotal leqa leqaTotal leqb leqbTotal p@(Right x) q@(Right y) =
       (leqSum leqa leqb p q || leqSum leqa leqb q p)
-  ==. (leqb x y || leqb y x)
   ==. True ? leqbTotal x y
   *** QED
 

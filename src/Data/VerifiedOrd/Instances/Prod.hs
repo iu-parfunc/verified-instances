@@ -46,12 +46,8 @@ leqProdAntisym :: (Eq a, Eq b)
                -> (a, b) -> (a, b) -> Proof
 leqProdAntisym leqa leqaAntisym leqb leqbAntisym p@(x1, y1) q@(x2, y2) =
       (leqProd leqa leqb p q && leqProd leqa leqb q p)
-  ==. ((if x1 == x2 then leqb y1 y2 else leqa x1 x2) && (if x2 == x1 then leqb y2 y1 else leqa x2 x1))
-  ==. (if x1 == x2 then leqb y1 y2 && leqb y2 y1 else leqa x1 x2 && leqa x2 x1)
   ==. (if x1 == x2 then y1 == y2 else leqa x1 x2 && leqa x2 x1) ? leqbAntisym y1 y2
   ==. (if x1 == x2 then y1 == y2 else x1 == x2)                 ? leqaAntisym x1 x2
-  ==. (x1 == x2 && y1 == y2)
-  ==. (p == q)
   *** QED
 
 {-@ leqProdTrans :: Eq a
@@ -71,36 +67,23 @@ leqProdTrans leqa leqaAntisym leqaTrans leqb leqbTrans p@(x1, y1) q@(x2, y2) r@(
     case x1 == x2 of
       True  -> case x2 == x3 of
         True  ->  (leqProd leqa leqb p q && leqProd leqa leqb q r)
-              ==. (leqb y1 y2 && leqb y2 y3)
               ==. leqb y1 y3 ? leqbTrans y1 y2 y3
-              ==. (if x1 == x3 then leqb y1 y3 else leqa x1 x3)
               ==. leqProd leqa leqb p r
               *** QED
         False ->  (leqProd leqa leqb p q && leqProd leqa leqb q r)
-              ==. (leqb y1 y2 && leqa x2 x3)
-              ==. leqa x1 x3
-              ==. (if x1 == x3 then leqb y1 y3 else leqa x1 x3)
               ==. leqProd leqa leqb p r
               *** QED
       False -> case x2 == x3 of
         True  ->  (leqProd leqa leqb p q && leqProd leqa leqb q r)
-              ==. (leqa x1 x2 && leqb y2 y3)
-              ==. leqa x1 x3
-              ==. (if x1 == x3 then leqb y1 y3 else leqa x1 x3)
               ==. leqProd leqa leqb p r
               *** QED
         False -> case x1 == x3 of
           True  ->  (leqProd leqa leqb p q && leqProd leqa leqb q r)
-                ==. (leqa x1 x2 && leqa x2 x3)
-                ==. (leqa x1 x2 && leqa x2 x1)
                 ==. (x1 == x2) ? leqaAntisym x1 x2
-                ==. leqb y1 y3
                 ==. (if x1 == x3 then leqb y1 y3 else leqa x1 x3)
                 *** QED
           False ->  (leqProd leqa leqb p q && leqProd leqa leqb q r)
-                ==. (leqa x1 x2 && leqa x2 x3)
                 ==. leqa x1 x3 ? leqaTrans x1 x2 x3
-                ==. (if x1 == x3 then leqb y1 y3 else leqa x1 x3)
                 ==. leqProd leqa leqb p r
                 *** QED
 

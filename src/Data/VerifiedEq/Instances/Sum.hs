@@ -27,7 +27,7 @@ eqSum eqa eqb (Right x) (Right y) = eqb x y
 eqSumRefl :: (a -> a -> Bool) -> (a -> Proof)
           -> (b -> b -> Bool) -> (b -> Proof)
           -> Either a b -> Proof
-eqSumRefl eqa eqaRefl eqb eqbRefl p@(Left x) = eqaRefl x *** QED
+eqSumRefl eqa eqaRefl eqb eqbRefl p@(Left x)  = eqaRefl x *** QED
 eqSumRefl eqa eqaRefl eqb eqbRefl p@(Right y) = eqbRefl y *** QED
 
 {-@ eqSumSym :: eqa:(a -> a -> Bool) -> eqaSym:(x:a -> y:a -> { eqa x y ==> eqa y x })
@@ -40,21 +40,17 @@ eqSumSym :: (a -> a -> Bool) -> (a -> a -> Proof)
          -> Either a b -> Either a b -> Proof
 eqSumSym eqa eqaSym eqb eqbSym p@(Left x) q@(Left y) =
       eqSum eqa eqb p q
-  ==. eqa x y
   ==. eqa y x ? eqaSym x y
   ==. eqSum eqa eqb q p
   *** QED
 eqSumSym eqa eqaSym eqb eqbSym p@(Left x) q@(Right y) =
       eqSum eqa eqb p q
-  ==. False
   *** QED
 eqSumSym eqa eqaSym eqb eqbSym p@(Right x) q@(Left y) =
       eqSum eqa eqb p q
-  ==. False
   *** QED
 eqSumSym eqa eqaSym eqb eqbSym p@(Right x) q@(Right y) =
       eqSum eqa eqb p q
-  ==. eqb x y
   ==. eqb y x ? eqbSym x y
   ==. eqSum eqa eqb q p
   *** QED
@@ -69,43 +65,29 @@ eqSumTrans :: (a -> a -> Bool) -> (a -> a -> a -> Proof)
            -> Either a b -> Either a b -> Either a b -> Proof
 eqSumTrans eqa eqaTrans eqb eqbTrans p@(Left x) q@(Left y) r@(Left z) =
       (eqSum eqa eqb p q && eqSum eqa eqb q r)
-  ==. (eqa x y && eqa y z)
   ==. eqa x z ? eqaTrans x y z
   ==. eqSum eqa eqb p r
   *** QED
 eqSumTrans eqa eqaTrans eqb eqbTrans p@(Left x) q@(Left y) r@(Right z) =
       (eqSum eqa eqb p q && eqSum eqa eqb q r)
-  ==. (eqa x y && False)
-  ==. False
   *** QED
 eqSumTrans eqa eqaTrans eqb eqbTrans p@(Left x) q@(Right y) r@(Left z) =
       (eqSum eqa eqb p q && eqSum eqa eqb q r)
-  ==. (False && False)
-  ==. False
   *** QED
 eqSumTrans eqa eqaTrans eqb eqbTrans p@(Left x) q@(Right y) r@(Right z) =
       (eqSum eqa eqb p q && eqSum eqa eqb q r)
-  ==. (False && eqb y z)
-  ==. False
   *** QED
 eqSumTrans eqa eqaTrans eqb eqbTrans p@(Right x) q@(Left y) r@(Left z) =
       (eqSum eqa eqb p q && eqSum eqa eqb q r)
-  ==. (False && eqa y z)
-  ==. False
   *** QED
 eqSumTrans eqa eqaTrans eqb eqbTrans p@(Right x) q@(Left y) r@(Right z) =
       (eqSum eqa eqb p q && eqSum eqa eqb q r)
-  ==. (False && False)
-  ==. False
   *** QED
 eqSumTrans eqa eqaTrans eqb eqbTrans p@(Right x) q@(Right y) r@(Left z) =
       (eqSum eqa eqb p q && eqSum eqa eqb q r)
-  ==. (eqb x y && False)
-  ==. False
   *** QED
 eqSumTrans eqa eqaTrans eqb eqbTrans p@(Right x) q@(Right y) r@(Right z) =
       (eqSum eqa eqb p q && eqSum eqa eqb q r)
-  ==. (eqb x y && eqb y z)
   ==. eqb x z ? eqbTrans x y z
   ==. eqSum eqa eqb p r
   *** QED
