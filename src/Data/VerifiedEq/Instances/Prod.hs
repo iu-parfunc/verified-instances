@@ -10,8 +10,8 @@ import Language.Haskell.Liquid.ProofCombinators
 {-@ axiomatize eqProd @-}
 eqProd :: (a -> a -> Bool) -> (b -> b -> Bool)
        -> (a, b) -> (a, b) -> Bool
-eqProd eqa eqb p q =
-  eqa (fst p) (fst q) && eqb (snd p) (snd q)
+eqProd eqa eqb (a1, b1) (a2, b2) =
+  eqa a1 a2 && eqb b1 b2
 {-# INLINE eqProd #-}
 
 {-@ eqProdRefl :: eqa:(a -> a -> Bool) -> eqaRefl:(x:a -> { eqa x x })
