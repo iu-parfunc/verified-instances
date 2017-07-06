@@ -22,7 +22,7 @@ Compile | Run
 Seq: $ ghc --make -O2 -fforce-recomp allpairs.hs | allpairs <numbodies> <steps>
 Par: $ ghc --make -O2 -threaded -rtsopts -fforce-recomp allpairs.hs | allpairs <numbodies> <steps> +RTS -Nx
 -}
-module Main (main) where
+module Main where
 import           Language.Haskell.Liquid.ProofCombinators
 
 import           Control.DeepSeq
@@ -145,23 +145,28 @@ instance NFData Body where rnf !_ = ()
 instance NFData Accel where rnf !_ = ()
 
 -- chunksize xs = (length xs) `quot` (numCapabilities * 1)
+{-@ assume chunksize :: Vector a -> Nat @-}
 chunksize :: Unbox a => Vector a -> Int
 chunksize xs = (V.length xs) `quot` (numCapabilities * 2)
 -- chunksize xs = (length xs) `quot` (numCapabilities * 4)
 
 -- | Parallel map over a vector with a given chunk size.
+{-@ parMapChunk :: (a -> Par b) -> Nat -> Vector a -> Par (Vector b) @-}
 parMapChunk :: (Unbox a, Unbox b) => (a -> Par b) -> Int -> Vector a -> Par (Vector b)
 parMapChunk g n xs =
     fmap V.concat $
     parMapM (V.mapM g) (chunk n xs)
 
 -- | This uses lists, but only at a coarse grain.
-{-@ chunk :: n:Int -> i:Vector a -> {vs:[{v:Vector a|vlen v <= vlen i}] | len vs >= 0} @-}
+-- FIXME: prove termination
+{-@ lazy chunk @-}
+{-@ chunk :: Nat -> xs:Vector a -> [Vector a] / [vlen xs] @-}
 chunk :: Unbox a => Int -> Vector a -> [Vector a]
 chunk n = go
   where
+    go :: Unbox a => Vector a -> [Vector a]
     go xs | V.null xs = []
-          | otherwise = as : chunk n bs where (as,bs) = V.splitAt n xs
+          | otherwise = let (as,bs) = V.splitAt n xs in as : chunk n bs
 
 timeStep :: Double
 timeStep = 0.001
@@ -170,10 +175,7 @@ timeStep = 0.001
 eps :: Double
 eps = 0.01
 
-{-@ measure omega :: Int @-}
-{-@ invariant {v:Int | omega >= v} @-}
-
-{-@ assume randomList :: Int -> {v:[a]|len v == omega} @-}
+{-@ assume randomList :: Int -> {v:[a]|len v > 7} @-}
 randomList :: Random a => Int -> [a]
 randomList seed = randoms (mkStdGen seed)
 
@@ -182,6 +184,8 @@ genBody s = Body (rand!!1) (rand!!2) (rand!!3) (rand!!4) (rand!!5) (rand!!6) (ra
   where
     rand = randomList s
 
+{-@ numBodies :: Nat @-}
+{-@ numSteps :: Nat @-}
 numBodies, numSteps :: Int
 numBodies = 2048
 numSteps  = 5
@@ -266,6 +270,7 @@ parMapFold f g z vec = do
        (\b1 b2 -> return $! f b1 b2)
        z
 
+{-@ doSteps :: Nat -> Vector Body -> Vector Body @-}
 doSteps :: Int -> Vector Body -> Vector Body
 doSteps s bs = runPar (stepLoop s bs)
 
@@ -273,6 +278,7 @@ whichFold :: (Accel -> Accel -> Accel) -> (Body -> Accel) -> Accel -> Vector Bod
 -- whichFold = seqMapFold
 whichFold = parMapFold
 
+{-@ stepLoop :: Nat -> Vector Body -> Par (Vector Body) @-}
 stepLoop :: Int -> Vector Body -> Par (Vector Body)
 stepLoop 0 bs = return bs
 stepLoop s bs = do
