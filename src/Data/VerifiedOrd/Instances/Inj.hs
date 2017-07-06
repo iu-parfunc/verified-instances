@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
+{-@ LIQUID "--automatic-instances=liquidinstances" @-}
 
 module Data.VerifiedOrd.Instances.Inj (vordInj, leqFrom) where
 
@@ -24,11 +25,7 @@ leqFrom leqa from x y = leqa (from x) (from y)
 leqFromRefl :: (a -> a -> Bool) -> (a -> Proof)
             -> (b -> a)
             -> b -> Proof
-leqFromRefl leqa leqaRefl from x =
-      leqFrom leqa from x x
-  ==. leqa (from x) (from x)
-  ==. True ? leqaRefl (from x)
-  *** QED
+leqFromRefl leqa leqaRefl from x = leqaRefl (from x) *** QED
 
 {-@ leqFromAntisym :: leqa:(a -> a -> Bool)
                    -> leqaAntisym:(x:a -> y:a -> { leqa x y && leqa y x ==> x == y })
@@ -74,7 +71,6 @@ leqFromTotal leqa leqaTotal from x y =
       (leqFrom leqa from x y || leqFrom leqa from y x)
   ==. (leqa (from x) (from y) || leqa (from y) (from x))
   ==. True ? leqaTotal (from x) (from y)
-  ==. leqFrom leqa from y x
   *** QED
 
 vordInj :: Inj b a -> VerifiedOrd a -> VerifiedOrd b

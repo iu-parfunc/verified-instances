@@ -1,6 +1,7 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--exactdc"            @-}
+{-@ LIQUID "--automatic-instances=liquidinstances" @-}
 
 module Data.VerifiedOrd.Instances.Prod (vordProd, leqProd) where
 
@@ -29,12 +30,7 @@ leqProdRefl :: Eq a
             => (a -> a -> Bool) -> (a -> Proof)
             -> (b -> b -> Bool) -> (b -> Proof)
             -> (a, b) -> Proof
-leqProdRefl leqa leqaRefl leqb leqbRefl p@(x, y) =
-      leqProd leqa leqb p p
-  ==. (if x == x then leqb y y else leqa x x)
-  ==. leqb y y
-  ==. True ? leqbRefl y
-  *** QED
+leqProdRefl leqa leqaRefl leqb leqbRefl p@(x, y) = leqbRefl y
 
 {-@ leqProdAntisym :: (Eq a, Eq b)
                    => leqa:(a -> a -> Bool)
@@ -118,12 +114,8 @@ leqProdTotal :: Eq a => (a -> a -> Bool) -> (a -> a -> Proof)
              -> (a, b) -> (a, b) -> Proof
 leqProdTotal leqa leqaTotal leqb leqbTotal p@(x1, y1) q@(x2, y2) =
       (leqProd leqa leqb p q || leqProd leqa leqb q p)
---   ==. ((if x1 == x2 then leqb y1 y2 else leqa x1 x2) || (if x2 == x1 then leqb y2 y1 else leqa x2 x1))
---   ==. ((if x1 == x2 then leqb y1 y2 else leqa x1 x2) || (if x1 == x2 then leqb y2 y1 else leqa x2 x1))
---   ==. (if x1 == x2 then leqb y1 y2 || leqb y2 y1 else leqa x1 x2 || leqa x2 x1)
   ==. (if x1 == x2 then True else leqa x1 x2 || leqa x2 x1) ? leqbTotal y1 y2
   ==. (if x1 == x2 then True else True)                     ? leqaTotal x1 x2
---   ==. True
   *** QED
 
 vordProd :: VerifiedOrd a -> VerifiedOrd b -> VerifiedOrd (a, b)

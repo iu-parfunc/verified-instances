@@ -1,6 +1,7 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--exactdc"            @-}
+{-@ LIQUID "--automatic-instances=liquidinstances" @-}
 
 module Data.VerifiedEq.Instances.Sum (veqSum, eqSum) where
 
@@ -26,16 +27,8 @@ eqSum eqa eqb (Right x) (Right y) = eqb x y
 eqSumRefl :: (a -> a -> Bool) -> (a -> Proof)
           -> (b -> b -> Bool) -> (b -> Proof)
           -> Either a b -> Proof
-eqSumRefl eqa eqaRefl eqb eqbRefl p@(Left x) =
-      eqSum eqa eqb p p
-  ==. eqa x x
-  ==. True ? eqaRefl x
-  *** QED
-eqSumRefl eqa eqaRefl eqb eqbRefl p@(Right y) =
-      eqSum eqa eqb p p
-  ==. eqb y y
-  ==. True ? eqbRefl y
-  *** QED
+eqSumRefl eqa eqaRefl eqb eqbRefl p@(Left x) = eqaRefl x *** QED
+eqSumRefl eqa eqaRefl eqb eqbRefl p@(Right y) = eqbRefl y *** QED
 
 {-@ eqSumSym :: eqa:(a -> a -> Bool) -> eqaSym:(x:a -> y:a -> { eqa x y ==> eqa y x })
              -> eqb:(b -> b -> Bool) -> eqbSym:(x:b -> y:b -> { eqb x y ==> eqb y x })

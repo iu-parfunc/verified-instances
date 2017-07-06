@@ -1,6 +1,7 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--exactdc"            @-}
+{-@ LIQUID "--automatic-instances=liquidinstances" @-}
 
 module Data.VerifiedEq.Instances.Prod (veqProd, eqProd) where
 
@@ -23,12 +24,7 @@ eqProdRefl :: (a -> a -> Bool) -> (a -> Proof)
            -> (b -> b -> Bool) -> (b -> Proof)
            -> (a, b) -> Proof
 eqProdRefl eqa eqaRefl eqb eqbRefl p@(x, y) =
-      eqProd eqa eqb p p
-  ==. (eqa x x && eqb y y)
-  ==. (True && eqb y y) ? eqaRefl x
-  ==. (True && True)    ? eqbRefl y
-  ==. True
-  *** QED
+  [eqaRefl x, eqbRefl y] *** QED
 
 {-@ eqProdSym :: eqa:(a -> a -> Bool) -> eqaSym:(x:a -> y:a -> { eqa x y ==> eqa y x })
               -> eqb:(b -> b -> Bool) -> eqbSym:(x:b -> y:b -> { eqb x y ==> eqb y x })

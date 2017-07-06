@@ -1,6 +1,7 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--exactdc"            @-}
+{-@ LIQUID "--automatic-instances=liquidinstances" @-}
 
 module Data.VerifiedOrd.Instances.Sum (vordSum, leqSum) where
 
@@ -29,16 +30,8 @@ leqSum leqa leqb (Right x) (Right y) = leqb x y
 leqSumRefl :: (a -> a -> Bool) -> (a -> Proof)
            -> (b -> b -> Bool) -> (b -> Proof)
            -> Either a b -> Proof
-leqSumRefl leqa leqaRefl leqb leqbRefl p@(Left x) =
-      leqSum leqa leqb p p
-  ==. leqa x x
-  ==. True ? leqaRefl x
-  *** QED
-leqSumRefl leqa leqaRefl leqb leqbRefl p@(Right y) =
-      leqSum leqa leqb p p
-  ==. leqb y y
-  ==. True ? leqbRefl y
-  *** QED
+leqSumRefl leqa leqaRefl leqb leqbRefl p@(Left x) = leqaRefl x
+leqSumRefl leqa leqaRefl leqb leqbRefl p@(Right y) = leqbRefl y
 
 {-@ leqSumAntisym :: leqa:(a -> a -> Bool) -> leqaAntisym:(x:a -> y:a -> { leqa x y && leqa y x ==> x == y })
                   -> leqb:(b -> b -> Bool) -> leqbAntisym:(x:b -> y:b -> { leqb x y && leqb y x ==> x == y })

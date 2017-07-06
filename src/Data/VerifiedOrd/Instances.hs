@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
+{-@ LIQUID "--automatic-instances=liquidinstances" @-}
 
 module Data.VerifiedOrd.Instances
   ( vordUnit
@@ -31,19 +32,19 @@ leqUnit () () = True
 
 {-@ leqUnitRefl :: x:() -> { leqUnit x x } @-}
 leqUnitRefl :: () -> Proof
-leqUnitRefl () = leqUnit () () ==. True *** QED
+leqUnitRefl () = simpleProof
 
 {-@ leqUnitAntisym :: x:() -> y:() -> { leqUnit x y && leqUnit y x ==> x == y } @-}
 leqUnitAntisym :: () -> () -> Proof
-leqUnitAntisym () () = (leqUnit () () && leqUnit () ()) ==. True *** QED
+leqUnitAntisym () () = simpleProof
 
 {-@ leqUnitTrans :: x:() -> y:() -> z:() -> { leqUnit x y && leqUnit y z ==> leqUnit x z } @-}
 leqUnitTrans :: () -> () -> () -> Proof
-leqUnitTrans () () () = (leqUnit () () && leqUnit () ()) ==. True *** QED
+leqUnitTrans () () () = simpleProof
 
 {-@ leqUnitTotal :: x:() -> y:() -> { leqUnit x y || leqUnit y x } @-}
 leqUnitTotal :: () -> () -> Proof
-leqUnitTotal () () = (leqUnit () () || leqUnit () ()) ==. True *** QED
+leqUnitTotal () () = (leqUnit () () || leqUnit () ()) *** QED
 
 vordUnit :: VerifiedOrd ()
 vordUnit = VerifiedOrd leqUnit leqUnitRefl leqUnitAntisym leqUnitTrans leqUnitTotal veqUnit
@@ -55,15 +56,15 @@ leqInt x y = x <= y
 
 {-@ leqIntRefl :: x:Int -> { leqInt x x } @-}
 leqIntRefl :: Int -> Proof
-leqIntRefl x = leqInt x x ==. x <= x *** QED
+leqIntRefl x = simpleProof
 
 {-@ leqIntAntisym :: x:Int -> y:Int -> { leqInt x y && leqInt y x ==> x == y } @-}
 leqIntAntisym :: Int -> Int -> Proof
-leqIntAntisym x y = (leqInt x y && leqInt y x) ==. (x <= y && y <= x) ==. x == y *** QED
+leqIntAntisym x y = (leqInt x y && leqInt y x) *** QED
 
 {-@ leqIntTrans :: x:Int -> y:Int -> z:Int -> { leqInt x y && leqInt y z ==> leqInt x z } @-}
 leqIntTrans :: Int -> Int -> Int -> Proof
-leqIntTrans x y z = (leqInt x y && leqInt y z) ==. (x <= y && y <= z) ==. x <= z ==. leqInt x z *** QED
+leqIntTrans x y z = (leqInt x y && leqInt y z) ==. leqInt x z *** QED
 
 {-@ leqIntTotal :: x:Int -> y:Int -> { leqInt x y || leqInt y x } @-}
 leqIntTotal :: Int -> Int -> Proof
@@ -79,15 +80,15 @@ leqInt64 x y = x <= y
 
 {-@ leqInt64Refl :: x:Int64 -> { leqInt64 x x } @-}
 leqInt64Refl :: Int64 -> Proof
-leqInt64Refl x = leqInt64 x x ==. x <= x *** QED
+leqInt64Refl x = simpleProof
 
 {-@ leqInt64Antisym :: x:Int64 -> y:Int64 -> { leqInt64 x y && leqInt64 y x ==> x == y } @-}
 leqInt64Antisym :: Int64 -> Int64 -> Proof
-leqInt64Antisym x y = (leqInt64 x y && leqInt64 y x) ==. (x <= y && y <= x) ==. x == y *** QED
+leqInt64Antisym x y = (leqInt64 x y && leqInt64 y x) *** QED
 
 {-@ leqInt64Trans :: x:Int64 -> y:Int64 -> z:Int64 -> { leqInt64 x y && leqInt64 y z ==> leqInt64 x z } @-}
 leqInt64Trans :: Int64 -> Int64 -> Int64 -> Proof
-leqInt64Trans x y z = (leqInt64 x y && leqInt64 y z) ==. (x <= y && y <= z) ==. x <= z ==. leqInt64 x z *** QED
+leqInt64Trans x y z = (leqInt64 x y && leqInt64 y z) ==. leqInt64 x z *** QED
 
 {-@ leqInt64Total :: x:Int64 -> y:Int64 -> { leqInt64 x y || leqInt64 y x } @-}
 leqInt64Total :: Int64 -> Int64 -> Proof
@@ -103,22 +104,18 @@ leqDouble x y = x <= y
 
 {-@ leqDoubleRefl :: x:Double -> { leqDouble x x } @-}
 leqDoubleRefl :: Double -> Proof
-leqDoubleRefl x = leqDouble x x ==. x <= x *** QED
+leqDoubleRefl x = simpleProof
 
 {-@ leqDoubleTotal :: x:Double -> y:Double
                    -> { leqDouble x y || leqDouble y x } @-}
 leqDoubleTotal :: Double -> Double -> Proof
-leqDoubleTotal x y
-  =   (leqDouble x y || leqDouble y x)
-  ==. (x <= y || y <= x)
-  *** QED
+leqDoubleTotal x y = (leqDouble x y || leqDouble y x) *** QED
 
 {-@ leqDoubleAntisym :: x:Double -> y:Double
                      -> { leqDouble x y && leqDouble y x ==> x == y } @-}
 leqDoubleAntisym :: Double -> Double -> Proof
 leqDoubleAntisym x y
   =   (leqDouble x y && leqDouble y x)
-  ==. (x <= y && y <= x)
   ==. x == y
   *** QED
 
@@ -127,8 +124,6 @@ leqDoubleAntisym x y
 leqDoubleTrans :: Double -> Double -> Double -> Proof
 leqDoubleTrans x y z
   =   (leqDouble x y && leqDouble y z)
-  ==. (x <= y && y <= z)
-  ==. x <= z
   ==. leqDouble x z
   *** QED
 
