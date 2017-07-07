@@ -32,27 +32,32 @@ leqProdRefl :: Eq a
             -> (a, b) -> Proof
 leqProdRefl leqa leqaRefl leqb leqbRefl p@(x, y) = leqbRefl y
 
-{-@ leqProdAntisym :: leqa:(a -> a -> Bool)
-                   -> leqaAntisym:(x:a -> y:{a | leqa x y && leqa y x} -> { x == y })
+{-@ leqProdAntisym :: (Eq a, Eq b)
+                   => leqa:(a -> a -> Bool)
+                   -> leqaAntisym:(x:a -> y:a -> { leqa x y && leqa y x ==> x == y })
                    -> leqb:(b -> b -> Bool)
-                   -> leqbAntisym:(x:b -> y:{b | leqb x y && leqb y x} -> { x == y })
-                   -> p:(a, b) -> q:{(a, b) | leqProd leqa leqb p q && leqProd leqa leqb q p}
-                   -> { p == q }
+                   -> leqbAntisym:(x:b -> y:b -> { leqb x y && leqb y x ==> x == y })
+                   -> p:(a, b) -> q:(a, b)
+                   -> { leqProd leqa leqb p q && leqProd leqa leqb q p ==> p == q }
 @-}
-leqProdAntisym :: (a -> a -> Bool) -> (a -> a -> Proof)
+leqProdAntisym :: (Eq a, Eq b)
+               => (a -> a -> Bool) -> (a -> a -> Proof)
                -> (b -> b -> Bool) -> (b -> b -> Proof)
                -> (a, b) -> (a, b) -> Proof
-leqProdAntisym leqa leqaAntisym leqb leqbAntisym p@(x1,y1) q@(x2,y2) =
-    [leqbAntisym y1 y2, leqaAntisym x1 x2] *** QED
+leqProdAntisym leqa leqaAntisym leqb leqbAntisym p@(x1, y1) q@(x2, y2) =
+      (leqProd leqa leqb p q && leqProd leqa leqb q p)
+  ==. (if x1 == x2 then y1 == y2 else leqa x1 x2 && leqa x2 x1) ? leqbAntisym y1 y2
+  ==. (if x1 == x2 then y1 == y2 else x1 == x2)                 ? leqaAntisym x1 x2
+  *** QED
 
 {-@ leqProdTrans :: Eq a
                  => leqa:(a -> a -> Bool)
-                 -> leqaAntisym:(x:a -> y:{a | leqa x y && leqa y x} -> { x == y })
-                 -> leqaTrans:(x:a -> y:{a | leqa x y} -> z:{a | leqa y z} -> { leqa x z })
+                 -> leqaAntisym:(x:a -> y:a -> { leqa x y && leqa y x ==> x == y })
+                 -> leqaTrans:(x:a -> y:a -> z:a -> { leqa x y && leqa y z ==> leqa x z })
                  -> leqb:(b -> b -> Bool)
-                 -> leqbTrans:(x:b -> y:{b | leqb x y} -> z:{b | leqb y z} -> { leqb x z })
-                 -> p:(a, b) -> q:{(a, b) | leqProd leqa leqb p q} -> r:{(a, b) | leqProd leqa leqb q r}
-                 -> { leqProd leqa leqb p r }
+                 -> leqbTrans:(x:b -> y:b -> z:b -> { leqb x y && leqb y z ==> leqb x z })
+                 -> p:(a, b) -> q:(a, b) -> r:(a, b)
+                 -> { leqProd leqa leqb p q && leqProd leqa leqb q r ==> leqProd leqa leqb p r }
 @-}
 leqProdTrans :: Eq a
              => (a -> a -> Bool) -> (a -> a -> Proof) -> (a -> a -> a -> Proof)
@@ -61,13 +66,26 @@ leqProdTrans :: Eq a
 leqProdTrans leqa leqaAntisym leqaTrans leqb leqbTrans p@(x1, y1) q@(x2, y2) r@(x3, y3) =
     case x1 == x2 of
       True  -> case x2 == x3 of
-        True  ->  leqbTrans y1 y2 y3
-        False ->  simpleProof
+        True  ->  (leqProd leqa leqb p q && leqProd leqa leqb q r)
+              ==. leqb y1 y3 ? leqbTrans y1 y2 y3
+              ==. leqProd leqa leqb p r
+              *** QED
+        False ->  (leqProd leqa leqb p q && leqProd leqa leqb q r)
+              ==. leqProd leqa leqb p r
+              *** QED
       False -> case x2 == x3 of
-        True  ->  simpleProof
+        True  ->  (leqProd leqa leqb p q && leqProd leqa leqb q r)
+              ==. leqProd leqa leqb p r
+              *** QED
         False -> case x1 == x3 of
-          True  ->  leqaAntisym x1 x2
-          False ->  leqaTrans x1 x2 x3
+          True  ->  (leqProd leqa leqb p q && leqProd leqa leqb q r)
+                ==. (x1 == x2) ? leqaAntisym x1 x2
+                ==. (if x1 == x3 then leqb y1 y3 else leqa x1 x3)
+                *** QED
+          False ->  (leqProd leqa leqb p q && leqProd leqa leqb q r)
+                ==. leqa x1 x3 ? leqaTrans x1 x2 x3
+                ==. leqProd leqa leqb p r
+                *** QED
 
 {-@ leqProdTotal :: Eq a => leqa:(a -> a -> Bool) -> leqaTotal:(x:a -> y:a -> { leqa x y || leqa y x })
                  -> leqb:(b -> b -> Bool) -> leqbTotal:(x:b -> y:b -> { leqb x y || leqb y x })
