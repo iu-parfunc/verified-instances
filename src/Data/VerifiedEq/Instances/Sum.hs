@@ -7,7 +7,6 @@ module Data.VerifiedEq.Instances.Sum (veqSum, eqSum) where
 
 import Data.VerifiedEq
 import Language.Haskell.Liquid.ProofCombinators
-qed _ = ()
 
 {-@ data Either a b = Left a | Right b @-}
 
@@ -28,13 +27,13 @@ eqSum eqa eqb (Right x) (Right y) = eqb x y
 eqSumRefl :: (a -> a -> Bool) -> (a -> Proof)
           -> (b -> b -> Bool) -> (b -> Proof)
           -> Either a b -> Proof
-eqSumRefl eqa eqaRefl eqb eqbRefl p@(Left x)  = ()
-eqSumRefl eqa eqaRefl eqb eqbRefl p@(Right y) = ()
+eqSumRefl eqa eqaRefl eqb eqbRefl p@(Left x)  = eqaRefl x *** QED
+eqSumRefl eqa eqaRefl eqb eqbRefl p@(Right y) = eqbRefl y *** QED
 
-{-@ eqSumSym :: eqa:(a -> a -> Bool) -> eqaSym:(x:a -> y:{a | eqa x y } -> { eqa y x })
-             -> eqb:(b -> b -> Bool) -> eqbSym:(x:b -> y:{b | eqb x y } -> { eqb y x })
-             -> p:Either a b -> q:{Either a b | eqSum eqa eqb p q }
-             -> { eqSum eqa eqb q p }
+{-@ eqSumSym :: eqa:(a -> a -> Bool) -> eqaSym:(x:a -> y:a -> { eqa x y ==> eqa y x })
+             -> eqb:(b -> b -> Bool) -> eqbSym:(x:b -> y:b -> { eqb x y ==> eqb y x })
+             -> p:Either a b -> q:Either a b
+             -> { eqSum eqa eqb p q ==> eqSum eqa eqb q p }
 @-}
 eqSumSym :: (a -> a -> Bool) -> (a -> a -> Proof)
          -> (b -> b -> Bool) -> (b -> b -> Proof)
@@ -56,10 +55,10 @@ eqSumSym eqa eqaSym eqb eqbSym p@(Right x) q@(Right y) =
   ==. eqSum eqa eqb q p
   *** QED
 
-{-@ eqSumTrans :: eqa:(a -> a -> Bool) -> eqaTrans:(x:a -> y:a -> z:{a | eqa x y && eqa y z } -> { eqa x z })
-               -> eqb:(b -> b -> Bool) -> eqbTrans:(x:b -> y:b -> z:{b | eqb x y && eqb y z } -> { eqb x z })
-               -> p:Either a b -> q:Either a b -> r:{Either a b | eqSum eqa eqb p q && eqSum eqa eqb q r }
-               -> { eqSum eqa eqb p r }
+{-@ eqSumTrans :: eqa:(a -> a -> Bool) -> eqaTrans:(x:a -> y:a -> z:a -> { eqa x y && eqa y z ==> eqa x z })
+               -> eqb:(b -> b -> Bool) -> eqbTrans:(x:b -> y:b -> z:b -> { eqb x y && eqb y z ==> eqb x z })
+               -> p:Either a b -> q:Either a b -> r:Either a b
+               -> { eqSum eqa eqb p q && eqSum eqa eqb q r ==> eqSum eqa eqb p r }
 @-}
 eqSumTrans :: (a -> a -> Bool) -> (a -> a -> a -> Proof)
            -> (b -> b -> Bool) -> (b -> b -> b -> Proof)

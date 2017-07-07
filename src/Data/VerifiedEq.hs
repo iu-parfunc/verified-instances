@@ -18,8 +18,8 @@ import Language.Haskell.Liquid.ProofCombinators
 {-@ data VerifiedEq a = VerifiedEq {
       eq :: a -> a -> Bool
     , refl :: x:a -> { v:() | eq x x }
-    , sym :: x:a -> y:{a | eq x y } -> { v:() | eq y x }
-    , trans :: x:a -> y:a -> z:{a | eq x y && eq y z } -> { v:() | eq x z }
+    , sym :: x:a -> y:a -> { v:() | eq x y ==> eq y x }
+    , trans :: x:a -> y:a -> z:a -> { v:() | eq x y && eq y z ==> eq x z }
     }
 @-}
 
