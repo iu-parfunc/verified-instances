@@ -25,3 +25,8 @@ fromList : List (IVar × Maybe Val) → Heap
 fromList [] = ε
 fromList ((ix , nothing) ∷ ts) = ix ↦̸, fromList ts
 fromList ((ix ,  just v) ∷ ts) = ix ↦ v , fromList ts
+
+open import Data.List.Perm
+
+_≡ₕ_ : Heap → Heap → Set
+h₁ ≡ₕ h₂ = IsPerm (toList h₁) (toList h₂)

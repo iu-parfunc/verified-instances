@@ -1,35 +1,16 @@
 module _ where
 
-open import Relation.Binary.PropositionalEquality
-open import Data.List hiding (sum)
-
--- `m ∪ ns ≡ mns` means that inserting `m` somewhere inside `ns` is
--- equal to `mns`. The index tracks the position of `m`.
-
-data _∪_≡_ {A : Set} (m : A) : List A → List A → Set where
-  here : ∀ {ms}
-       → m ∪ ms ≡ (m ∷ ms)
-  there : ∀ {n ns mns}
-        → m ∪ ns ≡ mns
-        → m ∪ (n ∷ ns) ≡ (n ∷ mns)
-
--- `IsPerm ms ns` means that `ms` is a permutation of `ns`.
-
-data IsPerm {A : Set} : List A → List A → Set where
-  []  : IsPerm [] []
-  _∷_ : ∀ {m ms ns mns}
-      → m ∪ ns ≡ mns
-      → IsPerm ms ns
-      → IsPerm (m ∷ ms) mns
+open import Prelude hiding (sum)
+open import Data.List.Perm
 
 -- examples:
-test₀ : IsPerm (1 ∷ []) (1 ∷ [])
+test₀ : IsPerm {Nat} (1 ∷ []) (1 ∷ [])
 test₀ = here ∷ []
-test₁ : IsPerm (1 ∷ 2 ∷ 3 ∷ []) (2 ∷ 3 ∷ 1 ∷ [])
+test₁ : IsPerm {Nat} (1 ∷ 2 ∷ 3 ∷ []) (2 ∷ 3 ∷ 1 ∷ [])
 test₁ = there (there here) ∷ (here ∷ (here ∷ []))
-test₂ : IsPerm (1 ∷ 2 ∷ 3 ∷ []) (3 ∷ 2 ∷ 1 ∷ [])
+test₂ : IsPerm {Nat} (1 ∷ 2 ∷ 3 ∷ []) (3 ∷ 2 ∷ 1 ∷ [])
 test₂ = there (there here) ∷ (there here ∷ (here ∷ []))
-test₃ : IsPerm (1 ∷ 2 ∷ 3 ∷ []) (1 ∷ 3 ∷ 2 ∷ [])
+test₃ : IsPerm {Nat} (1 ∷ 2 ∷ 3 ∷ []) (1 ∷ 3 ∷ 2 ∷ [])
 test₃ = here ∷ (there here ∷ (here ∷ []))
 
 -- We need a set with an identity element and a binary operation which
@@ -69,5 +50,5 @@ open import Data.Nat
 open import Data.Nat.Properties.Simple
 
 -- works with + and *
-open SumIsInvariantOnPermutation ℕ 0 _+_ +-comm +-assoc
-open SumIsInvariantOnPermutation ℕ 1 _*_ *-comm *-assoc
+open SumIsInvariantOnPermutation ℕ 0 _+N_ +-comm +-assoc
+open SumIsInvariantOnPermutation ℕ 1 _*N_ *-comm *-assoc
