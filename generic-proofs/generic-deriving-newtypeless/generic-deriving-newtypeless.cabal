@@ -1,0 +1,64 @@
+name:                   generic-deriving-newtypeless
+version:                1.11.1
+synopsis:               Generic programming library for generalised deriving.
+description:
+
+  This package provides functionality for generalising the deriving mechanism
+  in Haskell to arbitrary classes. It was first described in the paper:
+  .
+  *  /A generic deriving mechanism for Haskell/.
+     Jose Pedro Magalhaes, Atze Dijkstra, Johan Jeuring, and Andres Loeh.
+     Haskell'10.
+  .
+  The current implementation integrates with the new GHC Generics. See
+  <http://www.haskell.org/haskellwiki/GHC.Generics> for more information.
+  Template Haskell code is provided for supporting older GHCs.
+
+homepage:               https://github.com/dreixel/generic-deriving
+bug-reports:            https://github.com/dreixel/generic-deriving/issues
+category:               Generics
+copyright:              2011-2013 Universiteit Utrecht, University of Oxford
+license:                BSD3
+license-file:           LICENSE
+author:                 José Pedro Magalhães
+maintainer:             generics@haskell.org
+stability:              experimental
+build-type:             Simple
+cabal-version:          >= 1.10
+tested-with:            GHC == 7.10.3
+extra-source-files:     CHANGELOG.md
+                      , README.md
+
+library
+  hs-source-dirs:       src
+  exposed-modules:      Generics.Deriving.Newtypeless
+                        Generics.Deriving.Newtypeless.Base
+                        Generics.Deriving.Newtypeless.Instances
+                        Generics.Deriving.Newtypeless.TH
+                        Generics.Deriving.Newtypeless.Base.Internal
+                        Generics.Deriving.Newtypeless.TH.Internal
+
+  other-modules:        Paths_generic_deriving_newtypeless
+
+  build-depends:        base >= 4.8 && < 5
+  other-modules:        Generics.Deriving.Newtypeless.TH.NonDataKinded
+
+  build-depends:        containers       >= 0.1 && < 0.6
+                      , ghc-prim                   < 1
+                      , integer-gmp
+                      , template-haskell >= 2.4 && < 2.12
+
+  default-language:     Haskell2010
+  ghc-options:          -Wall
+
+test-suite spec
+  type:                 exitcode-stdio-1.0
+  main-is:              Spec.hs
+  other-modules:        ExampleSpec
+  build-depends:        base             >= 4.8  && < 5
+                      , generic-deriving-newtypeless
+                      , hspec            >= 2    && < 3
+                      , template-haskell >= 2.4  && < 2.12
+  hs-source-dirs:       tests
+  default-language:     Haskell2010
+  ghc-options:          -Wall -threaded -rtsopts

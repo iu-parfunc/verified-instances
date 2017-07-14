@@ -94,7 +94,7 @@ eqPar1Trans eqP eqPTrans x y z
   ==. eqPar1 eqP x z
   *** QED
 
-{-@ veqPar1 :: VerifiedEq p -> VerifiedEq (Par1 p) @-}
+-- {-@ veqPar1 :: VerifiedEq p -> VerifiedEq (Par1 p) @-}
 veqPar1 :: VerifiedEq p -> VerifiedEq (Par1 p)
 veqPar1 (VerifiedEq eqP eqPRefl eqPSym eqPTrans)
   = VerifiedEq (eqPar1      eqP)
@@ -102,6 +102,7 @@ veqPar1 (VerifiedEq eqP eqPRefl eqPSym eqPTrans)
                (eqPar1Sym   eqP eqPSym)
                (eqPar1Trans eqP eqPTrans)
 
+{-
 {-@ newtype Rec1 f p = Rec1 { unRec1 :: f p } @-}
 
 {-@ axiomatize eqRec1 @-}
@@ -247,4 +248,5 @@ eqSum eqFp _    (L1 x) (L1 y) = eqFp x y
 eqSum _    eqGp (R1 x) (R1 y) = eqGp x y
 eqSum _    _    (L1 _) (R1 _) = False
 eqSum _    _    (R1 _) (L1 _) = False
+-}
 -}

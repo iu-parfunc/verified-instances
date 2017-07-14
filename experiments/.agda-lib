@@ -1,4 +1,6 @@
 name: experiments
+depend:
+  standard-library
 include:
   .
   deps/agda-prelude/src
