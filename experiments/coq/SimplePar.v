@@ -1,3 +1,5 @@
+(** * SimplePar *)
+
 Set Asymmetric Patterns.
 
 Require Import Coq.Arith.Arith.
@@ -22,8 +24,6 @@ Polymorphic Definition joinM@{d c}
             {A : Type@{d}} (aMM:m (m A)) : m A :=
   bind aMM id.
 
-Hint Unfold joinM.
-
 Fixpoint split_at {A} (n : nat) (xs : list A) : list A * list A :=
   match (n, xs) with
   | (O, xs) => (nil, xs)
@@ -36,10 +36,6 @@ Definition yank {A} (n : nat) (x : A) (xs : list A) : A * list A :=
   | (hd, nil) => (x, hd)
   | (hd, cons x tl) => (x, hd ++ tl)
   end.
-
-(** * SimplePar *)
-
-Module SimplePar.
 
 Definition Val := nat.
 
@@ -62,7 +58,7 @@ Module IVar_as_OT <: OrderedType.
 End IVar_as_OT.
 
 Module option_as_OT (A : OrderedType) <: OrderedType.
-  Module OA := OrderedTypeFacts (A).
+  Module OA := OrderedTypeFacts A.
   Definition t:= option A.t.
   Definition eq x y :=
     match (x, y) with
@@ -290,5 +286,3 @@ Eval cbv in H.lt heap1 heap2.
 
 (* Fixpoint loopit {A} (acc : Val) (vr : IVar Val) : Par A := *)
 (*   bind (get vr) (fun n => loopit (acc + n) vr). *)
-
-End SimplePar.
