@@ -1,16 +1,14 @@
 Require Import Coq.omega.Omega.
 
-Require Import SimpleParV1.
+Require Import SimpleParV2.
 Require Import Utils.
 Require Import Par.Tactics.
 
-Definition steps (trc : Trace) (others : list Trace)
-           (blkd : Pool) (cntr : nat) (heap : Heap) : Prop :=
+Definition steps trc others blkd cntr heap : Prop :=
   exists trcs blkd' cntr' heap',
     step trc others blkd cntr heap = inr (trcs, blkd', cntr', heap').
 
-Lemma steps_cntr (trc : Trace) (others : list Trace)
-      (blkd : Pool) (cntr : nat) (heap : Heap) :
+Lemma steps_cntr trc others blkd cntr heap :
   forall trcs blkd' cntr' heap',
     step trc others blkd cntr heap = inr (trcs, blkd', cntr', heap') ->
     cntr <= cntr'.
@@ -33,21 +31,15 @@ Qed.
 
 Hint Resolve monotonicity_step.
 
-Lemma monotonicity_sched (fuel : nat) :
+Require Import Coq.Program.Equality.
+
+Lemma monotonicity_sched :
   forall randoms threads blkd cntr heap heap',
-    sched fuel randoms threads blkd cntr heap = inr heap' ->
+    sched randoms threads blkd cntr heap = inr heap' ->
     heap <<= heap'.
 Proof.
-  intros. destruct fuel.
-  - invert H.
-  - invert H. destruct threads.
-    + destruct_if.
-      * invert_inlr. auto.
-      * invert_inlr.
-    + destruct randoms.
-      destruct (yank n t threads).
-      destruct (step t0 l blkd cntr heap).
-      * invert_inlr.
-      * repeat destruct p.
-        (* Can't do induction using randoms *)
-Abort.
+  (* This is a gnarly proof but automation makes it look simple *)
+  intros.
+  dependent induction randoms;
+    invert H; destructo; invert_inlr; eauto.
+Qed.

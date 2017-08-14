@@ -48,13 +48,12 @@ Definition step (trc : Trace) (others : list Trace)
 Fixpoint sched (randoms : list nat) (threads : list Trace)
          (blkd : Pool) (cntr : nat) (heap : Heap) : Exn + Heap :=
   match randoms, threads with
-  | _ , nil => if M.is_empty blkd then ret heap else inl (Deadlock blkd)
-  | nil , _ => if M.is_empty blkd then ret heap else inl (Deadlock blkd)
-  | cons rnd rs, cons thd threads =>
+  | rnd :: rs, thd :: threads =>
     let (trc, others) := yank rnd thd threads in
     t <- (step trc others blkd cntr heap) ;;
       let '(thrds', blkd', cntr', heap') := t in
       sched rs thrds' blkd' cntr' heap'
+  | _, _ => if M.is_empty blkd then ret heap else inl (Deadlock blkd)
   end.
 
 Definition runPar (randoms : list nat) (p : Par Val) : Exn + Val :=
