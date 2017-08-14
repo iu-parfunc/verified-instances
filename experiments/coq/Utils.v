@@ -5,6 +5,8 @@ Require Import Coq.Structures.OrderedType.
 
 Import ListNotations.
 
+Require Import Par.Tactics.
+
 Polymorphic Definition joinM@{d c}
             {m : Type@{d} -> Type@{c}}
             {M : Monad m}
@@ -18,13 +20,57 @@ Fixpoint split_at {A} (n : nat) (xs : list A) : list A * list A :=
   | (S m, x :: xs) => let (xs1, xs2) := split_at m xs in (x :: xs1, xs2)
   end.
 
+Lemma split_at_nil : forall {A} n, @split_at A n nil = (nil, nil).
+Proof.
+  intros. destruct n; auto.
+Qed.
+
+Hint Resolve split_at_nil.
+
+Lemma split_at_S_singleton : forall {A} n (x : A), split_at (S n) [x] = ([x], nil).
+Proof.
+  intros. destruct n; auto.
+Qed.
+
+Hint Resolve split_at_S_singleton.
+
+Lemma split_at_length : forall {A} (xs : list A), split_at (length xs) xs = (xs, nil).
+Proof.
+  intros.
+  induction xs; simpl in *; auto.
+  destructo; congruence.
+Qed.
+
+Hint Resolve split_at_length.
+
+Lemma length_0 : forall {A} (xs : list A), length xs = 0 -> xs = [].
+Proof.
+  intros.
+  destruct xs.
+  - auto.
+  - invert H.
+Qed.
+
+Lemma nth_nil : forall {A} n x, @nth A n [] x = x.
+Proof.
+  intros.
+  induction n; auto.
+Qed.
+
 Definition yank {A} (n : nat) (x : A) (xs : list A) : A * list A :=
-  match split_at (length (x :: xs) / n) (x :: xs) with
+  match split_at (n mod length (x :: xs)) (x :: xs) with
   | (hd, nil) => (x, hd)
   | (hd, cons x tl) => (x, hd ++ tl)
   end.
 
-Require Import Tactics.
+From QuickChick Require Import QuickChick.
+Import QcDefaultNotation. Import QcNotation. Open Scope qc_scope.
+Import GenLow GenHigh.
+Set Warnings "-extraction-opaque-accessed,-extraction".
+
+Conjecture yank_fst : forall {A} n x xs,
+    n < length (x :: xs) -> fst (@yank A (S n) x xs) = nth n xs x.
+QuickChick yank_fst.
 
 Module option_as_OT (A : OrderedType) <: OrderedType.
   Module OA := OrderedTypeFacts A.

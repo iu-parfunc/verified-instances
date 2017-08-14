@@ -15,7 +15,7 @@ Lemma steps_cntr trc others blkd cntr heap :
 Proof.
   intros.
   induction trc;
-    invert H; destructo; invert_inlr; auto || omega.
+    invert H; destructo; inverto; auto || omega.
 Qed.
 
 Lemma monotonicity_step (trc : Trace) (others : list Trace)
@@ -26,10 +26,8 @@ Lemma monotonicity_step (trc : Trace) (others : list Trace)
 Proof.
   intros.
   induction trc;
-    invert H; destructo; invert_inlr; auto.
+    invert H; destructo; inverto; auto.
 Qed.
-
-Hint Resolve monotonicity_step.
 
 Require Import Coq.Program.Equality.
 
@@ -41,7 +39,7 @@ Proof.
   (* This is a gnarly proof but automation makes it look simple *)
   intros.
   dependent induction randoms;
-    invert H; destructo; invert_inlr; eauto.
+    invert H; destructo; inverto; eauto using monotonicity_step.
 Qed.
 
 Lemma deterministic_runPar :
@@ -53,10 +51,12 @@ Proof.
   unfold runPar.
   intros. destruct p.
   - destruct randoms1, randoms2; simpl in *;
-      destructo; invert_inlr;
+      destructo; inverto;
         unfold id in *; subst;
-          invert Heqp; invert_opt.
+          invert Heqo0; inverto.
     (* This is the interesting case *)
-    + invert Heqs0. invert Heqs2.
+    + invert Heqs0. invert Heqs1.
+      unfold singleton in *.
+      invert H1. invert H2.
       admit.
 Admitted.

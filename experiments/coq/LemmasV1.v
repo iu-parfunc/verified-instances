@@ -17,7 +17,7 @@ Lemma steps_cntr (trc : Trace) (others : list Trace)
 Proof.
   intros.
   induction trc;
-    invert H; destructo; invert_inlr; auto || omega.
+    invert H; destructo; inverto; auto || omega.
 Qed.
 
 Lemma monotonicity_step (trc : Trace) (others : list Trace)
@@ -28,7 +28,7 @@ Lemma monotonicity_step (trc : Trace) (others : list Trace)
 Proof.
   intros.
   induction trc;
-    invert H; destructo; invert_inlr; auto.
+    invert H; destructo; inverto; auto.
 Qed.
 
 Hint Resolve monotonicity_step.
@@ -42,12 +42,12 @@ Proof.
   - invert H.
   - invert H. destruct threads.
     + destruct_if.
-      * invert_inlr. auto.
-      * invert_inlr.
+      * invert_sum. auto.
+      * invert_sum.
     + destruct randoms.
       destruct (yank n t threads).
       destruct (step t0 l blkd cntr heap).
-      * invert_inlr.
+      * invert_sum.
       * repeat destruct p.
         (* Can't do induction using randoms *)
 Abort.
