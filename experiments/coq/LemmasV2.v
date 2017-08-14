@@ -43,3 +43,20 @@ Proof.
   dependent induction randoms;
     invert H; destructo; invert_inlr; eauto.
 Qed.
+
+Lemma deterministic_runPar :
+  forall randoms1 randoms2 p v1 v2,
+    runPar randoms1 p = inr v1 ->
+    runPar randoms2 p = inr v2 ->
+    v1 = v2.
+Proof.
+  unfold runPar.
+  intros. destruct p.
+  - destruct randoms1, randoms2; simpl in *;
+      destructo; invert_inlr;
+        unfold id in *; subst;
+          invert Heqp; invert_opt.
+    (* This is the interesting case *)
+    + invert Heqs0. invert Heqs2.
+      admit.
+Admitted.

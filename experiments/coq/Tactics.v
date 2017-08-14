@@ -52,3 +52,10 @@ Ltac invert_inlr :=
     | [ H : inr _ = inl _ |- _ ] => invert H
     | [ H : inr _ = inr _ |- _ ] => invert H
     end.
+
+Ltac invert_opt :=
+  repeat
+    match goal with
+    | [ H : None = Some _ |- _ ] => invert H
+    | [ H : Some _ = None |- _ ] => invert H
+    end.
