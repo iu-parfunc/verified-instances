@@ -5,12 +5,15 @@ Ltac destruct_typ X :=
   | option _ => destruct X eqn:?
   | list _   => destruct X eqn:?
   | nat => destruct X eqn:?
+  | comparison => destruct X eqn:?
   end.
 
 Ltac destruct_match :=
   match goal with
   | [ H : context [ match ?X with _ => _ end ] |- _ ] => destruct_typ X
   | [ |- context [ match ?X with _ => _ end ] ] => destruct_typ X
+  | [ H : context [ match ?X as _ return _ with _ => _ end ] |- _ ] => destruct_typ X
+  | [ |- context [ match ?X as _ return _ with _ => _ end ] ] => destruct_typ X
   end.
 
 Ltac destruct_let :=

@@ -42,21 +42,40 @@ Proof.
     invert H; destructo; inverto; eauto using monotonicity_step.
 Qed.
 
-Lemma deterministic_runPar :
+Lemma deterministic_runPar_nil :
+  forall p randoms v1 v2,
+    runPar nil p = inr v1 ->
+    runPar randoms p = inr v2 ->
+    v1 = v2.
+Proof.
+  intros. cbv in H. inverto.
+Qed.
+
+Conjecture heap_find_0 : forall h,
+    singleton 0 None <<= h -> HM.find 0 h = Some None.
+
+Theorem deterministic_runPar :
   forall randoms1 randoms2 p v1 v2,
     runPar randoms1 p = inr v1 ->
     runPar randoms2 p = inr v2 ->
     v1 = v2.
 Proof.
-  unfold runPar.
   intros. destruct p.
-  - destruct randoms1, randoms2; simpl in *;
-      destructo; inverto;
-        unfold id in *; subst;
-          invert Heqo0; inverto.
-    (* This is the interesting case *)
-    + invert Heqs0. invert Heqs1.
-      unfold singleton in *.
-      invert H1. invert H2.
-      admit.
-Admitted.
+  induction (t (fun v => Put 0 v Done));
+    unfold runPar in H; simpl in H.
+  destructo; inverto.
+  - unfold id in *; subst.
+    apply monotonicity_sched in Heqs.
+    apply heap_find_0 in Heqs.
+    rewrite Heqs in Heqo0. inverto.
+  - auto.
+  - auto using H1.
+  - auto.
+  - destructo; inverto.
+    unfold id in *; subst.
+    apply monotonicity_sched in Heqs.
+    apply heap_find_0 in Heqs.
+    rewrite Heqs in Heqo0; inverto.
+Qed.
+
+Print Assumptions deterministic_runPar.
