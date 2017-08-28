@@ -1,3 +1,5 @@
+Require Import Coq.Structures.OrderedType.
+
 Ltac destruct_typ X :=
   match type of X with
   | prod _ _ => destruct X eqn:?
@@ -5,7 +7,7 @@ Ltac destruct_typ X :=
   | option _ => destruct X eqn:?
   | list _   => destruct X eqn:?
   | nat => destruct X eqn:?
-  | comparison => destruct X eqn:?
+  | Compare _ _ _ _ _ => destruct X eqn:?
   end.
 
 Ltac destruct_match :=
