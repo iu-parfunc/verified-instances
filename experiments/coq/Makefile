@@ -302,6 +302,14 @@ $(addsuffix .d,$(VFILES)): %.v.d: %.v
 $(addsuffix .beautified,$(VFILES)): %.v.beautified:
 	$(COQC) $(COQDEBUG) $(COQFLAGS) -beautify $*.v
 
+deps:
+	opam repo add coq-released https://coq.inria.fr/opam/released || \
+          echo "OK, nevermind. NOT idempotent."
+	opam update
+	opam install -y coq-ext-lib coq-mathcomp-ssreflect
+
+nix:
+
 # WARNING
 #
 # This Makefile has been automagically generated

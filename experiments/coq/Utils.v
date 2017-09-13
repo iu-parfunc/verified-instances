@@ -63,14 +63,14 @@ Definition yank {A} (n : nat) (x : A) (xs : list A) : A * list A :=
   | (hd, cons x tl) => (x, hd ++ tl)
   end.
 
-From QuickChick Require Import QuickChick.
-Import QcDefaultNotation. Import QcNotation. Open Scope qc_scope.
-Import GenLow GenHigh.
-Set Warnings "-extraction-opaque-accessed,-extraction".
-
-Conjecture yank_fst : forall {A} n x xs,
-    n < length (x :: xs) -> fst (@yank A (S n) x xs) = nth n xs x.
-QuickChick yank_fst.
+(* From QuickChick Require Import QuickChick.
+ * Import QcDefaultNotation. Import QcNotation. Open Scope qc_scope.
+ * Import GenLow GenHigh.
+ * Set Warnings "-extraction-opaque-accessed,-extraction".
+ * 
+ * Conjecture yank_fst : forall {A} n x xs,
+ *     n < length (x :: xs) -> fst (@yank A (S n) x xs) = nth n xs x.
+ * QuickChick yank_fst. *)
 
 Module option_as_OT (A : OrderedType) <: OrderedType.
   Module OA := OrderedTypeFacts A.
