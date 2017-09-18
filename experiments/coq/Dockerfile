@@ -8,3 +8,6 @@ USER opam
 
 RUN opam repo add coq-released https://coq.inria.fr/opam/released
 RUN opam install coq.8.6 coqide coq-ext-lib coq-mathcomp-ssreflect
+
+# ADD . /coq
+# ENV COQPATH /coq
