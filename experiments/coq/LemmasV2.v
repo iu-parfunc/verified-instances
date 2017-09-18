@@ -53,6 +53,43 @@ Qed.
 Require Import Coq.Lists.List.
 Import ListNotations.
 
+Lemma deterministic_runPar_singleton :
+  forall p rnd randoms v1 v2,
+    runPar [rnd] p = inr v1 ->
+    runPar randoms p = inr v2 ->
+    v1 = v2.
+Proof.
+  intros. cbn in H.
+  destructo; inverto.
+
+  - unfold step in Heqs0.
+    destruct (Par.runCont p (fun v => Put 0 v Done)) eqn:?.
+
+    + destructo.
+      ++ cbn in Heqo0. inverto.
+      ++ cbn in Heqs0. inverto. cbn in Heqo. inverto.
+
+    + destructo.
+      ++ cbn in Heqo0. inverto.
+      ++ cbn in Heqo1. inverto.
+      ++ cbn in Heqs0. inverto. cbn in Heqo.
+         destruct (Nat_as_OT.compare 0 i).
+         * inverto.
+         * invert e. inverto. cbn in Heqo1, Heqo0.
+           destruct p. cbn in Heqt.
+           admit.
+         * inverto.
+
+    + cbn in Heqs0. inverto.
+      cbn in Heqo. inverto.
+
+    + cbn in Heqs0. inverto.
+      cbn in Heqo. inverto.
+
+    + cbn in Heqs0. inverto.
+      cbn in Heqo. inverto.
+Admitted.
+
 Module scratch.
 
 Example t : (Val -> Trace) -> Trace := fun f => Put 0 42 (Put 0 43 Done).
@@ -90,6 +127,16 @@ Theorem deterministic_runPar :
     runPar randoms2 p = inr v2 ->
     v1 = v2.
 Proof.
+  intros.
+  induction randoms1.
+
+  - cbn in H. inverto.
+
+  - cbn in H. destructo; inverto.
+
+    + apply monotonicity_step in Heqs0.
+      apply monotonicity_sched in Heqs.
+
 Admitted.
 
 Print Assumptions deterministic_runPar.
