@@ -3,12 +3,12 @@ Require Import Coq.FSets.FMapFacts.
 
 Require Import Trace.
 
-Module H := FMapList.Make_ord Nat_as_OT OV_as_OT.
+Module H := FMapList.Make_ord Nat_as_OT Val_as_OT.
 Module HM := H.MapS.
 
 Definition Heap := H.t.
 
-Module M := FMapList.Make (Nat_as_OT).
+Module M := FMapList.Make Nat_as_OT.
 
 Definition add_with {A} (f : A -> A -> A) (key : nat) (new_val : A) (m : M.t A) : M.t A :=
   match M.find key m with
@@ -28,8 +28,7 @@ Reserved Notation "h1 <<= h2" (at level 40).
 
 Inductive heap_lteq : Heap -> Heap -> Prop :=
   heap_refl : forall h, h <<= h
-| heap_add_none : forall h k, h <<= HM.add k None h
-| heap_add_some : forall h k v, h <<= HM.add k (Some v) h
+| heap_add_v : forall h k v, h <<= HM.add k v h
 | heap_trans : forall h1 h2 h3, h1 <<= h2 -> h2 <<= h3 -> h1 <<= h3
 where "h1 <<= h2" := (heap_lteq h1 h2).
 

@@ -32,13 +32,13 @@ Definition step (trc : Trace) (others : list Trace)
   match trc with
   | Done => ret (others, blkd, cntr, heap)
   | Fork t1 t2 => ret (t1 :: t2 :: others, blkd, cntr, heap)
-  | New k => ret (k cntr :: others, blkd, cntr + 1, HM.add cntr None heap)
-  | Get ix k => match joinM (HM.find ix heap) with
+  | New k => ret (k cntr :: others, blkd, cntr + 1, heap)
+  | Get ix k => match HM.find ix heap with
                | None => ret (others, add_with (app (A:=_)) ix [k] blkd, cntr, heap)
                | Some v => ret (k v :: others, blkd, cntr, heap)
                end
-  | Put ix v t2 => let heap' := HM.add ix (Some v) heap in
-                  match joinM (HM.find ix heap) with
+  | Put ix v t2 => let heap' := HM.add ix v heap in
+                  match HM.find ix heap with
                   | None => match M.find ix blkd with
                            | None => ret (t2 :: others, blkd, cntr, heap')
                            | Some ls => ret (t2 :: fmap (fun k => k v) ls ++ others, M.remove ix blkd, cntr, heap')
@@ -66,11 +66,11 @@ Fixpoint sched (fuel : nat) (randoms : Stream nat) (threads : list Trace)
   end.
 
 Definition runPar (randoms : Stream nat) (p : Par Val) : Exn + Val :=
-  let initHeap := singleton 0 None in
+  let initHeap := HM.empty _ in
   let initThreads := [ runCont p (fun v => Put 0 v Done) ] in
   let maxFuel := 100 in
   finalHeap <- sched maxFuel randoms initThreads (M.empty _) 1 initHeap ;;
-  match joinM (HM.find 0 finalHeap) with
+  match HM.find 0 finalHeap with
   | None => inl HeapExn
   | Some finalVal => ret finalVal
   end
@@ -108,8 +108,8 @@ Example dag1 : Par Val :=
 Eval cbn in runPar canonical dag1.
 Eval cbn in runPar round_robin dag1.
 
-Example heap1 : Heap := singleton 0 None.
-Example heap2 : Heap := singleton 0 (Some 1).
+Example heap1 : Heap := HM.empty _.
+Example heap2 : Heap := singleton 0 1.
 
 Eval cbv in H.lt heap1 heap2.
 
