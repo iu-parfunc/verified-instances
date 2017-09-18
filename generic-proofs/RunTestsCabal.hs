@@ -21,6 +21,7 @@ main = do
   let hsFiles = hsFiles' \\ [ "src/GenericProofs/TH.hs" -- Infinitely loops for some reason
                             ]
                          & filter (not . isPrefixOf "src/GenericProofs/VerifiedFunctor")
+                             -- Requires higher-rank reasoning that LH can't do
   putStrLn "Preparing to run liquid on:"
   forM_ hsFiles $ \hsFile -> putStrLn $ '\t':hsFile
   forM_ hsFiles $ \hsFile -> do
