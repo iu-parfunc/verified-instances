@@ -2,6 +2,8 @@ module Main (main) where
 
 import Control.Exception
 import Data.Foldable
+import Data.Function
+import Data.List
 import System.Directory
 import System.Environment
 import System.Exit
@@ -14,11 +16,16 @@ main = do
   let cabalHead = case mbCabalHead of
                     Just path -> path
                     Nothing   -> "cabal"
-  hsFiles <- filter ((== ".hs") . takeExtension) <$> getDirectoryContentsRecursive "src"
+  hsFiles' <- map ("src" </>) .
+              filter ((== ".hs") . takeExtension) <$> getDirectoryContentsRecursive "src"
+  let hsFiles = hsFiles' \\ [ "src/GenericProofs/TH.hs"
+                            ]
+                         & filter (not . isPrefixOf "src/GenericProofs/VerifiedFunctor")
+                         & filter (not . isPrefixOf "src/GenericProofs/VerifiedOrd")
   putStrLn "Preparing to run liquid on:"
   forM_ hsFiles $ \hsFile -> putStrLn $ '\t':hsFile
   forM_ hsFiles $ \hsFile -> do
-    let cmd = cabalHead ++ " new-run liquid -- -iinclude -isrc src" </> hsFile
+    let cmd = cabalHead ++ " new-run liquid -- -iinclude -isrc " ++ hsFile
     putStrLn cmd
     (_, _, _, handle) <- createProcess $ shell cmd
     ex <- waitForProcess handle
