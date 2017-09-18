@@ -18,10 +18,9 @@ main = do
                     Nothing   -> "cabal"
   hsFiles' <- map ("src" </>) .
               filter ((== ".hs") . takeExtension) <$> getDirectoryContentsRecursive "src"
-  let hsFiles = hsFiles' \\ [ "src/GenericProofs/TH.hs"
+  let hsFiles = hsFiles' \\ [ "src/GenericProofs/TH.hs" -- Infinitely loops for some reason
                             ]
                          & filter (not . isPrefixOf "src/GenericProofs/VerifiedFunctor")
-                         & filter (not . isPrefixOf "src/GenericProofs/VerifiedOrd")
   putStrLn "Preparing to run liquid on:"
   forM_ hsFiles $ \hsFile -> putStrLn $ '\t':hsFile
   forM_ hsFiles $ \hsFile -> do

@@ -1,7 +1,10 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--exactdc"            @-}
-module GenericProofs.VerifiedOrd.Instances (vordUnit, vordInt, vordInt64, vordDouble) where
+module GenericProofs.VerifiedOrd.Instances (
+    vordUnit, vordInt, vordInt64, vordDouble
+  , leqUnit,  leqInt,  leqInt64,  leqDouble
+  ) where
 
 import Data.Int
 import GenericProofs.VerifiedOrd

@@ -2,7 +2,7 @@
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--exactdc"            @-}
 
-module GenericProofs.VerifiedOrd (VerifiedOrd(..), {-vordEq,-} eqCompare, vordIso) where
+module GenericProofs.VerifiedOrd (VerifiedOrd(..), {-vordEq,-} eqCompare, leqFrom, vordIso) where
 
 import GenericProofs.Iso
 import Language.Haskell.Liquid.ProofCombinators
