@@ -1,5 +1,4 @@
 {-@ LIQUID "--higherorder"        @-}
-{-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--exactdc"            @-}
 module GenericProofs.VerifiedEq.Instances
   ( eqInt, veqInt

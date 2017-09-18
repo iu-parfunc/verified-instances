@@ -1,5 +1,4 @@
 {-@ LIQUID "--higherorder"    @-}
-{-@ LIQUID "--totality"       @-}
 {-@ LIQUID "--exactdc"        @-}
 {-# LANGUAGE EmptyCase     #-}
 {-# LANGUAGE TypeOperators #-}

@@ -1,5 +1,4 @@
 {-@ LIQUID "--higherorder" @-}
-{-@ LIQUID "--totality"    @-}
 {-@ LIQUID "--exactdc"     @-}
 module GenericProofs.VerifiedSemigroup.Instances (Unit(..), sappendUnit, vsemigroupUnit) where -- (Unit(..), vsemigroupUnit) where
 
