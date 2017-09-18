@@ -1,0 +1,10 @@
+-- For more information see
+-- http://cabal.readthedocs.io/en/latest/nix-local-build-overview.html
+
+packages: .
+          ./generic-deriving-newtypeless
+          ./liquidhaskell
+          ./liquid-fixpoint
+
+package liquidhaskell
+    flags: devel

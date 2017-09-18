@@ -2,3 +2,9 @@
 	path = experiments/deps/agda-prelude
 	url = https://github.com/UlfNorell/agda-prelude.git
 	branch = compat-2.5.2
+[submodule "generic-proofs/liquidhaskell"]
+	path = generic-proofs/liquidhaskell
+	url = https://github.com/ucsd-progsys/liquidhaskell
+[submodule "generic-proofs/liquid-fixpoint"]
+	path = generic-proofs/liquid-fixpoint
+	url = https://github.com/ucsd-progsys/liquid-fixpoint
