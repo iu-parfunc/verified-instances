@@ -54,6 +54,7 @@ library
                      , newtype       >= 0.2   && < 0.3
                      , reflection    >= 2.1.2 && < 2.2
                      , semigroups    >= 0.18  && < 0.19
+--                     , containers
   hs-source-dirs:      src
   ghc-options:         -O2 -Wall -fno-warn-orphans
   default-language:    Haskell2010
@@ -69,7 +70,8 @@ executable dpj2
                      , vector
                      , verified-instances
                      , deepseq, criterion
-                     , lvish, transformers
+--                     , lvish
+                     , transformers
                      , time
   hs-source-dirs:      examples/dpj
   ghc-options:         -O2 -Wall -threaded -rtsopts
@@ -109,3 +111,18 @@ executable simplepar
                      , tasty-quickcheck
   ghc-options:         -O2 -Wall -threaded -rtsopts
   default-language:    Haskell2010
+
+executable simplepar2
+  if !flag(examples)
+    buildable:         False
+
+  main-is:             experiments/Control/SimplePar2.hs
+  build-depends:       base >= 4.8 && < 5
+                     , containers
+                     , mtl
+                     , QuickCheck
+                     , tasty
+                     , tasty-quickcheck
+  ghc-options:         -O2 -Wall -threaded -rtsopts
+  default-language:    Haskell2010
+

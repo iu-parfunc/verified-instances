@@ -8,7 +8,7 @@ packages:
   subdirs:
   - src/par-classes
   - src/par-collections
-  - src/lvish
+#  - src/lvish
   - deps/concurrent-skiplist
   - deps/ctrie
 docker:

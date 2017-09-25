@@ -175,13 +175,12 @@ instance Show Exn where
 -- noninteference lemma:  i /= j  =>  get (IVar i) # put (IVar j) v
 
 
-
 -- | Run a Par computation.  Take a stream of random numbers for scheduling decisions.
 runPar :: InfList Word -> Par Val -> Except Exn Val
-runPar randoms p = do
+runPar randoms p0 = do
   let initHeap = M.singleton 0 Nothing
       initThreads :: [Trace]
-      initThreads = [runCont p (\v -> Put (IVar 0) v Done)]
+      initThreads = [runCont p0 (\v -> Put (IVar 0) v Done)]
 
   finalHeap <- sched randoms initThreads M.empty 1 initHeap
   let maybeFinalVal = finalHeap M.! 0
