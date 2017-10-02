@@ -5,4 +5,4 @@ Verified typeclasses using [LiquidHaskell](http://goto.ucsd.edu/~rjhala/liquid/h
 ### Build Status
 
  * Travis:
-   [![Build Status](https://travis-ci.org/iu-parfunc/verified-instances.svg?branch=master)](https://travis-ci.org/iu-parfunc/verified-instances)
+   [![Build Status](https://travis-ci.org/iu-parfunc/verified-instances.svg?branch=popl18)](https://travis-ci.org/iu-parfunc/verified-instances)
