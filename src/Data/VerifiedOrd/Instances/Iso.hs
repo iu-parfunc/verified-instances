@@ -1,5 +1,4 @@
 {-@ LIQUID "--higherorder"        @-}
-{-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--automatic-instances=liquidinstances" @-}
 
 module Data.VerifiedOrd.Instances.Iso (vordIso) where

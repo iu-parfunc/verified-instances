@@ -1,5 +1,4 @@
 {-@ LIQUID "--higherorder"        @-}
-{-@ LIQUID "--totality"           @-}
 
 module IsoInt where
 

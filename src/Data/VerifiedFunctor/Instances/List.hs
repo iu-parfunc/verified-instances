@@ -1,5 +1,4 @@
 {-@ LIQUID "--higherorder"     @-}
-{-@ LIQUID "--totality"        @-}
 {-@ LIQUID "--exactdc"         @-}
 
 module Data.VerifiedFunctor.Instances.List where

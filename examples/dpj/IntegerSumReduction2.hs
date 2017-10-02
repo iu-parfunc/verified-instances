@@ -1,6 +1,5 @@
 {-# LANGUAGE BangPatterns #-}
 {-@ LIQUID "--higherorder"    @-}
-{-@ LIQUID "--totality"       @-}
 {-@ LIQUID "--exactdc"        @-}
 {-@ LIQUID "--prune-unsorted" @-}
 {-@ LIQUID "--automatic-instances=liquidinstances" @-}

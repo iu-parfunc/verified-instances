@@ -1,5 +1,4 @@
 {-@ LIQUID "--higherorder" @-}
-{-@ LIQUID "--totality"    @-}
 {-# LANGUAGE Rank2Types #-}
 
 module Data.Iso where

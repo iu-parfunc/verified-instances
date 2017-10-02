@@ -4,7 +4,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE TypeFamilies         #-}
 {-@ LIQUID "--higherorder"        @-}
-{-@ LIQUID "--totality"           @-}
 
 module Data.VerifiedSemigroup where
 

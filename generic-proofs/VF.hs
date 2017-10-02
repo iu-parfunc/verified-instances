@@ -1,6 +1,5 @@
 -- VF.hs
 {-@ LIQUID "--higherorder"     @-}
-{-@ LIQUID "--totality"        @-}
 {-@ LIQUID "--exactdc"         @-}
 {-# LANGUAGE RankNTypes #-}
 module VF (VerifiedFunctor(..)) where

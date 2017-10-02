@@ -1,5 +1,4 @@
 {-@ LIQUID "--higherorder"        @-}
-{-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--exactdc"            @-}
 
 import Language.Haskell.Liquid.ProofCombinators

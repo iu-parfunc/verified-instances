@@ -1,4 +1,3 @@
-{-@ LIQUID "--totality"        @-}
 {-@ LIQUID "--higherorder"     @-}
 {-@ LIQUID "--prune-unsorted"  @-}
 

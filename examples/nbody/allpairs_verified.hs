@@ -1,5 +1,4 @@
 {-@ LIQUID "--higherorder"        @-}
-{-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--prune-unsorted"     @-}
 {-@ LIQUID "--exactdc"            @-}
 {-@ LIQUID "--trust-internals" @-}

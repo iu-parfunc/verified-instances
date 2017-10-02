@@ -4,7 +4,6 @@
 {-# LANGUAGE TypeFamilies         #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-@ LIQUID "--higherorder"        @-}
-{-@ LIQUID "--totality"           @-}
 
 module Data.VerifiedOrd where
 
