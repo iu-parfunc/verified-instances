@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--totality"           @-}
+{-@ LIQUID "--exactdc"            @-}
 {-@ LIQUID "--automatic-instances=liquidinstances" @-}
 
 module Data.VerifiedOrd.Instances.Inj (vordInj, leqFrom) where

@@ -1,4 +1,5 @@
 {-@ LIQUID "--totality"    @-}
+{-@ LIQUID "--exactdc"     @-}
 {-@ LIQUID "--higherorder" @-}
 
 module Composition where

@@ -1,5 +1,6 @@
-HS = $(shell find src examples -type f -name '*.hs' \
-	-not -path 'examples/dpj/*' -not -path 'examples/nbody/*')
+HS = $(shell find src -type f -name '*.hs')
+HS += examples/dpj/IntegerSumReduction2.hs examples/nbody/allpairs_verified.hs
+
 # Dummy target
 CHS = $(subst hs,chs,$(HS))
 
@@ -31,7 +32,7 @@ build:
 check: build $(CHS)
 
 %.chs: %.hs
-	$(LIQUID) -i src $<
+	$(LIQUID) -i src -i examples/nbody -i examples/dpj $<
 
 clean:
 	find . -type d -name '.liquid' -exec rm -rf {} \+

@@ -1,4 +1,5 @@
 {-@ LIQUID "--higherorder"        @-}
+{-@ LIQUID "--exactdc"            @-}
 {-@ LIQUID "--totality"           @-}
 {-@ LIQUID "--automatic-instances=liquidinstances" @-}
 

@@ -29,8 +29,6 @@ library
                      , Data.VerifiedEq.Instances.Iso
                      , Data.VerifiedEq.Instances.Sum
                      , Data.VerifiedEq.Instances.Prod
-                     , Data.VerifiedFunctor
-                     , Data.VerifiedFunctor.Instances.List
                      , Data.VerifiedOrd
                      , Data.VerifiedOrd.Instances
                      , Data.VerifiedOrd.Instances.Inj

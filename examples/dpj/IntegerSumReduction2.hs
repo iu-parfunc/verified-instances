@@ -19,7 +19,7 @@ import Control.LVish.Internal
 
 import Control.Exception
 import Data.Time.Clock
-import Data.Vector.Unboxed                      as V hiding ((++))
+import Data.Vector.Unboxed                      as V hiding ((++), empty)
 import Prelude                                  as P
 import System.Environment
 import System.IO.Unsafe                         (unsafePerformIO)
