@@ -23,7 +23,7 @@ endif
 all: $(ALL)
 
 docker:
-	docker build -t liquidhaskell .
+	docker build -t parfunc/verified-instances .
 
 build:
 	$(STACK) build
