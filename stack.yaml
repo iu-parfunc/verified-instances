@@ -17,7 +17,7 @@ packages:
     commit: bfa8d2b52f0d41439863b15863baa0ca2ef613d9
   extra-dep: true
 docker:
-  image: liquidhaskell
+  image: parfunc/verified-instances:popl18
   enable: false
 allow-newer: true
 extra-deps:
