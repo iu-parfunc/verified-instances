@@ -4,14 +4,33 @@ RUN apt-get -y install z3
 
 # force https on github instead of ssh
 RUN git config --system url."https://github.com/".insteadOf "git@github.com:"
+RUN stack config set system-ghc --global true
 
 RUN git clone --recursive https://github.com/ucsd-progsys/liquidhaskell.git /opt/liquidhaskell
 WORKDIR /opt/liquidhaskell
 
 # "popl18" branch
-ENV LIQUID_SHA popl18
 RUN git fetch --all && \
-    git checkout --force ${LIQUID_SHA} && \
+    git checkout --force popl18 && \
     git submodule update --init --recursive && \
     git clean -dffx && \
-    stack --system-ghc install --local-bin-path=/usr/local/bin
+    stack install --local-bin-path=/usr/local/bin \
+          liquid-fixpoint liquidhaskell
+RUN stack test liquidhaskell --no-run-tests
+
+RUN git clone -b popl18 --recursive https://github.com/iu-parfunc/lvars.git /opt/lvars
+WORKDIR /opt/lvars
+
+COPY . /opt/verified-instances
+WORKDIR /opt/verified-instances
+
+RUN stack build
+ENV DOCKER=false TIMEIT=false
+
+CMD cd /opt/liquidhaskell && \
+    stack test liquidhaskell && \
+    cd /opt/verified-instances && \
+    find . -type d -name '.liquid' -exec rm -rf {} \+ && \
+    make && \
+    cd /opt/lvars && \
+    make
