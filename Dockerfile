@@ -18,6 +18,9 @@ RUN git fetch --all && \
           liquid-fixpoint liquidhaskell
 RUN stack test liquidhaskell --no-run-tests
 
+RUN git clone -b popl18 --recursive https://github.com/iu-parfunc/lvars.git /opt/lvars
+WORKDIR /opt/lvars
+
 COPY . /opt/verified-instances
 WORKDIR /opt/verified-instances
 
@@ -28,4 +31,6 @@ CMD cd /opt/liquidhaskell && \
     stack test liquidhaskell && \
     cd /opt/verified-instances && \
     find . -type d -name '.liquid' -exec rm -rf {} \+ && \
+    make && \
+    cd /opt/lvars && \
     make
