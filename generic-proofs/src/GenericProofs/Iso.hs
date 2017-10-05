@@ -28,17 +28,17 @@ module GenericProofs.Iso (
 import Control.Category                         (Category (..))
 import Language.Haskell.Liquid.ProofCombinators
 
-{-@ data Iso a b = Iso { to   :: a -> b
-                       , from :: b -> a
-                       , tof  :: y:b -> { to (from y) == y }
-                       , fot  :: x:a -> { from (to x) == x }
+{-@ data Iso a b = Iso { isoTo   :: a -> b
+                       , isoFrom :: b -> a
+                       , isoTof  :: y:b -> { isoTo (isoFrom y) == y }
+                       , isoFot  :: x:a -> { isoFrom (isoTo x) == x }
                        }
 @-}
 
-data Iso a b = Iso { to   :: a -> b
-                   , from :: b -> a
-                   , tof  :: b -> Proof
-                   , fot  :: a -> Proof
+data Iso a b = Iso { isoTo   :: a -> b
+                   , isoFrom :: b -> a
+                   , isoTof  :: b -> Proof
+                   , isoFot  :: a -> Proof
                    }
 
 {-@ toInj :: to:(a -> b) -> from:(b -> a) -> fot:(x:a -> {from (to x) == x })
@@ -65,16 +65,16 @@ fromInj to from tof x y
   ==. x == y ? tof y
   *** QED
 
-{-@ data Iso1 f g = Iso1 { to1   :: forall a. f a -> g a
-                         , from1 :: forall a. g a -> f a
-                         , tof1  :: forall a. y:(g a) -> { to1 (from1 y) == y }
-                         , fot1  :: forall a. x:(f a) -> { from1 (to1 x) == x }
+{-@ data Iso1 f g = Iso1 { isoTo1   :: forall a. f a -> g a
+                         , isoFrom1 :: forall a. g a -> f a
+                         , isoTof1  :: forall a. y:(g a) -> { isoTo1 (isoFrom1 y) == y }
+                         , isoFot1  :: forall a. x:(f a) -> { isoFrom1 (isoTo1 x) == x }
                          }
 @-}
-data Iso1 f g = Iso1 { to1   :: forall a. f a -> g a
-                     , from1 :: forall a. g a -> f a
-                     , tof1  :: forall a. g a -> Proof
-                     , fot1  :: forall a. f a -> Proof
+data Iso1 f g = Iso1 { isoTo1   :: forall a. f a -> g a
+                     , isoFrom1 :: forall a. g a -> f a
+                     , isoTof1  :: forall a. g a -> Proof
+                     , isoFot1  :: forall a. f a -> Proof
                      }
 
 {-@ to1Inj :: to1:(f a -> g a) -> from1:(g a -> f a) -> fot1:(x:f a -> {from1 (to1 x) == x })
@@ -137,11 +137,11 @@ iso1Refl = undefined
 
 -- | 'Iso's are symmetric.
 isoSym :: Iso a b -> Iso b a
-isoSym Iso { to, from, tof, fot } = Iso from to fot tof
+isoSym Iso { isoTo, isoFrom, isoTof, isoFot } = Iso isoFrom isoTo isoFot isoTof
 
 -- | 'Iso1's are symmetric.
 iso1Sym :: Iso1 f g -> Iso1 g f
-iso1Sym Iso1 { to1, from1, tof1, fot1 } = Iso1 from1 to1 fot1 tof1
+iso1Sym Iso1 { isoTo1, isoFrom1, isoTof1, isoFot1 } = Iso1 isoFrom1 isoTo1 isoFot1 isoTof1
 
 -- Sadly, LH seems to have trouble with (.)
 {-@ axiomatize compose @-}
