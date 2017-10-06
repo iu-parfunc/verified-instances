@@ -1,5 +1,16 @@
-HS = $(shell find src -type f -name '*.hs')
-HS += examples/dpj/IntegerSumReduction2.hs examples/nbody/allpairs_verified.hs
+ifeq ($(PLE),true)
+	HS = $(shell find src -type f -name '*[^NoPLE].hs')
+	HS += examples/dpj/IntegerSumReduction2.hs
+	HS += examples/nbody/allpairs_verified.hs
+else ifeq ($(PLE),false)
+	HS = $(shell find src -type f -name '*NoPLE.hs')
+	HS += examples/dpj/IntegerSumReduction2NoPLE.hs
+	HS += examples/nbody/allpairs_verifiedNoPLE.hs
+else
+	HS = $(shell find src -type f -name '*.hs')
+	HS += examples/dpj/IntegerSumReduction2.hs examples/dpj/IntegerSumReduction2NoPLE.hs
+	HS += examples/nbody/allpairs_verified.hs examples/nbody/allpairs_verifiedNoPLE.hs
+endif
 
 # Dummy target
 CHS = $(subst hs,chs,$(HS))
