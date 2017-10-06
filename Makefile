@@ -45,6 +45,9 @@ check: build $(CHS)
 %.chs: %.hs
 	$(LIQUID) -i src -i examples/nbody -i examples/dpj $<
 
+count:
+	for file in $(HS); do echo $$file ; ./lh-count.sh $$file ; done
+
 clean:
 	find . -type d -name '.liquid' -exec rm -rf {} \+
 	$(STACK) clean
