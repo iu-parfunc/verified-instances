@@ -25,7 +25,7 @@ main = do
   putStrLn "Preparing to run liquid on:"
   forM_ hsFiles $ \hsFile -> putStrLn $ '\t':hsFile
   forM_ hsFiles $ \hsFile -> do
-    let cmd = cabalHead ++ " new-run liquid -- -iinclude -isrc " ++ hsFile
+    let cmd = cabalHead ++ " new-run liquid -- -isrc " ++ hsFile
     putStrLn cmd
     (_, _, _, handle) <- createProcess $ shell cmd
     ex <- waitForProcess handle

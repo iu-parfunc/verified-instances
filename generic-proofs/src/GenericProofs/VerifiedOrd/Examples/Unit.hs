@@ -7,6 +7,7 @@ module GenericProofs.VerifiedOrd.Examples.Unit where
 import Language.Haskell.Liquid.ProofCombinators
 
 import GenericProofs.Iso
+import GenericProofs.Orphans
 import GenericProofs.TH
 import GenericProofs.VerifiedOrd
 import GenericProofs.VerifiedOrd.Generics
