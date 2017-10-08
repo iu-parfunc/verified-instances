@@ -3,7 +3,6 @@
 module GenericProofs.VerifiedMonoid.Generics where
 
 import Language.Haskell.Liquid.ProofCombinators
-import GenericProofs.Orphans
 import GenericProofs.VerifiedMonoid
 import Generics.Deriving.Newtypeless.Base.Internal
 

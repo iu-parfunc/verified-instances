@@ -3,7 +3,6 @@
 module GenericProofs.VerifiedSemigroup.Generics where
 
 import Language.Haskell.Liquid.ProofCombinators
-import GenericProofs.Orphans
 import GenericProofs.VerifiedSemigroup
 import Generics.Deriving.Newtypeless.Base.Internal
 

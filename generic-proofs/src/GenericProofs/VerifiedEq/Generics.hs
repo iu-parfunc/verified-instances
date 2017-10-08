@@ -5,7 +5,6 @@
 module GenericProofs.VerifiedEq.Generics where
 
 import Language.Haskell.Liquid.ProofCombinators
-import GenericProofs.Orphans
 import GenericProofs.VerifiedEq
 
 import Generics.Deriving.Newtypeless.Base.Internal

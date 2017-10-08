@@ -9,7 +9,6 @@ module GenericProofs.VerifiedFunctor.Generics where
 import Prelude hiding (fmap)
 
 import GenericProofs.Iso
-import GenericProofs.Orphans
 import GenericProofs.VerifiedFunctor
 import Generics.Deriving.Newtypeless.Base.Internal
 import Language.Haskell.Liquid.ProofCombinators

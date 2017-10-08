@@ -4,7 +4,6 @@
 
 module GenericProofs.VerifiedOrd.Generics where
 
-import GenericProofs.Orphans
 import GenericProofs.VerifiedOrd
 import Generics.Deriving.Newtypeless.Base.Internal
 import Language.Haskell.Liquid.ProofCombinators

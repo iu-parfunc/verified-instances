@@ -14,7 +14,6 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:     GenericProofs.Iso
-                       GenericProofs.Orphans
                        GenericProofs.TH
                        GenericProofs.VerifiedEq
                        GenericProofs.VerifiedEq.Examples.Either
