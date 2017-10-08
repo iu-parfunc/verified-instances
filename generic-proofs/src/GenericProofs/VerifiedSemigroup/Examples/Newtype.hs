@@ -24,7 +24,6 @@ import GenericProofs.VerifiedSemigroup.Instances
 import Generics.Deriving.Newtypeless.Base.Internal
 
 -- Morally a newtype, but in practice, not.
-{-@ data WrapUnit = WrapUnit { runMyUnit :: Unit } @-}
 data WrapUnit = WrapUnit { runMyUnit :: Unit }
 
 {-@ axiomatize fromWrapUnit @-}

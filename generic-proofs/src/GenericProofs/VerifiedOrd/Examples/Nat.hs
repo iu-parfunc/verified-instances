@@ -16,7 +16,6 @@ import GenericProofs.VerifiedOrd.Instances
 
 import Generics.Deriving.Newtypeless.Base.Internal
 
-{-@ data N = Zero | Succ { pred :: N } @-}
 data N = Zero | Succ N deriving (Eq)
 
 {-@ axiomatize fromN @-}

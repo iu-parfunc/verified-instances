@@ -24,8 +24,9 @@ import GenericProofs.VerifiedMonoid.Instances
 
 import Generics.Deriving.Newtypeless.Base.Internal
 
+import Prelude hiding (Monoid(..))
+
 -- Morally a newtype, but in practice, not.
-{-@ data Identity a = Identity { getIdentity :: a } @-}
 data Identity a = Identity { getIdentity :: a }
 
 {-@ axiomatize fromIdentity @-}

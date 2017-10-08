@@ -26,8 +26,6 @@ import Generics.Deriving.Newtypeless.Base.Internal
 
 import Prelude hiding (Either(..))
 
--- Morally a newtype, but in practice, not.
-{-@ data Either a b = L a | R b @-}
 data Either a b = L a | R b
 
 {-@ axiomatize fromEither @-}

@@ -16,8 +16,6 @@ import GenericProofs.VerifiedOrd.Instances
 
 import Generics.Deriving.Newtypeless.Base.Internal
 
-
-{-@ data MyProduct = MyProduct { fld1 :: Int, fld2 :: Double } @-}
 data MyProduct = MyProduct Int Double deriving (Eq)
 
 {-@ axiomatize fromMyProduct @-}

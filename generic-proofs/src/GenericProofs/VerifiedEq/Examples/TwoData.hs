@@ -16,7 +16,6 @@ import GenericProofs.VerifiedEq.Instances
 
 import Generics.Deriving.Newtypeless.Base.Internal
 
-{-@ data N = Zero | Succ { pred :: N } @-}
 data N = Zero | Succ N
 
 {-@ axiomatize fromN @-}
@@ -36,8 +35,6 @@ veqN =
         (isoSym isoN)
         (veqM1 (veqSum (veqM1 veqU1) (veqM1 (veqM1 (veqK1 veqN)))))
 
-
-{-@ data MyProduct = MyProduct { fld1 :: Int, fld2 :: N } @-}
 data MyProduct = MyProduct Int N
 
 {-@ axiomatize fromMyProduct @-}

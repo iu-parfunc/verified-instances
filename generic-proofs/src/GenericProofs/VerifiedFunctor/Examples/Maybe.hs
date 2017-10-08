@@ -16,7 +16,6 @@ import Generics.Deriving.Newtypeless.Base.Internal
 
 import Prelude hiding (Maybe(..))
 
-{-@ data Maybe a = Nothing | Just a @-}
 data Maybe a = Nothing | Just a
 
 {-@ axiomatize fromMaybe @-}

@@ -15,7 +15,6 @@ import GenericProofs.VerifiedOrd.Instances
 
 import Generics.Deriving.Newtypeless.Base.Internal
 
-{-@ data MySum = MyLeft Int | MyRight Double @-}
 data MySum = MyLeft Int | MyRight Double deriving (Eq)
 
 {-@ axiomatize fromMySum @-}

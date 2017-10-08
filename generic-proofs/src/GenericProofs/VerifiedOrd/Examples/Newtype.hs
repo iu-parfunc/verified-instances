@@ -25,7 +25,6 @@ import GenericProofs.VerifiedOrd.Instances
 import Generics.Deriving.Newtypeless.Base.Internal
 
 -- Morally a newtype, but in practice, not.
-{-@ data MyInt = MyInt { getMyInt :: Int } @-}
 data MyInt = MyInt { getMyInt :: Int } deriving (Eq)
 
 {-@ axiomatize fromMyInt @-}

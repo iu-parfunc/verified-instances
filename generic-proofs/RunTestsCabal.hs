@@ -22,6 +22,7 @@ main = do
                             ]
                          & filter (not . isPrefixOf "src/GenericProofs/VerifiedFunctor")
                              -- Requires higher-rank reasoning that LH can't do
+  callProcess "make" ["clean"]
   putStrLn "Preparing to run liquid on:"
   forM_ hsFiles $ \hsFile -> putStrLn $ '\t':hsFile
   forM_ hsFiles $ \hsFile -> do

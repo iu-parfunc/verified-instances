@@ -6,7 +6,6 @@ module GenericProofs.VerifiedSemigroup.Instances (Unit(..), sappendUnit, vsemigr
 import GenericProofs.VerifiedSemigroup
 import Language.Haskell.Liquid.ProofCombinators
 
-{-@ data Unit = Unit @-}
 data Unit = Unit
 
 {-@ axiomatize sappendUnit @-}

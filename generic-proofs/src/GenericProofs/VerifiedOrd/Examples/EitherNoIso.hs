@@ -9,7 +9,6 @@ import Language.Haskell.Liquid.ProofCombinators
 import Prelude                                  hiding (Either (..))
 
 data Either a b = Left a | Right b deriving (Eq)
-{-@ data Either a b = Left a | Right b @-}
 
 {-@ axiomatize leqSum @-}
 leqSum :: (a -> a -> Bool) -> (b -> b -> Bool)

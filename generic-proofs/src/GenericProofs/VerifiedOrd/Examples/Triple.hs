@@ -16,8 +16,6 @@ import GenericProofs.VerifiedOrd.Instances
 
 import Generics.Deriving.Newtypeless.Base.Internal
 
-
-{-@ data Triple a b c = MkTriple { fld1 :: a, fld2 :: b, fld3 :: c } @-}
 data Triple a b c = MkTriple a b c deriving (Eq)
 
 {-@ axiomatize fromTriple @-}

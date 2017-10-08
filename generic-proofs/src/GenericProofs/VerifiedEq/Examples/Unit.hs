@@ -14,7 +14,6 @@ import GenericProofs.VerifiedEq.Generics
 
 import Generics.Deriving.Newtypeless.Base.Internal
 
-{-@ data MyUnit = MyUnit @-}
 data MyUnit = MyUnit
 
 {-@ axiomatize fromMyUnit @-}
