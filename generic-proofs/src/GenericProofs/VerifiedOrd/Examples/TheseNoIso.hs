@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--exactdc"            @-}
+{-@ LIQUID "--noadt"              @-}
 
 module GenericProofs.VerifiedOrd.Examples.TheseNoIso
   ( These(..)

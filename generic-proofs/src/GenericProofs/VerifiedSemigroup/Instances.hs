@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder" @-}
 {-@ LIQUID "--exactdc"     @-}
+{-@ LIQUID "--noadt"       @-}
 module GenericProofs.VerifiedSemigroup.Instances (Unit(..), sappendUnit, vsemigroupUnit) where -- (Unit(..), vsemigroupUnit) where
 
 import GenericProofs.VerifiedSemigroup

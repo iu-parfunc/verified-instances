@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder"      @-}
 {-@ LIQUID "--exactdc"          @-}
+{-@ LIQUID "--noadt"            @-}
 {-# LANGUAGE Rank2Types #-}
 
 module GenericProofs.VerifiedFunctor where

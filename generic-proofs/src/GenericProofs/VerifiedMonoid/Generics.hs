@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder"    @-}
 {-@ LIQUID "--exactdc"        @-}
+{-@ LIQUID "--noadt"          @-}
 module GenericProofs.VerifiedMonoid.Generics where
 
 import Language.Haskell.Liquid.ProofCombinators

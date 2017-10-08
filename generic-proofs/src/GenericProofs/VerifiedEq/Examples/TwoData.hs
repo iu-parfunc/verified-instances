@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--exactdc"            @-}
+{-@ LIQUID "--noadt"              @-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies    #-}
 
@@ -59,4 +60,4 @@ veqMyProduct = veqIso (isoSym isoMyProduct) $ veqM1
                                             $ veqProd (veqM1 $ veqK1 veqInt)
                                                       (veqM1 $ veqK1 veqN)
 
-        
+

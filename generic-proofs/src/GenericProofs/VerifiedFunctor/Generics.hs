@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder"  @-}
 {-@ LIQUID "--exactdc"      @-}
+{-@ LIQUID "--noadt"        @-}
 {-# LANGUAGE EmptyCase     #-}
 {-# LANGUAGE Rank2Types    #-}
 {-# LANGUAGE TypeOperators #-}

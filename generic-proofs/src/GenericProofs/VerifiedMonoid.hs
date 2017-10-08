@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder"    @-}
 {-@ LIQUID "--exactdc"        @-}
+{-@ LIQUID "--noadt"          @-}
 module GenericProofs.VerifiedMonoid where
 
 import GenericProofs.Iso
