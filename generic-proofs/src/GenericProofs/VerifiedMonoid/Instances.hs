@@ -1,11 +1,12 @@
 {-@ LIQUID "--higherorder" @-}
 {-@ LIQUID "--exactdc"     @-}
+{-@ LIQUID "--noadt"       @-}
 module GenericProofs.VerifiedMonoid.Instances where
 
 import GenericProofs.VerifiedMonoid
 import Language.Haskell.Liquid.ProofCombinators
+import Prelude hiding (Monoid(..))
 
-{-@ data Unit = Unit @-}
 data Unit = Unit
 
 {-@ axiomatize mappendUnit @-}

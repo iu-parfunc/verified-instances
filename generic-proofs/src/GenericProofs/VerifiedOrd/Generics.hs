@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--exactdc"            @-}
+{-@ LIQUID "--noadt"              @-}
 {-# LANGUAGE EmptyCase #-}
 
 module GenericProofs.VerifiedOrd.Generics where

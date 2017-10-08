@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--exactdc"            @-}
+{-@ LIQUID "--noadt"              @-}
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -14,8 +15,7 @@ import GenericProofs.VerifiedFunctor.Generics
 
 import Generics.Deriving.Newtypeless.Base.Internal
 
-{-@ data List a = Nil | Cons { hd :: a, tl :: List a } @-}
-data List a = Nil | Cons { hd :: a, tl :: List a }
+data List a = Nil | Cons a (List a)
 
 {-
 type RepList = Sum U1 (Product Par1 (Rec1 List))

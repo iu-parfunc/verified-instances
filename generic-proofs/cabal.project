@@ -4,7 +4,7 @@
 packages: .
           ./generic-deriving-newtypeless
           ./liquidhaskell
-          ./liquid-fixpoint
+          ./liquidhaskell/liquid-fixpoint
 
 package liquidhaskell
     flags: devel

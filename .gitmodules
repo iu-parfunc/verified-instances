@@ -5,6 +5,3 @@
 [submodule "generic-proofs/liquidhaskell"]
 	path = generic-proofs/liquidhaskell
 	url = https://github.com/ucsd-progsys/liquidhaskell
-[submodule "generic-proofs/liquid-fixpoint"]
-	path = generic-proofs/liquid-fixpoint
-	url = https://github.com/ucsd-progsys/liquid-fixpoint

@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder"    @-}
 {-@ LIQUID "--exactdc"        @-}
+{-@ LIQUID "--noadt"          @-}
 module GenericProofs.VerifiedEq where
 
 import Data.Functor.Contravariant

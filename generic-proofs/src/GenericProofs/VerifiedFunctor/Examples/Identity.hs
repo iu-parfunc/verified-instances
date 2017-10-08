@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--exactdc"            @-}
+{-@ LIQUID "--noadt"              @-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 module GenericProofs.VerifiedFunctor.Examples.Identity where
@@ -14,7 +15,6 @@ import GenericProofs.VerifiedFunctor.Generics
 import Generics.Deriving.Newtypeless.Base.Internal
 
 -- Morally a newtype, but in practice, not.
-{-@ data Identity a = Identity { getIdentity :: a } @-}
 data Identity a = Identity { runIdentity :: a }
 
 {-

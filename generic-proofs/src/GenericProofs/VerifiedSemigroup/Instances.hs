@@ -1,11 +1,11 @@
 {-@ LIQUID "--higherorder" @-}
 {-@ LIQUID "--exactdc"     @-}
+{-@ LIQUID "--noadt"       @-}
 module GenericProofs.VerifiedSemigroup.Instances (Unit(..), sappendUnit, vsemigroupUnit) where -- (Unit(..), vsemigroupUnit) where
 
 import GenericProofs.VerifiedSemigroup
 import Language.Haskell.Liquid.ProofCombinators
 
-{-@ data Unit = Unit @-}
 data Unit = Unit
 
 {-@ axiomatize sappendUnit @-}

@@ -22,10 +22,11 @@ main = do
                             ]
                          & filter (not . isPrefixOf "src/GenericProofs/VerifiedFunctor")
                              -- Requires higher-rank reasoning that LH can't do
+  callProcess "make" ["clean"]
   putStrLn "Preparing to run liquid on:"
   forM_ hsFiles $ \hsFile -> putStrLn $ '\t':hsFile
   forM_ hsFiles $ \hsFile -> do
-    let cmd = cabalHead ++ " new-run liquid -- -iinclude -isrc " ++ hsFile
+    let cmd = cabalHead ++ " new-run liquid -- -isrc " ++ hsFile
     putStrLn cmd
     (_, _, _, handle) <- createProcess $ shell cmd
     ex <- waitForProcess handle

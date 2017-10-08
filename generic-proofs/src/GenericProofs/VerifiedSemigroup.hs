@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder"    @-}
 {-@ LIQUID "--exactdc"        @-}
+{-@ LIQUID "--noadt"          @-}
 module GenericProofs.VerifiedSemigroup where
 
 import GenericProofs.Iso

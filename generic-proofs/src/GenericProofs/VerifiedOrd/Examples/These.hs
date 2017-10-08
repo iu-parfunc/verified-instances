@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--exactdc"            @-}
+{-@ LIQUID "--noadt"              @-}
 
 module GenericProofs.VerifiedOrd.Examples.These
   ( These(..)
@@ -22,7 +23,6 @@ import GenericProofs.VerifiedOrd.Instances
 
 import Generics.Deriving.Newtypeless.Base.Internal
 
-{-@ data These a b = This a | That b | These { a :: a, b :: b } @-}
 data These a b = This a | That b | These a b deriving (Eq)
 
 data D1These

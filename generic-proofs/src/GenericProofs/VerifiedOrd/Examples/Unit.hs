@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--exactdc"            @-}
+{-@ LIQUID "--noadt"              @-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies    #-}
 module GenericProofs.VerifiedOrd.Examples.Unit where
@@ -13,7 +14,6 @@ import GenericProofs.VerifiedOrd.Generics
 
 import Generics.Deriving.Newtypeless.Base.Internal
 
-{-@ data MyUnit = MyUnit @-}
 data MyUnit = MyUnit deriving (Eq)
 
 {-@ axiomatize fromMyUnit @-}

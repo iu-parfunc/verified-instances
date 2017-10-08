@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--exactdc"            @-}
+{-@ LIQUID "--noadt"              @-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 module GenericProofs.VerifiedFunctor.Examples.Maybe where
@@ -15,7 +16,6 @@ import Generics.Deriving.Newtypeless.Base.Internal
 
 import Prelude hiding (Maybe(..))
 
-{-@ data Maybe a = Nothing | Just a @-}
 data Maybe a = Nothing | Just a
 
 {-@ axiomatize fromMaybe @-}

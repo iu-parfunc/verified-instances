@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--exactdc"            @-}
+{-@ LIQUID "--noadt"              @-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 module GenericProofs.VerifiedEq.Examples.Identity
@@ -24,7 +25,6 @@ import GenericProofs.VerifiedEq.Instances
 import Generics.Deriving.Newtypeless.Base.Internal
 
 -- Morally a newtype, but in practice, not.
-{-@ data Identity a = Identity { getIdentity :: a } @-}
 data Identity a = Identity { getIdentity :: a }
 
 {-@ axiomatize fromIdentity @-}

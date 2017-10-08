@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--exactdc"            @-}
+{-@ LIQUID "--noadt"              @-}
 module GenericProofs.VerifiedOrd.Instances (
     vordUnit, vordInt, vordInt64, vordDouble
   , leqUnit,  leqInt,  leqInt64,  leqDouble

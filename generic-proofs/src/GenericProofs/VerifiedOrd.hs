@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--exactdc"            @-}
+{-@ LIQUID "--noadt"              @-}
 
 module GenericProofs.VerifiedOrd (VerifiedOrd(..), {-vordEq,-} eqCompare, leqFrom, vordIso) where
 

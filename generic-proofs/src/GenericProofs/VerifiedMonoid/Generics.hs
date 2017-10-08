@@ -1,10 +1,13 @@
 {-@ LIQUID "--higherorder"    @-}
 {-@ LIQUID "--exactdc"        @-}
+{-@ LIQUID "--noadt"          @-}
 module GenericProofs.VerifiedMonoid.Generics where
 
 import Language.Haskell.Liquid.ProofCombinators
 import GenericProofs.VerifiedMonoid
 import Generics.Deriving.Newtypeless.Base.Internal
+
+import Prelude hiding (Monoid(..))
 
 {-@ axiomatize memptyU1 @-}
 memptyU1 :: U1 p

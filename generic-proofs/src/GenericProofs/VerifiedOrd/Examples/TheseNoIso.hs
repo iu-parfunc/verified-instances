@@ -1,5 +1,6 @@
 {-@ LIQUID "--higherorder"        @-}
 {-@ LIQUID "--exactdc"            @-}
+{-@ LIQUID "--noadt"              @-}
 
 module GenericProofs.VerifiedOrd.Examples.TheseNoIso
   ( These(..)
@@ -11,7 +12,6 @@ import Language.Haskell.Liquid.ProofCombinators
 
 import GenericProofs.VerifiedOrd
 
-{-@ data These = This a | That b | These { a :: a, b :: b } @-}
 data These a b = This a | That b | These a b deriving (Eq)
 
 {-@ axiomatize leqThese @-}
