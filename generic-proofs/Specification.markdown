@@ -63,3 +63,7 @@ Note that there are two parts to the reflected definition:
 I use the phrase "quasi-syntax", since you can't normally write a LH annotation for a partially applied function like this. To make something like what is pictured above a reality, we will have to bake in special typing rules for class methods applied to dictionary arguments.
 
 I don't think this is too objectionable, however. After all, the dictionary argument does not appear in the surface syntax, so a user would intuitively expect `bar` to have the type we wrote anyways (just not with the explicit dictionary).
+
+## The wrinkle with `assume`d class methods
+
+Specifically, a wrinkle with their implementation. In order to be able to `assume` something about a binding, there needs to be a top-level Core binder for it (I believe). But GHC doesn't generate these bindings until during optimization. See [here](http://git.haskell.org/ghc.git/blob/da4766c313bf33e5f0790583af204935f62699a0:/compiler/main/TidyPgm.hs#l563) for the full story.
