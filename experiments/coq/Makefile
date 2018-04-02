@@ -102,6 +102,7 @@ endif
 ######################
 
 VFILES:=Heap.v\
+  Heap2.v\
   IVar.v\
   LemmasV1.v\
   LemmasV2.v\

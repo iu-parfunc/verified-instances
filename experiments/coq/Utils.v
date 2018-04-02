@@ -67,7 +67,7 @@ Definition yank {A} (n : nat) (x : A) (xs : list A) : A * list A :=
  * Import QcDefaultNotation. Import QcNotation. Open Scope qc_scope.
  * Import GenLow GenHigh.
  * Set Warnings "-extraction-opaque-accessed,-extraction".
- * 
+ *
  * Conjecture yank_fst : forall {A} n x xs,
  *     n < length (x :: xs) -> fst (@yank A (S n) x xs) = nth n xs x.
  * QuickChick yank_fst. *)
