@@ -1,13 +1,16 @@
-Require Import Coq.Program.Basics.
+Require Import Coq.Lists.List.
 Require Import Coq.Program.Equality.
 Require Import Coq.Logic.FunctionalExtensionality.
+Import ListNotations.
 
 Require Import Val.
 Require Import IVar.
 Require Import Trace.
+Require Import Par.
 
 Module Type Heap.
   Parameter Heap : Type -> Type.
+  Axiom initHeap : forall {A}, Heap A.
   Axiom newHeap : forall {A}, (IVar A -> Heap A) -> Heap A.
   Axiom writeHeap : forall {A}, IVar A -> A -> Heap A -> Heap A.
   Axiom readHeap : forall {A}, IVar A -> Heap A -> A.
@@ -43,13 +46,25 @@ Module Par (H : Heap).
   Definition fork {A} (k1 k2 : Heap A -> Heap A) (h : Heap A) : Heap A :=
     let (h1, h2) := splitHeap h in joinHeap (k1 h) (k2 h).
 
-  Fixpoint runTrace (tr : Trace) (h : Heap Val) : Heap Val :=
+  Fixpoint step (tr : Trace) (h : Heap Val) : Heap Val :=
     match tr with
-    | Get i k => get i (fun v h' => runTrace (k v) h') h
-    | Put i v tr1 => put i v (fun h' => runTrace tr1 h') h
-    | New k => new (fun i => runTrace (k i) h)
-    | Fork tr1 tr2 => fork (runTrace tr1) (runTrace tr2) h
+    | Get i k => get i (fun v h' => step (k v) h') h
+    | Put i v tr1 => put i v (fun h' => step tr1 h') h
+    | New k => new (fun i => step (k i) h)
+    | Fork tr1 tr2 => fork (step tr1) (step tr2) h
     | Done => h
     end.
+
+  Fixpoint sched (thunks : list Trace) (h : Heap Val) : Heap Val :=
+    match thunks with
+    | nil => h
+    | t :: ts => sched ts (step t h)
+    end.
+
+  Definition runPar (p : Par Val) : Val :=
+    let initThreads := [ runCont p (fun v => Put 0 v Done) ] in
+    let finalHeap := sched initThreads initHeap in
+    readHeap 0 finalHeap
+  .
 
 End Par.
