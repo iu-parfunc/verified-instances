@@ -1,4 +1,5 @@
 Require Import Coq.Structures.OrderedType.
+Require Import Future.
 
 Ltac destruct_typ X :=
   match type of X with
@@ -8,6 +9,7 @@ Ltac destruct_typ X :=
   | list _   => destruct X eqn:?
   | nat => destruct X eqn:?
   | Compare _ _ _ _ _ => destruct X eqn:?
+  | Future _ => destruct X eqn:?
   end.
 
 Ltac destruct_match :=

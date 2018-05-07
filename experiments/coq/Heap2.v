@@ -7,64 +7,68 @@ Require Import Val.
 Require Import IVar.
 Require Import Trace.
 Require Import Par.
+Require Import Future.
+Require Import Tactics.
 
 Module Type Heap.
   Parameter Heap : Type -> Type.
   Axiom initHeap : forall {A}, Heap A.
-  Axiom newHeap : forall {A}, (IVar A -> Heap A) -> Heap A.
-  Axiom writeHeap : forall {A}, IVar A -> A -> Heap A -> Heap A.
+  Axiom newHeap : forall {A}, (IVar A -> Future (Heap A)) -> Future (Heap A).
+  Axiom writeHeap : forall {A}, IVar A -> A -> Heap A -> Future (Heap A).
   Axiom readHeap : forall {A}, IVar A -> Heap A -> A.
   Axiom splitHeap : forall {A}, Heap A -> Heap A * Heap A.
-  Axiom joinHeap : forall {A}, Heap A -> Heap A -> Heap A.
+  Axiom joinHeap : forall {A}, Heap A -> Heap A -> Future (Heap A).
   Axiom dropHeap : forall {A}, Heap A -> unit.
-  Axiom commutesHeap : forall {A} (h : Heap A) (f g : Heap A -> Heap A),
-      f (g h) = g (f h) /\ g (f h) = let (h1, h2) := splitHeap h in joinHeap (f h) (g h).
+  Axiom commutesHeap : forall {A} {i1 i2 : IVar A} {v1 v2 : A} {k : Heap A -> Future (Heap A)} {h : Heap A},
+      bindFuture (writeHeap i2 v2 h) (fun h' => bindFuture (writeHeap i1 v1 h') k) =
+      bindFuture (writeHeap i1 v1 h) (fun h' => bindFuture (writeHeap i2 v2 h') k) /\
+      bindFuture (writeHeap i1 v1 h) (fun h' => bindFuture (writeHeap i2 v2 h') k) =
+      let (h1, h2) := splitHeap h
+      in bindFuture (writeHeap i1 v1 h) (fun h' => bindFuture (writeHeap i2 v2 h) (fun h'' => bindFuture (joinHeap h' h'') k)).
 End Heap.
 
 Module Par (H : Heap).
   Import H.
 
-  Definition new {A} (k : IVar A -> Heap A) : Heap A :=
+  Definition new {A} (k : IVar A -> Future (Heap A)) : Future (Heap A) :=
     newHeap k.
 
-  Definition get {A} (i : IVar A) (k : A -> Heap A -> Heap A) (h : Heap A) : Heap A :=
+  Definition get {A} (i : IVar A) (k : A -> Heap A -> Future (Heap A)) (h : Heap A) : Future (Heap A) :=
     k (readHeap i h) h.
 
-  Definition put {A} (i : IVar A) (v : A) (k : Heap A -> Heap A) (h : Heap A) : Heap A :=
-    k (writeHeap i v h).
+  Definition put {A} (i : IVar A) (v : A) (k : Heap A -> Future (Heap A)) (h : Heap A) : Future (Heap A) :=
+    bindFuture (writeHeap i v h) k.
 
-  Lemma putsCommute {A} (i1 i2 : IVar A) (v1 v2 : A) (k : Heap A -> Heap A) :
+  Lemma putsCommute {A} (i1 i2 : IVar A) (v1 v2 : A) (k : Heap A -> Future (Heap A)) :
     put i2 v2 (fun h => put i1 v1 k h) = put i1 v1 (fun h => put i2 v2 k h).
   Proof.
-    compute.
+    unfold put.
     extensionality h.
-    assert (writeHeap i2 v2 (writeHeap i1 v1 h) = writeHeap i1 v1 (writeHeap i2 v2 h)).
-    apply (commutesHeap h (writeHeap i2 v2) (writeHeap i1 v1)).
-    congruence.
+    apply commutesHeap.
   Qed.
 
-  Definition fork {A} (k1 k2 : Heap A -> Heap A) (h : Heap A) : Heap A :=
+  Definition fork {A} (k1 k2 : Heap A -> Heap A) (h : Heap A) : Future (Heap A) :=
     let (h1, h2) := splitHeap h in joinHeap (k1 h) (k2 h).
 
-  Fixpoint step (tr : Trace) (h : Heap Val) : Heap Val :=
+  Fixpoint step (tr : Trace) (h : Heap Val) : Future (Heap Val) :=
     match tr with
     | Get i k => get i (fun v h' => step (k v) h') h
     | Put i v tr1 => put i v (fun h' => step tr1 h') h
     | New k => new (fun i => step (k i) h)
-    | Fork tr1 tr2 => fork (step tr1) (step tr2) h
-    | Done => h
+    | Fork tr1 tr2 => bindFuture (step tr1 h) (fun h' => step tr2 h')
+    | Done => retFuture h
     end.
 
-  Fixpoint sched (thunks : list Trace) (h : Heap Val) : Heap Val :=
+  Fixpoint sched (thunks : list Trace) (h : Heap Val) : Future (Heap Val) :=
     match thunks with
-    | nil => h
-    | t :: ts => sched ts (step t h)
+    | nil => retFuture h
+    | t :: ts => bindFuture (step t h) (sched ts)
     end.
 
-  Definition runPar (p : Par Val) : Val :=
+  Definition runPar (p : Par Val) : Future Val :=
     let initThreads := [ runCont p (fun v => Put 0 v Done) ] in
     let finalHeap := sched initThreads initHeap in
-    readHeap 0 finalHeap
+    mapFuture finalHeap (fun h => readHeap 0 h)
   .
 
 End Par.

@@ -1,5 +1,6 @@
 -R . Par
 
+Future.v
 Heap.v
 Heap2.v
 IVar.v

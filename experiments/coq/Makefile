@@ -101,7 +101,8 @@ endif
 #                    #
 ######################
 
-VFILES:=Heap.v\
+VFILES:=Future.v\
+  Heap.v\
   Heap2.v\
   IVar.v\
   LemmasV1.v\
