@@ -17,6 +17,9 @@ Definition runFuture {A} (fa : Future A) : Exn + A :=
 Definition retFuture {A} (a : A) : Future A :=
   mkFuture (inr a).
 
+Definition failFuture {A} (err : string) : Future A :=
+  mkFuture (inl err).
+
 Definition mapFuture {A B} (fa : Future A) (f : A -> B) : Future B :=
   match fa with
   | mkFuture (inl e) => mkFuture (inl e)
@@ -29,4 +32,4 @@ Definition bindFuture {A B} (fa : Future A) (f : A -> Future B) : Future B :=
   | mkFuture (inr a) => f a
   end.
 
-Opaque runFuture retFuture mapFuture bindFuture.
+Opaque runFuture retFuture failFuture mapFuture bindFuture.

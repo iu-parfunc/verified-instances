@@ -15,7 +15,7 @@ Module Type Heap.
   Axiom initHeap : forall {A}, Heap A.
   Axiom newHeap : forall {A}, (IVar A -> Future (Heap A)) -> Future (Heap A).
   Axiom writeHeap : forall {A}, IVar A -> A -> Heap A -> Future (Heap A).
-  Axiom readHeap : forall {A}, IVar A -> Heap A -> A.
+  Axiom readHeap : forall {A}, IVar A -> Heap A -> Future A.
   Axiom splitHeap : forall {A}, Heap A -> Heap A * Heap A.
   Axiom joinHeap : forall {A}, Heap A -> Heap A -> Future (Heap A).
   Axiom dropHeap : forall {A}, Heap A -> unit.
@@ -34,7 +34,7 @@ Module Par (H : Heap).
     newHeap k.
 
   Definition get {A} (i : IVar A) (k : A -> Heap A -> Future (Heap A)) (h : Heap A) : Future (Heap A) :=
-    k (readHeap i h) h.
+    bindFuture (readHeap i h) (fun a => k a h).
 
   Definition put {A} (i : IVar A) (v : A) (k : Heap A -> Future (Heap A)) (h : Heap A) : Future (Heap A) :=
     bindFuture (writeHeap i v h) k.
@@ -68,7 +68,14 @@ Module Par (H : Heap).
   Definition runPar (p : Par Val) : Future Val :=
     let initThreads := [ runCont p (fun v => Put 0 v Done) ] in
     let finalHeap := sched initThreads initHeap in
-    mapFuture finalHeap (fun h => readHeap 0 h)
+    bindFuture finalHeap (fun h => readHeap 0 h)
   .
+
+  Lemma sched_two_deterministic : forall {t1 t2 : Trace} {h : Heap Val},
+      sched (t1 :: t2 :: []) h = sched (t2 :: t1 :: []) h.
+  Proof.
+    intros.
+    induction t1; induction t2; compute.
+  Abort.
 
 End Par.
