@@ -1,13 +1,13 @@
-{-@ LIQUID "--higherorder"        @-}
-{-@ LIQUID "--exactdc"            @-}
-{-@ LIQUID "--automatic-instances=liquidinstances" @-}
+{-@ LIQUID "--reflection" @-}
+{-@ LIQUID "--ple"        @-} 
 
-module Data.VerifiedEq.Instances.Sum (veqSum, eqSum) where
+module Data.VerifiedEq.Instances.Sum (Either (..), veqSum, eqSum) where
 
 import Data.VerifiedEq
 import Language.Haskell.Liquid.ProofCombinators
+import Prelude hiding (Either (..))
 
-{-@ data Either a b = Left a | Right b @-}
+data Either a b = Left a | Right b 
 
 {-@ axiomatize eqSum @-}
 eqSum :: (a -> a -> Bool) -> (b -> b -> Bool)

@@ -1,16 +1,15 @@
-{-@ LIQUID "--higherorder"        @-}
-{-@ LIQUID "--exactdc"            @-}
+{-@ LIQUID "--reflection"        @-}
+
 {-# LANGUAGE EmptyCase            #-}
 
 module Data.VerifiedEq.Instances.Generics where
 
-import GHC.Generics
+import GHC.Generics hiding (unPar1)
 import Data.VerifiedEq
 import Language.Haskell.Liquid.ProofCombinators
 
-{-@ data V1 @-}
 
-{-@ axiomatize eqV1 @-}
+{-@ reflect eqV1 @-}
 eqV1 :: V1 p -> V1 p -> Bool
 eqV1 _ _ = False
 -- eqV1 x _ = case x of {}
@@ -18,47 +17,51 @@ eqV1 _ _ = False
 absurd :: V1 p -> a
 absurd x = case x of {}
 
-{-@ eqV1Refl :: x:V1 p -> { eqV1 x x } @-}
+{-@ eqV1Refl :: x:_ -> { eqV1 x x } @-}
 eqV1Refl :: V1 p -> Proof
 eqV1Refl x = absurd x
 
-{-@ eqV1Sym :: x:V1 p -> y:V1 p -> { eqV1 x y ==> eqV1 y x } @-}
+{-@ eqV1Sym :: x:_ -> y:_ -> { eqV1 x y ==> eqV1 y x } @-}
 eqV1Sym :: V1 p -> V1 p -> Proof
 eqV1Sym x _ = absurd x
 
-{-@ eqV1Trans :: x:V1 p -> y:V1 p -> z:V1 p -> { eqV1 x y && eqV1 y z ==> eqV1 x z } @-}
+{-@ eqV1Trans :: x:_ -> y:_ -> z:_ -> { eqV1 x y && eqV1 y z ==> eqV1 x z } @-}
 eqV1Trans :: V1 p -> V1 p -> V1 p -> Proof
 eqV1Trans x _ _ = absurd x
 
-{-@ veqV1 :: VerifiedEq (V1 p) @-}
+{- veqV1 :: VerifiedEq (V1 p) @-}
 veqV1 :: VerifiedEq (V1 p)
 veqV1 = VerifiedEq eqV1 eqV1Refl eqV1Sym eqV1Trans
 
 {-@ data U1 p = U1 @-}
 
-{-@ axiomatize eqU1 @-}
+{-@ reflect eqU1 @-}
 eqU1 :: U1 p -> U1 p -> Bool
 eqU1 _ _ = True
 
-{-@ eqU1Refl :: x:U1 p -> { eqU1 x x } @-}
+{-@ eqU1Refl :: x:_  -> { eqU1 x x } @-}
 eqU1Refl :: U1 p -> Proof
 eqU1Refl x = eqU1 x x *** QED
 
-{-@ eqU1Sym :: x:U1 p -> y:U1 p -> { eqU1 x y ==> eqU1 y x } @-}
+{-@ eqU1Sym :: x:_ -> y:_  -> { eqU1 x y ==> eqU1 y x } @-}
 eqU1Sym :: U1 p -> U1 p -> Proof
 eqU1Sym x y = eqU1 x y ==. eqU1 y x *** QED
 
-{-@ eqU1Trans :: x:U1 p -> y:U1 p -> z:U1 p -> { eqU1 x y && eqU1 y z ==> eqU1 x z } @-}
+{-@ eqU1Trans :: x:_ -> y:_  -> z:_  -> { eqU1 x y && eqU1 y z ==> eqU1 x z } @-}
 eqU1Trans :: U1 p -> U1 p -> U1 p -> Proof
 eqU1Trans x y z = (eqU1 x y && eqU1 y z) ==. eqU1 x z *** QED
 
-{-@ veqU1 :: VerifiedEq (U1 p) @-}
+{- veqU1 :: VerifiedEq (U1 p) @-}
 veqU1 :: VerifiedEq (U1 p)
 veqU1 = VerifiedEq eqU1 eqU1Refl eqU1Sym eqU1Trans
 
-{-@ newtype Par1 p = Par1 { unPar1 :: p } @-}
+{- newtype Par1 p = Par1 { unPar1 :: p } @-}
 
-{-@ axiomatize eqPar1 @-}
+{-@ reflect unPar1 @-}
+unPar1 :: Par1 p -> p 
+unPar1 (Par1 p) = p
+
+{-@ reflect eqPar1 @-}
 eqPar1 :: (p -> p -> Bool) -> Par1 p -> Par1 p -> Bool
 eqPar1 eqP x y = eqP (unPar1 x) (unPar1 y)
 
@@ -104,7 +107,7 @@ veqPar1 (VerifiedEq eqP eqPRefl eqPSym eqPTrans)
 {-
 {-@ newtype Rec1 f p = Rec1 { unRec1 :: f p } @-}
 
-{-@ axiomatize eqRec1 @-}
+{-@ reflect eqRec1 @-}
 eqRec1 :: (f p -> f p -> Bool) -> Rec1 f p -> Rec1 f p -> Bool
 eqRec1 eqFp x y = eqFp (unRec1 x) (unRec1 y)
 
@@ -149,7 +152,7 @@ veqRec1 (VerifiedEq eqFp eqFpRefl eqFpSym eqFpTrans)
 
 {-@ newtype K1 i c p = K1 { unK1 :: c } @-}
 
-{-@ axiomatize eqK1 @-}
+{-@ reflect eqK1 @-}
 eqK1 :: (c -> c -> Bool) -> K1 i c p -> K1 i c p -> Bool
 eqK1 eqC x y = eqC (unK1 x) (unK1 y)
 
@@ -194,7 +197,7 @@ veqK1 (VerifiedEq eqC eqCRefl eqCSym eqCTrans)
 
 {-@ newtype M1 i c f p = M1 { unM1 :: f p } @-}
 
-{-@ axiomatize eqM1 @-}
+{-@ reflect eqM1 @-}
 eqM1 :: (f p -> f p -> Bool) -> M1 i c f p -> M1 i c f p -> Bool
 eqM1 eqFp x y = eqFp (unM1 x) (unM1 y)
 
@@ -240,7 +243,7 @@ veqM1 (VerifiedEq eqFp eqFpRefl eqFpSym eqFpTrans)
 {-
 {-@ data (:+:) f g p = L1 (f p) | R1 (g p) @-}
 
-{-@ axiomatize eqSum @-}
+{-@ reflect eqSum @-}
 eqSum :: (f p -> f p -> Bool) -> (g p -> g p -> Bool)
       -> (:+:) f g p -> (:+:) f g p -> Bool
 eqSum eqFp _    (L1 x) (L1 y) = eqFp x y
