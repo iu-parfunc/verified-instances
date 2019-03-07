@@ -1,5 +1,5 @@
-{-@ LIQUID "--higherorder"        @-}
-{-@ LIQUID "--automatic-instances=liquidinstances" @-}
+{-@ LIQUID "--reflection" @-}
+{-@ LIQUID "--ple"        @-}
 
 module Data.VerifiedEq.Instances.Contra (veqContra, eqContra) where
 
@@ -7,7 +7,7 @@ import Data.Functor.Contravariant
 import Data.VerifiedEq
 import Language.Haskell.Liquid.ProofCombinators
 
-{-@ axiomatize eqContra @-}
+{-@ reflect eqContra @-}
 eqContra :: (a -> a -> Bool)
          -> (b -> a)
          -> (b -> b -> Bool)

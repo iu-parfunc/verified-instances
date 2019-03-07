@@ -1,5 +1,6 @@
-{-@ LIQUID "--higherorder"        @-}
-{-@ LIQUID "--automatic-instances=liquidinstances" @-}
+{-@ LIQUID "--reflection"     @-}
+{-@ LIQUID "--ple"            @-}
+{-@ LIQUID "--prune-unsorted" @-}
 
 module Data.VerifiedEq.Instances
   ( veqInt
@@ -10,23 +11,31 @@ module Data.VerifiedEq.Instances
   , eqUnit
   , eqInt
   , eqInt64
-  , eqDouble )
+  , eqDouble 
+  )
   where
 
 import Data.Int
 import Data.VerifiedEq.Instances.Contra         as X
--- import Data.VerifiedEq.Instances.Generics       as X
 import Data.VerifiedEq.Instances.Iso            as X
 import Data.VerifiedEq.Instances.Prod           as X
 import Data.VerifiedEq.Instances.Sum            as X
 
 import Data.VerifiedEq
 import Language.Haskell.Liquid.ProofCombinators
+import Prelude hiding (Either (..))
+
+
+-- imports (Left  _) = ()
+-- imports (Right _) = ()
 
 {-@ axiomatize eqUnit @-}
 eqUnit :: () -> () -> Bool
 eqUnit () () = True
 {-# INLINE eqUnit #-}
+
+simpleProof :: ()
+simpleProof = ()
 
 {-@ eqUnitRefl :: x:() -> { eqUnit x x } @-}
 eqUnitRefl :: () -> Proof
@@ -58,7 +67,7 @@ eqIntSym x y = eqInt x y *** QED
 
 {-@ eqIntTrans :: x:Int -> y:Int -> z:Int -> { eqInt x y && eqInt y z ==> eqInt x z } @-}
 eqIntTrans :: Int -> Int -> Int -> Proof
-eqIntTrans x y z = eqInt x y && eqInt y z *** QED
+eqIntTrans x y z = (eqInt x y && eqInt y z) *** QED
 
 veqInt :: VerifiedEq Int
 veqInt = VerifiedEq eqInt eqIntRefl eqIntSym eqIntTrans
@@ -78,7 +87,7 @@ eqInt64Sym x y = eqInt64 x y *** QED
 
 {-@ eqInt64Trans :: x:Int64 -> y:Int64 -> z:Int64 -> { eqInt64 x y && eqInt64 y z ==> eqInt64 x z } @-}
 eqInt64Trans :: Int64 -> Int64 -> Int64 -> Proof
-eqInt64Trans x y z = eqInt64 x y && eqInt64 y z *** QED
+eqInt64Trans x y z = (eqInt64 x y && eqInt64 y z) *** QED
 
 veqInt64 :: VerifiedEq Int64
 veqInt64 = VerifiedEq eqInt64 eqInt64Refl eqInt64Sym eqInt64Trans
@@ -100,7 +109,7 @@ eqDoubleSym x y = eqDouble x y *** QED
 {-@ eqDoubleTrans :: x:Double -> y:Double -> z:Double
                   -> { eqDouble x y && eqDouble y z ==> eqDouble x z } @-}
 eqDoubleTrans :: Double -> Double -> Double -> Proof
-eqDoubleTrans x y z = eqDouble x y && eqDouble y z *** QED
+eqDoubleTrans x y z = (eqDouble x y && eqDouble y z) *** QED
 
 veqDouble :: VerifiedEq Double
 veqDouble = VerifiedEq eqDouble eqDoubleRefl eqDoubleSym eqDoubleTrans

@@ -1,5 +1,5 @@
-{-@ LIQUID "--higherorder"        @-}
-{-@ LIQUID "--automatic-instances=liquidinstances" @-}
+{-@ LIQUID "--reflection" @-}
+{-@ LIQUID "--ple"        @-}
 
 module Data.VerifiedEq.Instances.Iso (veqIso) where
 

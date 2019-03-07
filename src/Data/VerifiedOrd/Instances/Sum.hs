@@ -1,16 +1,15 @@
-{-@ LIQUID "--higherorder"        @-}
-{-@ LIQUID "--exactdc"            @-}
-{-@ LIQUID "--automatic-instances=liquidinstances" @-}
+{-@ LIQUID "--reflection" @-}
+{-@ LIQUID "--ple"        @-}
 
 module Data.VerifiedOrd.Instances.Sum (vordSum, leqSum) where
 
 import Data.VerifiableConstraint
 import Data.VerifiedEq
 import Data.VerifiedEq.Instances
+import Data.VerifiedEq.Instances.Sum (Either (..))
 import Data.VerifiedOrd
 import Language.Haskell.Liquid.ProofCombinators
-
-{-@ data Either a b = Left a | Right b @-}
+import Prelude hiding (Either (..))
 
 {-@ axiomatize leqSum @-}
 leqSum :: (a -> a -> Bool) -> (b -> b -> Bool)
@@ -60,7 +59,7 @@ leqSumAntisym leqa leqaAntisym leqb leqbAntisym veqa veqb p@(Right x) q@(Left y)
 leqSumAntisym leqa leqaAntisym leqb leqbAntisym veqa veqb p@(Right x) q@(Right y) =
       using (VEq veqb)
     $ (leqSum leqa leqb p q && leqSum leqa leqb q p)
-  ==. x == y ? leqbAntisym x y
+  ==. (x == y ? leqbAntisym x y)
   *** QED
 
 {-@ leqSumTrans :: leqa:(a -> a -> Bool) -> leqaTrans:(x:a -> y:a -> z:a -> { leqa x y && leqa y z ==> leqa x z })
