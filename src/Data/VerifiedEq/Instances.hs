@@ -15,10 +15,8 @@ module Data.VerifiedEq.Instances
   )
   where
 
-import Data.Either as E
 import Data.Int
 import Data.VerifiedEq.Instances.Contra         as X
--- import Data.VerifiedEq.Instances.Generics       as X
 import Data.VerifiedEq.Instances.Iso            as X
 import Data.VerifiedEq.Instances.Prod           as X
 import Data.VerifiedEq.Instances.Sum            as X

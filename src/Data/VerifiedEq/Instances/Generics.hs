@@ -1,4 +1,5 @@
-{-@ LIQUID "--reflection"        @-}
+{-@ LIQUID "--reflection" @-}
+{-@ LIQUID "--ple"        @-}
 
 {-# LANGUAGE EmptyCase            #-}
 
@@ -29,11 +30,10 @@ eqV1Sym x _ = absurd x
 eqV1Trans :: V1 p -> V1 p -> V1 p -> Proof
 eqV1Trans x _ _ = absurd x
 
-{- veqV1 :: VerifiedEq (V1 p) @-}
 veqV1 :: VerifiedEq (V1 p)
 veqV1 = VerifiedEq eqV1 eqV1Refl eqV1Sym eqV1Trans
 
-{-@ data U1 p = U1 @-}
+{- data U1 p = U1 @-}
 
 {-@ reflect eqU1 @-}
 eqU1 :: U1 p -> U1 p -> Bool
@@ -65,8 +65,9 @@ unPar1 (Par1 p) = p
 eqPar1 :: (p -> p -> Bool) -> Par1 p -> Par1 p -> Bool
 eqPar1 eqP x y = eqP (unPar1 x) (unPar1 y)
 
-{-@ eqPar1Refl :: eqP:(p -> p -> Bool) -> eqPRefl:(x:p -> { eqP x x })
-               -> x:Par1 p -> { eqPar1 eqP x x } @-}
+{-@ eqPar1Refl :: eqP:_ -> eqPRefl:(x:_ -> { eqP x x })
+               -> x:_ -> { eqPar1 eqP x x } 
+  @-}
 eqPar1Refl :: (p -> p -> Bool) -> (p -> Proof) -> Par1 p -> Proof
 eqPar1Refl eqP eqPRefl x
   =   eqPar1 eqP x x
@@ -74,8 +75,10 @@ eqPar1Refl eqP eqPRefl x
   ==. True ? eqPRefl (unPar1 x)
   *** QED
 
-{-@ eqPar1Sym :: eqP:(p -> p -> Bool) -> eqPSym:(x:p -> y:p -> { eqP x y ==> eqP y x })
-             -> x:Par1 p -> y:Par1 p -> { eqPar1 eqP x y ==> eqPar1 eqP y x } @-}
+
+{-@ eqPar1Sym :: eqP:_ -> eqPSym:(x:_ -> y:_ -> { eqP x y ==> eqP y x })
+             -> x:_ -> y:_ -> { eqPar1 eqP x y ==> eqPar1 eqP y x } 
+  @-}
 eqPar1Sym :: (p -> p -> Bool) -> (p -> p -> Proof)
           -> Par1 p -> Par1 p -> Proof
 eqPar1Sym eqP eqPSym x y
@@ -96,13 +99,16 @@ eqPar1Trans eqP eqPTrans x y z
   ==. eqPar1 eqP x z
   *** QED
 
--- {-@ veqPar1 :: VerifiedEq p -> VerifiedEq (Par1 p) @-}
 veqPar1 :: VerifiedEq p -> VerifiedEq (Par1 p)
 veqPar1 (VerifiedEq eqP eqPRefl eqPSym eqPTrans)
   = VerifiedEq (eqPar1      eqP)
                (eqPar1Refl  eqP eqPRefl)
                (eqPar1Sym   eqP eqPSym)
                (eqPar1Trans eqP eqPTrans)
+
+
+
+
 
 {-
 {-@ newtype Rec1 f p = Rec1 { unRec1 :: f p } @-}
